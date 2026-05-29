@@ -1,0 +1,142 @@
+<!-- TOPO -->
+<header class="topbar">
+    <div class="page-title">
+      <span class="icon">📚</span>
+      <h1>Tarefas</h1>
+    </div>
+  
+    <div class="top-actions">
+      <div class="date-box">
+        📅 Sexta-feira, 29 de Maio de 2026
+      </div>
+  
+      <!-- APENAS PROFESSOR -->
+      <button class="btn-criar" *ngIf="tipoUsuario === 'professor'" (click)="abrirModal()">
+        + Nova tarefa
+      </button>
+    </div>
+  </header>
+  
+  <!-- FILTROS -->
+  <section class="filters">
+    <select>
+      <option>Todas as matérias</option>
+      <option>Matemática</option>
+      <option>Português</option>
+      <option>História</option>
+    </select>
+  
+    <select>
+      <option>Todas</option>
+      <option>Pendentes</option>
+      <option>Concluídas</option>
+    </select>
+  </section>
+  
+  <!-- LISTA -->
+  <section class="tarefas-grid">
+  
+    <div class="task-card" *ngFor="let tarefa of tarefas">
+  
+      <!-- STATUS -->
+      <div class="task-top">
+        <span class="materia">{{ tarefa.materia }}</span>
+  
+        <span class="status" [class.concluida]="tarefa.concluida">
+          {{ tarefa.concluida ? 'Concluída' : 'Pendente' }}
+        </span>
+      </div>
+  
+      <!-- BANNER -->
+      <img
+        class="task-banner"
+        [src]="tarefa.banner"
+        alt="Banner da tarefa"
+      />
+  
+      <!-- TITULO -->
+      <h2>{{ tarefa.titulo }}</h2>
+  
+      <!-- DESCRIÇÃO -->
+      <p>{{ tarefa.descricao }}</p>
+  
+      <!-- BOTÕES -->
+      <div class="task-actions">
+  
+        <!-- ABRIR GOOGLE FORMS -->
+        <a
+          class="btn-abrir"
+          [href]="tarefa.link"
+          target="_blank"
+        >
+          Abrir atividade
+        </a>
+  
+        <!-- SOMENTE ALUNO -->
+        <button
+          *ngIf="tipoUsuario === 'aluno'"
+          class="btn-feito"
+          (click)="marcarConcluida(tarefa)"
+        >
+          ✔ Finalizar
+        </button>
+  
+      </div>
+  
+    </div>
+  
+  </section>
+  
+  <!-- MODAL PROFESSOR -->
+  <div class="modal-overlay" *ngIf="modalAberto">
+  
+    <div class="modal-box">
+  
+      <div class="modal-header">
+        <h2>Nova tarefa</h2>
+  
+        <button class="close-btn" (click)="fecharModal()">
+          ✕
+        </button>
+      </div>
+  
+      <div class="modal-body">
+  
+        <input
+          type="text"
+          placeholder="Título da tarefa"
+          [(ngModel)]="novaTarefa.titulo"
+        />
+  
+        <input
+          type="text"
+          placeholder="Matéria"
+          [(ngModel)]="novaTarefa.materia"
+        />
+  
+        <textarea
+          placeholder="Descrição"
+          [(ngModel)]="novaTarefa.descricao"
+        ></textarea>
+  
+        <input
+          type="text"
+          placeholder="Link do Google Forms"
+          [(ngModel)]="novaTarefa.link"
+        />
+  
+        <input
+          type="text"
+          placeholder="Banner da tarefa (URL da imagem)"
+          [(ngModel)]="novaTarefa.banner"
+        />
+  
+        <button class="btn-publicar" (click)="criarTarefa()">
+          Publicar tarefa
+        </button>
+  
+      </div>
+  
+    </div>
+  
+  </div>
