@@ -1,0 +1,178 @@
+<!-- SIDEBAR (compartilhada - mesmo código da home) -->
+<aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <div class="sidebar-header">
+        <div class="logo">
+            <div class="logo-icon">🌟</div>
+            <span class="logo-text" *ngIf="!sidebarCollapsed">Educa<span>Inclusiva</span></span>
+        </div>
+        <button class="toggle-btn" (click)="toggleSidebar()">
+            <i class="ti" [class.ti-layout-sidebar-left-collapse]="!sidebarCollapsed"
+                [class.ti-layout-sidebar-right-collapse]="sidebarCollapsed"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-profile" *ngIf="!sidebarCollapsed">
+        <div class="avatar">{{ iniciais }}</div>
+        <div class="profile-info">
+            <span class="profile-name">{{ usuario.nome.split(' ')[0] }}</span>
+            <span class="profile-badge">Aluno • Nível {{ usuario.nivel }}</span>
+        </div>
+    </div>
+    <div class="sidebar-avatar-mini" *ngIf="sidebarCollapsed">
+        <div class="avatar mini">{{ iniciais }}</div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <p class="nav-label" *ngIf="!sidebarCollapsed">PRINCIPAL</p>
+        <a class="nav-item" routerLink="/painel" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+            <i class="ti ti-home"></i><span *ngIf="!sidebarCollapsed">Home</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/informacoes" routerLinkActive="active">
+            <i class="ti ti-user-circle"></i><span *ngIf="!sidebarCollapsed">Informações</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/tarefas" routerLinkActive="active">
+            <i class="ti ti-clipboard-list"></i><span *ngIf="!sidebarCollapsed">Tarefas</span>
+        </a>
+        <p class="nav-label" *ngIf="!sidebarCollapsed">APRENDIZADO</p>
+        <a class="nav-item" routerLink="/painel/materiais" routerLinkActive="active">
+            <i class="ti ti-books"></i><span *ngIf="!sidebarCollapsed">Materiais Digitais</span>
+        </a>
+        <p class="nav-label" *ngIf="!sidebarCollapsed">CONTA</p>
+        <a class="nav-item logout" (click)="sair()">
+            <i class="ti ti-logout"></i><span *ngIf="!sidebarCollapsed">Sair</span>
+        </a>
+    </nav>
+</aside>
+
+<!-- CONTEÚDO -->
+<div class="content" [class.expanded]="sidebarCollapsed">
+
+    <header class="topbar">
+        <div class="topbar-left">
+            <a class="back-btn" routerLink="/painel"><i class="ti ti-arrow-left"></i></a>
+            <h1 class="page-title">Minhas Informações</h1>
+        </div>
+    </header>
+
+    <main class="main-content">
+
+        <!-- HERO DO PERFIL -->
+        <div class="profile-hero">
+            <div class="avatar-hero">{{ iniciais }}</div>
+            <div class="hero-info">
+                <h2>{{ usuario.nome }}</h2>
+                <p>{{ usuario.email }}</p>
+                <div class="hero-chips">
+                    <span class="chip blue">Nível {{ usuario.nivel }}</span>
+                    <span class="chip yellow">{{ usuario.pontos }} pontos</span>
+                    <span class="chip green" *ngIf="usuario.serie">Série: {{ usuario.serie }}</span>
+                    <span class="chip purple" *ngIf="usuario.condicao && usuario.condicao !== 'Nenhuma'">
+                        {{ usuario.condicao }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROGRESSO -->
+        <div class="info-card">
+            <div class="card-title"><i class="ti ti-chart-bar"></i> Progresso Geral</div>
+            <div class="progress-row">
+                <div class="progress-track">
+                    <div class="progress-fill" [style.width.%]="usuario.progresso || 0"></div>
+                </div>
+                <span class="progress-pct">{{ usuario.progresso || 0 }}%</span>
+            </div>
+            <div class="stats-row">
+                <div class="stat">
+                    <span class="stat-num">{{ usuario.nivel }}</span>
+                    <span class="stat-label">Nível</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-num">{{ usuario.pontos }}</span>
+                    <span class="stat-label">Pontos XP</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-num">{{ usuario.progresso }}%</span>
+                    <span class="stat-label">Progresso</span>
+                </div>
+                <div class="stat" *ngIf="usuario.nivelAutismo">
+                    <span class="stat-num">{{ usuario.nivelAutismo }}</span>
+                    <span class="stat-label">Nível Autismo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRID DE INFORMAÇÕES -->
+        <div class="info-grid">
+
+            <!-- Dados Pessoais -->
+            <div class="info-card">
+                <div class="card-title"><i class="ti ti-user"></i> Dados Pessoais</div>
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-key"><i class="ti ti-user-circle"></i> Nome completo</span>
+                        <span class="info-val">{{ usuario.nome }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key"><i class="ti ti-mail"></i> E-mail</span>
+                        <span class="info-val">{{ usuario.email }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key"><i class="ti ti-phone"></i> Telefone</span>
+                        <span class="info-val">{{ usuario.telefone || 'Não informado' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key"><i class="ti ti-id-badge"></i> CPF</span>
+                        <span class="info-val">{{ maskCpf(usuario.cpf) }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key"><i class="ti ti-id-badge-2"></i> RG</span>
+                        <span class="info-val">{{ usuario.rg || 'Não informado' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dados Escolares -->
+            <div class="info-card">
+                <div class="card-title"><i class="ti ti-school"></i> Dados Escolares</div>
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-key"><i class="ti ti-book"></i> Série</span>
+                        <span class="info-val">{{ usuario.serie || 'Não informada' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key"><i class="ti ti-building"></i> Tipo de Escola</span>
+                        <span class="info-val">{{ usuario.tipoEscola || 'Não informado' }}</span>
+                    </div>
+                    <div class="info-row" *ngIf="usuario.disciplina">
+                        <span class="info-key"><i class="ti ti-pencil"></i> Disciplina</span>
+                        <span class="info-val">{{ usuario.disciplina }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key"><i class="ti ti-heart"></i> Condição</span>
+                        <span class="info-val condicao-val">
+                            {{ usuario.condicao === 'Nenhuma' || !usuario.condicao ? 'Não informada' :
+                            usuario.condicao }}
+                        </span>
+                    </div>
+                    <div class="info-row" *ngIf="usuario.nivelAutismo">
+                        <span class="info-key"><i class="ti ti-brain"></i> Nível Autismo</span>
+                        <span class="info-val">{{ usuario.nivelAutismo }}</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SENHAS (edição) -->
+        <div class="info-card senha-card">
+            <div class="card-title"><i class="ti ti-lock"></i> Segurança</div>
+            <p class="senha-sub">Para alterar sua senha, entre em contato com seu professor ou responsável.</p>
+            <div class="senha-hint">
+                <i class="ti ti-shield-check"></i>
+                Sua conta está protegida
+            </div>
+        </div>
+
+    </main>
+</div>

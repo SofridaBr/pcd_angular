@@ -158,7 +158,7 @@ export class Login {
 
       localStorage.setItem('usuario', JSON.stringify(usuario));
 
-      window.location.href = '/painel';
+      window.location.href = '/home';
 
     } catch (error) {
       alert('Erro ao conectar ao servidor.');
