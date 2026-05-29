@@ -1,0 +1,517 @@
+<!-- Top bar -->
+<header class="topbar">
+    <div class="logo-icon">🌟</div>
+    <div class="logo-text">Educa<span>Inclusiva</span></div>
+</header>
+
+<main class="main">
+
+    <!-- LEFT -->
+    <section class="left">
+        <h1 class="headline">
+            Aprender é para<br />
+            <span>todos!</span>
+        </h1>
+
+        <p class="desc">
+            A plataforma pensada para alunos com PCD que têm dificuldades no aprendizado.
+            Aqui, cada criança aprende no seu ritmo, com atividades adaptadas e cheias de cor!
+        </p>
+
+        <div class="features">
+
+            <div class="feat">
+                <div class="feat-icon ic-red">🎮</div>
+                <div class="feat-text">
+                    <span class="feat-title">Atividades adaptadas</span>
+                    <span class="feat-sub">
+                        Exercícios criados para cada tipo de necessidade e ritmo de aprendizado
+                    </span>
+                </div>
+            </div>
+
+            <div class="feat">
+                <div class="feat-icon ic-green">📊</div>
+                <div class="feat-text">
+                    <span class="feat-title">Acompanhamento fácil</span>
+                    <span class="feat-sub">
+                        Professores e responsáveis acompanham o progresso em tempo real
+                    </span>
+                </div>
+            </div>
+
+            <div class="feat">
+                <div class="feat-icon ic-purple">🔊</div>
+                <div class="feat-text">
+                    <span class="feat-title">Acessibilidade total</span>
+                    <span class="feat-sub">
+                        Áudio, imagens grandes, cores contrastantes e leitura em voz alta
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- RIGHT -->
+    <section class="right">
+
+        <!-- Alerta de acesso negado -->
+        <div *ngIf="alertaAcesso" class="alerta-acesso">
+            ⚠️ {{ alertaAcesso }}
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+
+            <button class="tab" [class.active]="abaAtual === 'aluno'" (click)="switchTab('aluno')">
+                <i class="ti ti-school"></i>
+                Sou Aluno
+            </button>
+
+            <button class="tab" [class.active]="abaAtual === 'resp'" (click)="switchTab('resp')">
+                <i class="ti ti-users"></i>
+                Professor / Responsável
+            </button>
+
+        </div>
+
+        <!-- LOGIN ALUNO -->
+        <div *ngIf="abaAtual === 'aluno'">
+
+            <p class="form-title">Olá, aluno!</p>
+            <p class="form-sub">Entre com seu e-mail e senha para continuar aprendendo</p>
+
+            <form class="form" (ngSubmit)="loginAluno()">
+
+                <div>
+                    <label class="label">
+                        <i class="ti ti-mail"></i>
+                        E-mail
+                    </label>
+                    <div class="input-wrap">
+                        <i class="ti ti-mail field-icon"></i>
+                        <input class="ei-input" type="email" placeholder="seuemail@escola.com" [(ngModel)]="aluno.email"
+                            name="alunoEmail">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="label">
+                        <i class="ti ti-lock"></i>
+                        Senha
+                    </label>
+                    <div class="input-wrap">
+                        <i class="ti ti-lock field-icon"></i>
+                        <input class="ei-input" type="password" placeholder="••••••••" [(ngModel)]="aluno.senha"
+                            name="alunoSenha">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    <i class="ti ti-login"></i>
+                    Entrar e aprender!
+                </button>
+
+                <div class="divider">
+                    <span>ainda não tem conta?</span>
+                </div>
+
+                <button type="button" class="btn-secondary" (click)="abrirModalAluno()">
+                    <i class="ti ti-user-plus"></i>
+                    Criar conta de aluno
+                </button>
+
+            </form>
+        </div>
+
+        <!-- LOGIN PROFESSOR -->
+        <div *ngIf="abaAtual === 'resp'">
+
+            <p class="form-title">Área do educador</p>
+            <p class="form-sub">Acesse os perfis e o progresso dos seus alunos</p>
+
+            <form class="form" (ngSubmit)="loginProfessor()">
+
+                <div>
+                    <label class="label">
+                        <i class="ti ti-id-badge"></i>
+                        Tipo de acesso
+                    </label>
+                    <div class="input-wrap">
+                        <i class="ti ti-id-badge field-icon"></i>
+                        <select class="ei-select" [(ngModel)]="professor.tipo" name="professorTipo">
+                            <option value="Professor(a)">Professor(a)</option>
+                            <option value="Responsável / Familiar">Responsável / Familiar</option>
+                            <option value="Coordenador(a)">Coordenador(a)</option>
+                            <option value="Apoio / Cuidador">Apoio / Cuidador</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="label">
+                        <i class="ti ti-mail"></i>
+                        E-mail institucional
+                    </label>
+                    <div class="input-wrap">
+                        <i class="ti ti-mail field-icon"></i>
+                        <input class="ei-input" type="email" placeholder="professor@escola.com"
+                            [(ngModel)]="professor.email" name="professorEmail">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="label">
+                        <i class="ti ti-lock"></i>
+                        Senha
+                    </label>
+                    <div class="input-wrap">
+                        <i class="ti ti-lock field-icon"></i>
+                        <input class="ei-input" type="password" placeholder="••••••••" [(ngModel)]="professor.senha"
+                            name="professorSenha">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    <i class="ti ti-dashboard"></i>
+                    Acessar painel
+                </button>
+                <div class="divider">
+                    <span>ainda não tem conta?</span>
+                </div>
+
+                <button type="button" class="btn-secondary" (click)="abrirModalInstitucional()">
+                    <i class="ti ti-user-plus"></i>
+                    Criar conta de institucional
+                </button>
+            </form>
+        </div>
+
+    </section>
+
+</main>
+
+<!-- MODAL CADASTRO ALUNO -->
+<div class="modal-overlay" *ngIf="modalAlunoAberto">
+    <div class="modal-box">
+
+        <div class="modal-header">
+            <span class="modal-title">🧒 Criar conta de aluno</span>
+            <button class="modal-close" (click)="fecharModalAluno()">✕</button>
+        </div>
+
+        <p class="modal-sub">Preencha os dados para criar sua conta</p>
+
+        <div class="modal-alert" [class.error]="alertaAluno && alertaAluno !== 'Conta criada com sucesso!'"
+            [class.success]="alertaAluno === 'Conta criada com sucesso!'" *ngIf="alertaAluno">
+            {{ alertaAluno }}
+        </div>
+
+        <form class="modal-form" (ngSubmit)="cadastrarAluno()">
+
+            <div>
+                <label class="label">Nome completo *</label>
+                <div class="input-wrap">
+                    <i class="ti ti-user field-icon"></i>
+                    <input class="ei-input" type="text" placeholder="Nome do aluno" [(ngModel)]="cadastroAluno.nome"
+                        name="caNome">
+                </div>
+            </div>
+
+            <div>
+                <label class="label">E-mail *</label>
+                <div class="input-wrap">
+                    <i class="ti ti-mail field-icon"></i>
+                    <input class="ei-input" type="email" placeholder="email@exemplo.com"
+                        [(ngModel)]="cadastroAluno.email" name="caEmail">
+                </div>
+            </div>
+
+            <div>
+                <label class="label">CPF *</label>
+                <div class="input-wrap">
+                    <i class="ti ti-id-badge field-icon"></i>
+                    <input class="ei-input" type="text" placeholder="000.000.000-00" [(ngModel)]="cadastroAluno.cpf"
+                        name="caCpf">
+                </div>
+            </div>
+
+            <div>
+                <label class="label">RG *</label>
+                <div class="input-wrap">
+                    <i class="ti ti-id-badge field-icon"></i>
+                    <input class="ei-input" type="text" placeholder="00.000.000-0" [(ngModel)]="cadastroAluno.rg"
+                        name="caRg">
+                </div>
+            </div>
+
+            <div>
+                <label class="label">Telefone *</label>
+                <div class="input-wrap">
+                    <i class="ti ti-phone field-icon"></i>
+                    <input class="ei-input" type="text" placeholder="(11) 99999-9999"
+                        [(ngModel)]="cadastroAluno.telefone" name="caTelefone">
+                </div>
+            </div>
+
+            <div>
+                <label class="label">Série</label>
+                <div class="input-wrap">
+                    <i class="ti ti-school field-icon"></i>
+                    <input class="ei-input" type="text" placeholder="Ex: 5º ano" [(ngModel)]="cadastroAluno.serie"
+                        name="caSerie">
+                </div>
+            </div>
+
+            <div>
+                <label class="label">Senha *</label>
+                <div class="input-wrap">
+                    <i class="ti ti-lock field-icon"></i>
+                    <input class="ei-input" type="password" placeholder="••••••••" [(ngModel)]="cadastroAluno.senha"
+                        name="caSenha">
+                </div>
+            </div>
+
+            <div>
+                <label class="label">Confirmar senha *</label>
+                <div class="input-wrap">
+                    <i class="ti ti-lock field-icon"></i>
+                    <input class="ei-input" type="password" placeholder="••••••••" [(ngModel)]="cadastroAluno.senha2"
+                        name="caSenha2">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">
+                <i class="ti ti-user-plus"></i>
+                Criar conta
+            </button>
+
+        </form>
+    </div>
+</div>
+
+<!-- MODAL CADASTRO INSTITUCIONAL -->
+<div class="modal-overlay" *ngIf="modalInstitucionalAberto">
+    <div class="modal-box">
+
+        <div class="modal-header">
+            <span class="modal-title">🏫 Cadastro Institucional</span>
+            <button class="modal-close" (click)="fecharModalInstitucional()">✕</button>
+        </div>
+
+        <p class="modal-sub">
+            Preencha seus dados para solicitar acesso à plataforma
+        </p>
+
+        <div class="modal-alert"
+            [class.error]="alertaInstitucional && alertaInstitucional !== 'Cadastro solicitado com sucesso!'"
+            [class.success]="alertaInstitucional === 'Cadastro solicitado com sucesso!'"
+            *ngIf="alertaInstitucional">
+
+            {{ alertaInstitucional }}
+        </div>
+
+        <form class="modal-form" (ngSubmit)="cadastrarInstitucional()">
+
+            <!-- Nome -->
+            <div>
+                <label class="label">Nome completo *</label>
+
+                <div class="input-wrap">
+                    <i class="ti ti-user field-icon"></i>
+
+                    <input class="ei-input"
+                        type="text"
+                        placeholder="Seu nome completo"
+                        [(ngModel)]="cadastroInstitucional.nome"
+                        name="ciNome">
+                </div>
+            </div>
+
+            <!-- Tipo -->
+            <div>
+                <label class="label">Tipo de acesso *</label>
+
+                <div class="input-wrap">
+                    <i class="ti ti-id-badge field-icon"></i>
+
+                    <select class="ei-select"
+                        [(ngModel)]="cadastroInstitucional.tipo"
+                        name="ciTipo">
+
+                        <option value="professor">Professor(a)</option>
+                        <option value="responsavel">Responsável / Familiar</option>
+                        <option value="coordenador">Coordenador(a)</option>
+                        <option value="apoio">Apoio / Cuidador</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label class="label">E-mail institucional *</label>
+
+                <div class="input-wrap">
+                    <i class="ti ti-mail field-icon"></i>
+
+                    <input class="ei-input"
+                        type="email"
+                        placeholder="seuemail@escola.com"
+                        [(ngModel)]="cadastroInstitucional.email"
+                        name="ciEmail">
+                </div>
+            </div>
+
+            <!-- CPF -->
+            <div>
+                <label class="label">CPF *</label>
+
+                <div class="input-wrap">
+                    <i class="ti ti-id-badge field-icon"></i>
+
+                    <input class="ei-input"
+                        type="text"
+                        placeholder="000.000.000-00"
+                        [(ngModel)]="cadastroInstitucional.cpf"
+                        name="ciCpf">
+                </div>
+            </div>
+
+            <!-- RG -->
+            <div>
+                <label class="label">RG *</label>
+
+                <div class="input-wrap">
+                    <i class="ti ti-id-badge field-icon"></i>
+
+                    <input class="ei-input"
+                        type="text"
+                        placeholder="00.000.000-0"
+                        [(ngModel)]="cadastroInstitucional.rg"
+                        name="ciRg">
+                </div>
+            </div>
+
+            <!-- Telefone -->
+            <div>
+                <label class="label">Telefone *</label>
+
+                <div class="input-wrap">
+                    <i class="ti ti-phone field-icon"></i>
+
+                    <input class="ei-input"
+                        type="text"
+                        placeholder="(11) 99999-9999"
+                        [(ngModel)]="cadastroInstitucional.telefone"
+                        name="ciTelefone">
+                </div>
+            </div>
+
+            <!-- Disciplina -->
+            <div *ngIf="cadastroInstitucional.tipo === 'professor'">
+
+                <label class="label">Disciplina/Aula</label>
+
+                <div class="input-wrap">
+                    <i class="ti ti-book field-icon"></i>
+
+                    <input class="ei-input"
+                        type="text"
+                        placeholder="Ex: Matemática, Português..."
+                        [(ngModel)]="cadastroInstitucional.disciplina"
+                        name="ciDisciplina">
+                </div>
+            </div>
+
+            <!-- Tipo Escola -->
+            <div>
+                <label class="label">Tipo de Escola (Opcional)</label>
+
+                <div class="pcd-row" role="group">
+
+                    <button type="button"
+                        class="pcd-chip chip-green"
+                        [class.active]="cadastroInstitucional.tipoEscola === 'Regular'"
+                        (click)="cadastroInstitucional.tipoEscola = 'Regular'">
+
+                        📚 Regular
+                    </button>
+
+                    <button type="button"
+                        class="pcd-chip chip-purple"
+                        [class.active]="cadastroInstitucional.tipoEscola === 'Integral'"
+                        (click)="cadastroInstitucional.tipoEscola = 'Integral'">
+
+                        🏢 Integral
+                    </button>
+
+                </div>
+            </div>
+
+            <!-- Senha -->
+            <div>
+                <label class="label">Senha *</label>
+
+                <div class="input-wrap">
+                    <i class="ti ti-lock field-icon"></i>
+
+                    <input class="ei-input"
+                        type="password"
+                        placeholder="Mínimo 6 caracteres"
+                        [(ngModel)]="cadastroInstitucional.senha"
+                        name="ciSenha">
+                </div>
+            </div>
+
+            <!-- Confirmar Senha -->
+            <div>
+                <label class="label">Confirmar senha *</label>
+
+                <div class="input-wrap">
+                    <i class="ti ti-lock-check field-icon"></i>
+
+                    <input class="ei-input"
+                        type="password"
+                        placeholder="Repita a senha"
+                        [(ngModel)]="cadastroInstitucional.senha2"
+                        name="ciSenha2">
+                </div>
+            </div>
+
+            <!-- Botões -->
+            <button type="submit" class="btn-primary">
+                <i class="ti ti-send"></i>
+                Solicitar cadastro
+            </button>
+
+            <button type="button"
+                class="btn-secondary"
+                (click)="fecharModalInstitucional()">
+
+                Cancelar
+            </button>
+
+        </form>
+    </div>
+</div>
+
+<!-- BOTÃO ACESSIBILIDADE -->
+<div class="accessibility-button" (click)="toggleMenu()">♿</div>
+
+<!-- MENU ACESSIBILIDADE -->
+<div class="accessibility-menu" [class.active]="menuAcessibilidade">
+    <h2>♿ Acessibilidade</h2>
+    <button (click)="increaseFont()">🔡 Aumentar fonte</button>
+    <button (click)="decreaseFont()">🔤 Diminuir fonte</button>
+    <button (click)="toggleContrast()">🌗 Alto contraste</button>
+    <button (click)="toggleDyslexia()">📖 Modo dislexia</button>
+    <button (click)="toggleTDAH()">🎯 Modo TDAH</button>
+    <button (click)="zoomPage()">🔍 Zoom +</button>
+    <button (click)="speakText()">🔊 Ler página</button>
+    <button (click)="toggleGuide()">📏 Guia de leitura</button>
+</div>
+
+
+<!-- GUIA DE LEITURA -->
+<div id="reading-guide" [style.display]="guiaLeitura ? 'block' : 'none'"></div>
