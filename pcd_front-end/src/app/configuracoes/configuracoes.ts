@@ -3,17 +3,18 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 @Component({
-  selector: 'app-informacoes',
+  selector: 'app-configuracoes',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './informacoes.html',
-  styleUrl: './informacoes.scss',
+  templateUrl: './configuracoes.html',
+  styleUrl: './configuracoes.scss'
 })
-export class Informacoes implements OnInit {
+export class Configuracoes implements OnInit {
 
-  sidebarCollapsed = false;
   usuario: any = null;
   iniciais = '';
+  sidebarCollapsed = false;
+  abaAtiva: 'sobre' | 'privacidade' | 'termos' | 'suporte' = 'sobre';
 
   ngOnInit(): void {
     const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
@@ -25,16 +26,18 @@ export class Informacoes implements OnInit {
       : partes[0]?.[0] || '?').toUpperCase();
   }
 
-  toggleSidebar() { this.sidebarCollapsed = !this.sidebarCollapsed; }
+  toggleSidebar(): void { this.sidebarCollapsed = !this.sidebarCollapsed; }
 
-  sair() {
+  sair(): void {
     localStorage.removeItem('usuario');
     sessionStorage.removeItem('usuario');
     window.location.href = '/login';
   }
 
-  maskCpf(cpf: string | undefined): string {
-    if (!cpf) return 'Não informado';
-    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  }
+  get isProfessor(): boolean {
+  return this.usuario?.tipo === 'professor' || 
+         this.usuario?.tipo === 'coordenador' || 
+         this.usuario?.tipo === 'apoio' || 
+         this.usuario?.tipo === 'responsavel';
+}
 }

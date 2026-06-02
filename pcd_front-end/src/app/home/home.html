@@ -45,14 +45,33 @@
             <span class="badge" *ngIf="totalTarefas > 0 && !sidebarCollapsed">{{ totalTarefas }}</span>
         </a>
 
+        <a class="nav-item" routerLink="/painel/boletim" routerLinkActive="active">
+            <i class="ti ti-chart-bar"></i>
+            <span *ngIf="!sidebarCollapsed">Boletim</span>
+        </a>
+
+        <a class="nav-item" routerLink="/painel/recados" routerLinkActive="active">
+            <i class="ti ti-mail"></i>
+            <span *ngIf="!sidebarCollapsed">Recados</span>
+            <span class="badge" *ngIf="totalRecadosNaoLidos > 0 && !sidebarCollapsed">{{ totalRecadosNaoLidos }}</span>
+        </a>
+
         <p class="nav-label" *ngIf="!sidebarCollapsed">APRENDIZADO</p>
 
         <a class="nav-item" routerLink="/painel/materiais" routerLinkActive="active">
             <i class="ti ti-books"></i>
             <span *ngIf="!sidebarCollapsed">Materiais Digitais</span>
         </a>
+        <a class="nav-item" routerLink="/painel/tutoriais" routerLinkActive="active">
+            <i class="ti ti-video"></i><span *ngIf="!sidebarCollapsed">Tutoriais</span>
+        </a>
 
         <p class="nav-label" *ngIf="!sidebarCollapsed">CONTA</p>
+
+        <a class="nav-item" routerLink="/painel/configuracoes" routerLinkActive="active">
+            <i class="ti ti-settings"></i>
+            <span *ngIf="!sidebarCollapsed">Configurações</span>
+        </a>
 
         <a class="nav-item logout" (click)="sair()">
             <i class="ti ti-logout"></i>
@@ -87,44 +106,19 @@
                 <div class="avatar-big">{{ iniciais }}</div>
                 <div>
                     <h2 class="welcome-title">Olá, {{ usuario?.nome?.split(' ')[0] }}! 👋</h2>
-                    <p class="welcome-sub">Série: {{ usuario?.serie || 'Não informada' }} • {{ usuario?.tipoEscola }}
+                    <p class="welcome-sub">
+                        {{ usuario?.serie || 'Série não informada' }} •
+                        {{ usuario?.tipoEscola || 'Escola não informada' }}
+                    </p>
+                    <p class="welcome-condicao" *ngIf="usuario?.condicao && usuario?.condicao !== 'Nenhuma'">
+                        ♿ {{ usuario?.condicao }}
                     </p>
                 </div>
             </div>
-            <div class="welcome-right">
-                <div class="xp-box">
-                    <span class="xp-label">✨ XP Total</span>
-                    <span class="xp-value">{{ usuario?.pontos }} pts</span>
-                </div>
-            </div>
+            
         </div>
 
-        <!-- PROGRESSO -->
-        <div class="progress-section">
-            <div class="section-header">
-                <h3>Seu progresso</h3>
-            </div>
-            <div class="progress-bar-wrap">
-                <div class="progress-bar-track">
-                    <div class="progress-bar-fill" [style.width.%]="usuario?.progresso || 0"></div>
-                </div>
-                <span class="progress-percent">{{ usuario?.progresso || 0 }}%</span>
-            </div>
-            <div class="level-chips">
-                <div class="level-chip">
-                    <i class="ti ti-star-filled"></i>
-                    Nível {{ usuario?.nivel }}
-                </div>
-                <div class="level-chip green">
-                    <i class="ti ti-trophy"></i>
-                    {{ usuario?.pontos }} pontos
-                </div>
-                <div class="level-chip purple" *ngIf="usuario?.condicao && usuario?.condicao !== 'Nenhuma'">
-                    <i class="ti ti-heart"></i>
-                    {{ usuario?.condicao }}
-                </div>
-            </div>
-        </div>
+
 
         <!-- CARDS RESUMO -->
         <div class="cards-grid">
@@ -150,6 +144,47 @@
                 </div>
             </div>
 
+            <!-- Boletim -->
+            <div class="summary-card" routerLink="/painel/boletim">
+                <div class="card-icon teal">
+                    <i class="ti ti-chart-bar"></i>
+                </div>
+                <div class="card-body">
+                    <span class="card-label">Boletim</span>
+                    <span class="card-num teal-text">📊</span>
+                    <span class="card-sub">notas do bimestre</span>
+                    <div class="task-list">
+                        <div class="task-item"><i class="ti ti-pencil"></i> Ver minhas notas</div>
+                        <div class="task-item"><i class="ti ti-award"></i> Acompanhar desempenho</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recados -->
+            <div class="summary-card" routerLink="/painel/recados">
+                <div class="card-icon orange" [class.has-badge]="totalRecadosNaoLidos > 0">
+                    <i class="ti ti-mail"></i>
+                    <span class="card-badge" *ngIf="totalRecadosNaoLidos > 0">{{ totalRecadosNaoLidos }}</span>
+                </div>
+                <div class="card-body">
+                    <span class="card-label">Recados</span>
+                    <span class="card-num orange-text">
+                        {{ totalRecadosNaoLidos > 0 ? totalRecadosNaoLidos : '📬' }}
+                    </span>
+                    <span class="card-sub">
+                        {{ totalRecadosNaoLidos > 0 ? 'recado(s) não lido(s)' : 'recados do professor' }}
+                    </span>
+                    <div class="task-list">
+                        <div class="task-item" *ngFor="let r of recadosRecentes">
+                            <i class="ti ti-mail"></i> {{ r.titulo }}
+                        </div>
+                        <div class="task-item empty" *ngIf="recadosRecentes.length === 0">
+                            Nenhum recado novo 📬
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Informações pessoais -->
             <div class="summary-card" routerLink="/painel/informacoes">
                 <div class="card-icon blue">
@@ -161,9 +196,8 @@
                     <span class="card-sub">ver suas informações</span>
                     <div class="task-list">
                         <div class="task-item"><i class="ti ti-mail"></i> {{ usuario?.email }}</div>
-                        <div class="task-item"><i class="ti ti-phone"></i> {{ usuario?.telefone || 'Não informado' }}
-                        </div>
-                        <div class="task-item"><i class="ti ti-school"></i> Série {{ usuario?.serie }}</div>
+                        <div class="task-item"><i class="ti ti-school"></i> {{ usuario?.serie || 'Série não informada'
+                            }}</div>
                     </div>
                 </div>
             </div>
@@ -180,6 +214,23 @@
                     <div class="task-list">
                         <div class="task-item"><i class="ti ti-file-text"></i> Acesse os materiais</div>
                         <div class="task-item"><i class="ti ti-video"></i> Vídeos e documentos</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tutoriais — adiciona depois do card Materiais -->
+            <div class="summary-card" routerLink="/painel/tutoriais">
+                <div class="card-icon purple">
+                    <i class="ti ti-video"></i>
+                </div>
+                <div class="card-body">
+                    <span class="card-label">Tutoriais</span>
+                    <span class="card-num purple-text">🎬</span>
+                    <span class="card-sub">aprenda com vídeos</span>
+                    <div class="task-list">
+                        <div class="task-item"><i class="ti ti-player-play"></i> Vídeo 1</div>
+                        <div class="task-item"><i class="ti ti-player-play"></i> Vídeo 2</div>
+                        <div class="task-item"><i class="ti ti-player-play"></i> Vídeo 3</div>
                     </div>
                 </div>
             </div>

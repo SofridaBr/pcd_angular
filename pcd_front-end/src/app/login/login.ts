@@ -158,7 +158,7 @@ export class Login {
 
       localStorage.setItem('usuario', JSON.stringify(usuario));
 
-      window.location.href = '/home';
+      window.location.href = '/painel/tarefas';
 
     } catch (error) {
       alert('Erro ao conectar ao servidor.');
@@ -212,7 +212,7 @@ export class Login {
 
       localStorage.setItem('usuario', JSON.stringify(usuario));
 
-      window.location.href = '/painel-prof';
+      window.location.href = '/professor'; // ← só isso mudou
 
     } catch (error) {
       alert('Erro ao conectar ao servidor.');
@@ -379,6 +379,64 @@ export class Login {
         'Erro ao conectar ao servidor';
 
     }
+  }
+
+  mascaraCpf(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let v = input.value.replace(/\D/g, '').substring(0, 11);
+    v = v.replace(/(\d{3})(\d)/, '$1.$2');
+    v = v.replace(/(\d{3})(\d)/, '$1.$2');
+    v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    input.value = v;
+    this.cadastroAluno.cpf = v;
+  }
+
+  mascaraRg(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let v = input.value.replace(/\D/g, '').substring(0, 9);
+    v = v.replace(/(\d{2})(\d)/, '$1.$2');
+    v = v.replace(/(\d{3})(\d)/, '$1.$2');
+    v = v.replace(/(\d{3})(\d{1})$/, '$1-$2');
+    input.value = v;
+    this.cadastroAluno.rg = v;
+  }
+
+  mascaraTelefone(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let v = input.value.replace(/\D/g, '').substring(0, 11);
+    v = v.replace(/(\d{2})(\d)/, '($1) $2');
+    v = v.replace(/(\d{5})(\d)/, '$1-$2');
+    input.value = v;
+    this.cadastroAluno.telefone = v;
+  }
+
+  mascaraCpfInst(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let v = input.value.replace(/\D/g, '').substring(0, 11);
+    v = v.replace(/(\d{3})(\d)/, '$1.$2');
+    v = v.replace(/(\d{3})(\d)/, '$1.$2');
+    v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    input.value = v;
+    this.cadastroInstitucional.cpf = v;
+  }
+
+  mascaraRgInst(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let v = input.value.replace(/\D/g, '').substring(0, 9);
+    v = v.replace(/(\d{2})(\d)/, '$1.$2');
+    v = v.replace(/(\d{3})(\d)/, '$1.$2');
+    v = v.replace(/(\d{3})(\d{1})$/, '$1-$2');
+    input.value = v;
+    this.cadastroInstitucional.rg = v;
+  }
+
+  mascaraTelefoneInst(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let v = input.value.replace(/\D/g, '').substring(0, 11);
+    v = v.replace(/(\d{2})(\d)/, '($1) $2');
+    v = v.replace(/(\d{5})(\d)/, '$1-$2');
+    input.value = v;
+    this.cadastroInstitucional.telefone = v;
   }
 }
 

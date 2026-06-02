@@ -33,11 +33,23 @@
         <a class="nav-item" routerLink="/painel/tarefas" routerLinkActive="active">
             <i class="ti ti-clipboard-list"></i><span *ngIf="!sidebarCollapsed">Tarefas</span>
         </a>
+        <a class="nav-item" routerLink="/painel/boletim" routerLinkActive="active">
+            <i class="ti ti-chart-bar"></i><span *ngIf="!sidebarCollapsed">Boletim</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/recados" routerLinkActive="active">
+            <i class="ti ti-mail"></i><span *ngIf="!sidebarCollapsed">Recados</span>
+        </a>
         <p class="nav-label" *ngIf="!sidebarCollapsed">APRENDIZADO</p>
         <a class="nav-item" routerLink="/painel/materiais" routerLinkActive="active">
             <i class="ti ti-books"></i><span *ngIf="!sidebarCollapsed">Materiais Digitais</span>
         </a>
+        <a class="nav-item" routerLink="/painel/tutoriais" routerLinkActive="active">
+            <i class="ti ti-video"></i><span *ngIf="!sidebarCollapsed">Tutoriais</span>
+        </a>
         <p class="nav-label" *ngIf="!sidebarCollapsed">CONTA</p>
+        <a class="nav-item" routerLink="/painel/configuracoes" routerLinkActive="active">
+            <i class="ti ti-settings"></i><span *ngIf="!sidebarCollapsed">Configurações</span>
+        </a>
         <a class="nav-item logout" (click)="sair()">
             <i class="ti ti-logout"></i><span *ngIf="!sidebarCollapsed">Sair</span>
         </a>
@@ -63,8 +75,8 @@
                 <h2>{{ usuario.nome }}</h2>
                 <p>{{ usuario.email }}</p>
                 <div class="hero-chips">
-                    <span class="chip blue">Nível {{ usuario.nivel }}</span>
-                    <span class="chip yellow">{{ usuario.pontos }} pontos</span>
+                    
+                    
                     <span class="chip green" *ngIf="usuario.serie">Série: {{ usuario.serie }}</span>
                     <span class="chip purple" *ngIf="usuario.condicao && usuario.condicao !== 'Nenhuma'">
                         {{ usuario.condicao }}
@@ -73,34 +85,6 @@
             </div>
         </div>
 
-        <!-- PROGRESSO -->
-        <div class="info-card">
-            <div class="card-title"><i class="ti ti-chart-bar"></i> Progresso Geral</div>
-            <div class="progress-row">
-                <div class="progress-track">
-                    <div class="progress-fill" [style.width.%]="usuario.progresso || 0"></div>
-                </div>
-                <span class="progress-pct">{{ usuario.progresso || 0 }}%</span>
-            </div>
-            <div class="stats-row">
-                <div class="stat">
-                    <span class="stat-num">{{ usuario.nivel }}</span>
-                    <span class="stat-label">Nível</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-num">{{ usuario.pontos }}</span>
-                    <span class="stat-label">Pontos XP</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-num">{{ usuario.progresso }}%</span>
-                    <span class="stat-label">Progresso</span>
-                </div>
-                <div class="stat" *ngIf="usuario.nivelAutismo">
-                    <span class="stat-num">{{ usuario.nivelAutismo }}</span>
-                    <span class="stat-label">Nível Autismo</span>
-                </div>
-            </div>
-        </div>
 
         <!-- GRID DE INFORMAÇÕES -->
         <div class="info-grid">

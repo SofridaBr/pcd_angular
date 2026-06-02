@@ -1,0 +1,150 @@
+<!-- SIDEBAR -->
+<aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <div class="sidebar-header">
+        <div class="logo">
+            <div class="logo-icon">🌟</div>
+            <span class="logo-text" *ngIf="!sidebarCollapsed">Educa<span>Inclusiva</span></span>
+        </div>
+        <button class="toggle-btn" (click)="toggleSidebar()">
+            <i class="ti" [class.ti-layout-sidebar-left-collapse]="!sidebarCollapsed"
+                [class.ti-layout-sidebar-right-collapse]="sidebarCollapsed"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-profile" *ngIf="!sidebarCollapsed">
+        <div class="avatar">{{ iniciais }}</div>
+        <div class="profile-info">
+            <span class="profile-name">{{ usuario?.nome?.split(' ')[0] }}</span>
+            <span class="profile-badge">Professor(a)</span>
+        </div>
+    </div>
+    <div class="sidebar-avatar-mini" *ngIf="sidebarCollapsed">
+        <div class="avatar mini">{{ iniciais }}</div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <p class="nav-label" *ngIf="!sidebarCollapsed">PRINCIPAL</p>
+        <a class="nav-item" routerLink="/professor">
+            <i class="ti ti-home"></i><span *ngIf="!sidebarCollapsed">Home</span>
+        </a>
+        <a class="nav-item" [routerLink]="['/professor']" [queryParams]="{aba: 'alunos'}">
+            <i class="ti ti-users"></i><span *ngIf="!sidebarCollapsed">Meus Alunos</span>
+        </a>
+        <a class="nav-item" [routerLink]="['/professor']" [queryParams]="{aba: 'boletim'}">
+            <i class="ti ti-clipboard-list"></i><span *ngIf="!sidebarCollapsed">Boletim</span>
+        </a>
+
+        <p class="nav-label" *ngIf="!sidebarCollapsed">ATIVIDADES</p>
+        <a class="nav-item" [routerLink]="['/professor']" [queryParams]="{aba: 'tarefas'}">
+            <i class="ti ti-circle-plus"></i><span *ngIf="!sidebarCollapsed">Nova Atividade</span>
+        </a>
+
+        <p class="nav-label" *ngIf="!sidebarCollapsed">APRENDIZADO</p>
+        <a class="nav-item" [routerLink]="['/professor']" [queryParams]="{aba: 'materiais'}">
+            <i class="ti ti-books"></i><span *ngIf="!sidebarCollapsed">Materiais</span>
+        </a>
+       
+
+        <p class="nav-label" *ngIf="!sidebarCollapsed">COMUNICAÇÃO</p>
+        <a class="nav-item" [routerLink]="['/professor']" [queryParams]="{aba: 'recados'}">
+            <i class="ti ti-mail"></i><span *ngIf="!sidebarCollapsed">Recados</span>
+        </a>
+
+        <p class="nav-label" *ngIf="!sidebarCollapsed">CONTA</p>
+        <a class="nav-item active" routerLink="/professor/configuracoes">
+            <i class="ti ti-settings"></i><span *ngIf="!sidebarCollapsed">Configurações</span>
+        </a>
+        <div class="nav-spacer"></div>
+        <a class="nav-item logout" (click)="sair()">
+            <i class="ti ti-logout"></i><span *ngIf="!sidebarCollapsed">Sair</span>
+        </a>
+    </nav>
+</aside>
+
+<!-- CONTEÚDO -->
+<div class="content" [class.expanded]="sidebarCollapsed">
+    <header class="topbar">
+        <h1 class="page-title">⚙️ Configurações</h1>
+    </header>
+
+    <main class="main-content">
+        <div class="config-layout">
+
+            <nav class="config-nav">
+                <button class="config-tab" [class.ativa]="abaAtiva === 'sobre'" (click)="abaAtiva = 'sobre'">
+                    <i class="ti ti-info-circle"></i> Sobre
+                </button>
+                <button class="config-tab" [class.ativa]="abaAtiva === 'privacidade'"
+                    (click)="abaAtiva = 'privacidade'">
+                    <i class="ti ti-shield"></i> Política de Privacidade
+                </button>
+                <button class="config-tab" [class.ativa]="abaAtiva === 'termos'" (click)="abaAtiva = 'termos'">
+                    <i class="ti ti-file-text"></i> Termos de Uso
+                </button>
+                <button class="config-tab" [class.ativa]="abaAtiva === 'suporte'" (click)="abaAtiva = 'suporte'">
+                    <i class="ti ti-help-circle"></i> Suporte
+                </button>
+            </nav>
+
+            <div class="config-body">
+
+                <div *ngIf="abaAtiva === 'sobre'">
+                    <h2>Sobre o EducaInclusiva</h2>
+                    <p>O <strong>EducaInclusiva</strong> nasceu para transformar a experiência educacional, conectando
+                        alunos, professores e responsáveis em uma plataforma acessível e inclusiva.</p>
+                    <h3>Benefícios para professores</h3>
+                    <ul>
+                        <li><strong>Gestão de alunos:</strong> adicione e acompanhe seus alunos.</li>
+                        <li><strong>Envio de tarefas:</strong> envie atividades diretamente para os alunos.</li>
+                        <li><strong>Comunicação:</strong> envie recados e acompanhe a leitura.</li>
+                    </ul>
+                </div>
+
+                <div *ngIf="abaAtiva === 'privacidade'">
+                    <h2>Política de Privacidade</h2>
+                    <p>Seus dados são tratados com total segurança e confidencialidade. Não compartilhamos informações
+                        pessoais com terceiros.</p>
+                    <h3>Dados coletados</h3>
+                    <ul>
+                        <li>Nome, e-mail e informações institucionais para personalizar a experiência.</li>
+                        <li>Dados dos alunos para geração de relatórios educacionais.</li>
+                    </ul>
+                    <h3>Uso dos dados</h3>
+                    <ul>
+                        <li>Exclusivamente para fins educacionais dentro da plataforma.</li>
+                        <li>Nunca vendidos ou compartilhados com anunciantes.</li>
+                    </ul>
+                </div>
+
+                <div *ngIf="abaAtiva === 'termos'">
+                    <h2>Termos de Uso</h2>
+                    <p>Ao usar o EducaInclusiva, você concorda com os seguintes termos:</p>
+                    <ul>
+                        <li>Usar a plataforma apenas para fins educacionais.</li>
+                        <li>Não compartilhar suas credenciais de acesso.</li>
+                        <li>Respeitar os outros usuários da plataforma.</li>
+                        <li>Não publicar conteúdo inadequado ou ofensivo.</li>
+                    </ul>
+                </div>
+
+                <div *ngIf="abaAtiva === 'suporte'">
+                    <h2>Suporte</h2>
+                    <p>Encontrou algum problema ou tem alguma dúvida? Entre em contato:</p>
+                    <div class="suporte-cards">
+                        <div class="suporte-card">
+                            <i class="ti ti-mail"></i>
+                            <strong>E-mail</strong>
+                            <span>suporte&#64;educainclusiva.com</span>
+                        </div>
+                        <div class="suporte-card">
+                            <i class="ti ti-help-circle"></i>
+                            <strong>FAQ</strong>
+                            <span>Acesse as perguntas frequentes</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>

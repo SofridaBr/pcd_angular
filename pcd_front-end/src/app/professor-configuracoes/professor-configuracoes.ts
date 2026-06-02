@@ -1,23 +1,26 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
-  selector: 'app-informacoes',
+  selector: 'app-professor-configuracoes',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './informacoes.html',
-  styleUrl: './informacoes.scss',
+  templateUrl: './professor-configuracoes.html',
+  styleUrl: './professor-configuracoes.scss'
 })
-export class Informacoes implements OnInit {
+export class ProfessorConfiguracoes implements OnInit {
 
-  sidebarCollapsed = false;
   usuario: any = null;
   iniciais = '';
+  abaAtiva: 'sobre' | 'privacidade' | 'termos' | 'suporte' = 'sobre';
+  sidebarCollapsed = false;
+
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
     const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
-    if (!raw) { window.location.href = '/login'; return; }
+    if (!raw) { this.router.navigate(['/login']); return; }
     this.usuario = JSON.parse(raw);
     const partes = (this.usuario.nome || '').split(' ');
     this.iniciais = (partes.length >= 2
@@ -25,16 +28,13 @@ export class Informacoes implements OnInit {
       : partes[0]?.[0] || '?').toUpperCase();
   }
 
-  toggleSidebar() { this.sidebarCollapsed = !this.sidebarCollapsed; }
-
-  sair() {
-    localStorage.removeItem('usuario');
-    sessionStorage.removeItem('usuario');
-    window.location.href = '/login';
+  toggleSidebar(): void {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
   }
 
-  maskCpf(cpf: string | undefined): string {
-    if (!cpf) return 'Não informado';
-    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  sair(): void {
+    localStorage.removeItem('usuario');
+    sessionStorage.removeItem('usuario');
+    this.router.navigate(['/login']);
   }
 }

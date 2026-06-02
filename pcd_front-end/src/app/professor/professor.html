@@ -1,0 +1,512 @@
+<!-- ══ LAYOUT ══ -->
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon">🌟</div>
+            <span class="logo-text">Educa<span>Inclusiva</span></span>
+        </div>
+
+        <div class="sidebar-profile">
+            <div class="avatar">{{ iniciais }}</div>
+            <div class="profile-info">
+                <span class="profile-name">{{ nomeProfessor }}</span>
+                <span class="profile-sub">Professor(a)</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <p class="nav-label">PRINCIPAL</p>
+            <a class="nav-item" [class.active]="abaAtiva === 'alunos'" (click)="abaAtiva = 'alunos'">
+                <i class="ti ti-home"></i> <span>Home</span>
+            </a>
+            <a class="nav-item" [class.active]="abaAtiva === 'alunos'" (click)="abaAtiva = 'alunos'">
+                <i class="ti ti-users"></i> <span>Meus Alunos</span>
+            </a>
+            <a class="nav-item" [class.active]="abaAtiva === 'boletim'" (click)="abaAtiva = 'boletim'">
+                <i class="ti ti-clipboard-list"></i> <span>Boletim</span>
+            </a>
+
+            <p class="nav-label">ATIVIDADES</p>
+            <a class="nav-item" [class.active]="abaAtiva === 'tarefas'" (click)="abaAtiva = 'tarefas'">
+                <i class="ti ti-circle-plus"></i> <span>Nova Atividade</span>
+                <span class="nav-badge" *ngIf="tarefasEnviadas.length > 0">{{ tarefasEnviadas.length }}</span>
+            </a>
+
+            <p class="nav-label">APRENDIZADO</p>
+            <a class="nav-item" [class.active]="abaAtiva === 'materiais'" (click)="abaAtiva = 'materiais'">
+                <i class="ti ti-books"></i> <span>Materiais</span>
+            </a>
+
+
+            <p class="nav-label">COMUNICAÇÃO</p>
+            <a class="nav-item" [class.active]="abaAtiva === 'recados'" (click)="abaAtiva = 'recados'">
+                <i class="ti ti-mail"></i> <span>Recados</span>
+                <span class="nav-badge" *ngIf="recadosEnviados.length > 0">{{ recadosEnviados.length }}</span>
+            </a>
+
+            <p class="nav-label">CONTA</p>
+            <a class="nav-item" routerLink="/professor/configuracoes">
+                <i class="ti ti-settings"></i> <span>Configurações</span>
+            </a>
+
+            <div class="nav-spacer"></div>
+            <a class="nav-item logout" (click)="sair()">
+                <i class="ti ti-logout"></i> <span>Sair</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- CONTEÚDO -->
+    <div class="content">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <div class="search-box">
+                    <i class="ti ti-search"></i>
+                    <input type="text" placeholder="Buscar aluno ou turma..." [(ngModel)]="buscaAluno" />
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="date-chip"><i class="ti ti-calendar"></i> {{ dataHoje }}</div>
+                <div class="professor-chip">
+                    <div class="avatar-sm">{{ iniciais }}</div>
+                    <span>{{ nomeProfessor }}</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN -->
+        <main class="main-content">
+
+            <!-- ══ ABA: HOME / ALUNOS ══ -->
+            <ng-container *ngIf="abaAtiva === 'alunos'">
+
+                <!-- Boas-vindas -->
+                <div class="welcome-bar">
+                    <div class="welcome-left">
+                        <div class="avatar-big">{{ iniciais }}</div>
+                        <div>
+                            <h2 class="welcome-title">Bom dia, {{ nomeProfessor }}! 👋</h2>
+                            <p class="welcome-sub">{{ dataHoje }}</p>
+                        </div>
+                    </div>
+                    <div class="welcome-actions">
+                        <button class="btn-action yellow" (click)="abrirModalTarefa()">
+                            <i class="ti ti-plus"></i> Nova Atividade
+                        </button>
+                        <button class="btn-action green" (click)="abrirModalRecado()">
+                            <i class="ti ti-message"></i> Enviar Recado
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sub-abas internas -->
+                <div class="inner-tabs">
+                    <button class="inner-tab" [class.active]="innerTab === 'visao'" (click)="innerTab = 'visao'">
+                        <i class="ti ti-layout-dashboard"></i> Visão Geral
+                    </button>
+                    <button class="inner-tab" [class.active]="innerTab === 'alunos'" (click)="innerTab = 'alunos'">
+                        <i class="ti ti-users"></i> Alunos
+                    </button>
+                    <button class="inner-tab" [class.active]="isRecadosAtivo" (click)="irParaRecados()">
+                        <i class="ti ti-mail"></i> Recados
+                    </button>
+                </div>
+
+                <!-- VISÃO GERAL -->
+                <ng-container *ngIf="innerTab === 'visao'">
+
+                    <!-- Cards resumo -->
+                    <div class="summary-grid">
+                        <div class="summary-card">
+                            <div class="sc-icon blue"><i class="ti ti-users"></i></div>
+                            <div class="sc-body">
+                                <span class="sc-num">{{ alunos.length }}</span>
+                                <span class="sc-label">Alunos na turma</span>
+                            </div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="sc-icon orange"><i class="ti ti-calendar-due"></i></div>
+                            <div class="sc-body">
+                                <span class="sc-num">{{ tarefasEnviadas.length }}</span>
+                                <span class="sc-label">Entregas pendentes</span>
+                            </div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="sc-icon purple"><i class="ti ti-accessibility"></i></div>
+                            <div class="sc-body">
+                                <span class="sc-num">{{ alunosPcd }}</span>
+                                <span class="sc-label">Alunos PcD ativos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visão rápida dos alunos -->
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <span><i class="ti ti-users"></i> Alunos — Visão Rápida</span>
+                            <div class="filter-chips">
+                                <button class="fchip" [class.active]="filtroVisao === 'todos'"
+                                    (click)="filtroVisao = 'todos'">Todos</button>
+                                <button class="fchip" [class.active]="filtroVisao === 'pcd'"
+                                    (click)="filtroVisao = 'pcd'">PcD</button>
+                            </div>
+                        </div>
+                        <table class="alunos-table">
+                            <thead>
+                                <tr>
+                                    <th>Aluno</th>
+                                    <th>Série</th>
+                                    <th>Boletim</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let a of alunosFiltradosVisao">
+                                    <td class="td-aluno">
+                                        <div class="avatar-xs">{{ a.nome[0] }}</div>
+                                        <div>
+                                            <span class="aluno-nome">{{ a.nome }}</span>
+                                            <span class="aluno-cond" *ngIf="a.condicao && a.condicao !== 'Nenhuma'">{{
+                                                a.condicao }}</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="chip-serie">{{ abreviarSerie(a.serie) }}</span></td>
+                                    <td>
+                                        <button class="btn-ver" (click)="abrirBoletimAluno(a)">Ver</button>
+                                    </td>
+                                </tr>
+                                <tr *ngIf="alunosFiltradosVisao.length === 0">
+                                    <td colspan="3" style="text-align:center;color:#aaa;padding:20px">Nenhum aluno
+                                        encontrado</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </ng-container>
+
+                <!-- ALUNOS (sub-aba) -->
+                <ng-container *ngIf="innerTab === 'alunos'">
+                    <div class="add-aluno-box">
+                        <h3>Adicionar aluno pelo e-mail</h3>
+                        <div class="add-aluno-row">
+                            <input type="email" placeholder="Email do aluno" [(ngModel)]="emailNovoAluno"
+                                class="input-email" />
+                            <button class="btn-add" (click)="adicionarAluno()" [disabled]="carregandoAdd">
+                                {{ carregandoAdd ? 'Adicionando...' : '+ Adicionar' }}
+                            </button>
+                        </div>
+                        <p class="msg-feedback" *ngIf="msgFeedbackAluno" [class.erro]="erroAluno">{{ msgFeedbackAluno }}
+                        </p>
+                    </div>
+
+                    <div class="filtro-serie-bar">
+                        <button class="chip-serie" [class.ativo]="serieFiltro === ''" (click)="serieFiltro = ''">Todas
+                            as séries</button>
+                        <button class="chip-serie" *ngFor="let s of seriesDisponiveis" [class.ativo]="serieFiltro === s"
+                            (click)="serieFiltro = s">{{ s }}</button>
+                    </div>
+
+                    <h3 class="section-title">{{ serieFiltro || 'Todos os alunos' }} ({{ alunosFiltrados.length }})</h3>
+                    <p class="vazio" *ngIf="alunosFiltrados.length === 0">Nenhum aluno encontrado.</p>
+
+                    <div class="alunos-grid">
+                        <div class="aluno-card" *ngFor="let aluno of alunosFiltrados">
+                            <div class="aluno-avatar">{{ aluno.nome[0] }}</div>
+                            <div class="aluno-info">
+                                <strong>{{ aluno.nome }}</strong>
+                                <span>{{ aluno.email }}</span>
+                                <span *ngIf="aluno.serie" class="chip-info blue">📚 {{ aluno.serie }}</span>
+                                <span *ngIf="aluno.tipoEscola && aluno.tipoEscola !== 'Não informado'"
+                                    class="chip-info gray">🏫 {{ aluno.tipoEscola }}</span>
+                                <span *ngIf="aluno.condicao && aluno.condicao !== 'Nenhuma'" class="chip-info purple">♿
+                                    {{ aluno.condicao }}</span>
+                            </div>
+                            <div class="aluno-progresso">
+                                <span class="progresso-label">Progresso</span>
+                                <div class="barra-fundo">
+                                    <div class="barra-fill" [style.width.%]="aluno.progresso"></div>
+                                </div>
+                                <span class="progresso-num">{{ aluno.progresso }}%</span>
+                                <button class="btn-mini" (click)="abrirBoletimAluno(aluno)">📊</button>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+
+            </ng-container>
+
+            <!-- ══ ABA: TAREFAS ══ -->
+            <ng-container *ngIf="abaAtiva === 'tarefas'">
+                <div class="tarefas-header">
+                    <h2 class="section-title">Tarefas enviadas ({{ tarefasEnviadas.length }})</h2>
+                    <button class="btn-nova-tarefa" (click)="abrirModalTarefa()">+ Nova tarefa</button>
+                </div>
+                <p class="vazio" *ngIf="tarefasEnviadas.length === 0">Nenhuma tarefa enviada ainda. 📝</p>
+                <div class="tarefas-grid">
+                    <div class="tarefa-card" *ngFor="let tarefa of tarefasEnviadas">
+                        <img *ngIf="tarefa.banner" class="tarefa-banner" [src]="tarefa.banner" alt="Banner" />
+                        <div class="tarefa-body">
+                            <span class="tarefa-materia">{{ tarefa.materia }}</span>
+                            <h3>{{ tarefa.titulo }}</h3>
+                            <p>{{ tarefa.descricao }}</p>
+                            <div class="tarefa-stats">
+                                <span>👥 {{ tarefa.totalAlunos }} alunos</span>
+                                <span>✅ {{ tarefa.totalConcluidas || 0 }} concluíram</span>
+                            </div>
+                            <a [href]="tarefa.link" target="_blank" class="link-forms">🔗 Ver formulário</a>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- ══ ABA: BOLETIM ══ -->
+            <ng-container *ngIf="abaAtiva === 'boletim'">
+                <div class="boletim-header">
+                    <h2 class="section-title">Lançar Notas</h2>
+                    <div class="bimestre-select">
+                        <label>Bimestre:</label>
+                        <select [(ngModel)]="bimestreSelecionado" (change)="onBimestreChange()">
+                            <option [value]="1">1º Bimestre</option>
+                            <option [value]="2">2º Bimestre</option>
+                            <option [value]="3">3º Bimestre</option>
+                            <option [value]="4">4º Bimestre</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="aluno-select-box" *ngIf="!alunoBoletimSelecionado">
+                    <p class="select-hint">Selecione um aluno para lançar as notas:</p>
+                    <div class="alunos-grid">
+                        <div class="aluno-card selectable" *ngFor="let aluno of alunos"
+                            (click)="abrirBoletimAluno(aluno)">
+                            <div class="aluno-avatar">{{ aluno.nome[0] }}</div>
+                            <div class="aluno-info">
+                                <strong>{{ aluno.nome }}</strong>
+                                <span class="chip-info blue" *ngIf="aluno.serie">{{ aluno.serie }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="boletim-editor" *ngIf="alunoBoletimSelecionado">
+                    <div class="boletim-editor-header">
+                        <div class="aluno-avatar">{{ alunoBoletimSelecionado.nome[0] }}</div>
+                        <div>
+                            <h3>{{ alunoBoletimSelecionado.nome }}</h3>
+                            <span class="chip-info blue">{{ alunoBoletimSelecionado.serie }}</span>
+                        </div>
+                        <button class="btn-secondary-sm" (click)="alunoBoletimSelecionado = null">← Voltar</button>
+                    </div>
+                    <div class="materias-grid">
+                        <div class="materia-row" *ngFor="let item of notasBoletim">
+                            <div class="materia-nome"><span class="materia-emoji">{{ getMateriaEmoji(item.materia)
+                                    }}</span>{{ item.materia }}</div>
+                            <div class="nota-input-wrap">
+                                <input type="number" class="nota-input"
+                                    [class.nota-boa]="item.nota != null && item.nota >= 7"
+                                    [class.nota-media]="item.nota != null && item.nota >= 5 && item.nota < 7"
+                                    [class.nota-ruim]="item.nota !== null && item.nota < 5" placeholder="—"
+                                    [(ngModel)]="item.nota" (blur)="salvarNota(item)" />
+                            </div>
+                            <div class="nota-status" *ngIf="item.salvo"><span class="salvo-ok">✓ Salvo</span></div>
+                        </div>
+                    </div>
+                    <p class="boletim-hint">💡 Notas salvas automaticamente ao sair do campo. Intervalo: 0 a 10.</p>
+                    <p class="msg-feedback" *ngIf="msgFeedbackBoletim" [class.erro]="erroBoletim">{{ msgFeedbackBoletim
+                        }}</p>
+                </div>
+            </ng-container>
+
+            <!-- ══ ABA: RECADOS ══ -->
+            <ng-container *ngIf="abaAtiva === 'recados'">
+                <div class="recados-header">
+                    <h2 class="section-title">Recados Enviados</h2>
+                    <button class="btn-nova-tarefa" (click)="abrirModalRecado()">✉️ Novo Recado</button>
+                </div>
+                <p class="vazio" *ngIf="recadosEnviados.length === 0">Nenhum recado enviado ainda. 📬</p>
+                <div class="recados-lista">
+                    <div class="recado-card" *ngFor="let r of recadosEnviados">
+                        <div class="recado-header">
+                            <span class="recado-titulo">{{ r.titulo }}</span>
+                            <span class="recado-destinatario">Para: <strong>{{ r.aluno }}</strong></span>
+                            <span class="recado-data">{{ formatarData(r.criado_em) }}</span>
+                        </div>
+                        <p class="recado-msg">{{ r.mensagem }}</p>
+                        <span class="lido-badge" [class.lido]="r.lido">{{ r.lido ? '✓ Lido' : '⏳ Não lido' }}</span>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- ══ ABA: MATERIAIS ══ -->
+            <ng-container *ngIf="abaAtiva === 'materiais'">
+                <div class="tarefas-header">
+                    <h2 class="section-title">Materiais publicados ({{ materiaisEnviados.length }})</h2>
+                    <button class="btn-nova-tarefa" (click)="abrirModalMaterial()">📚 Novo Material</button>
+                </div>
+                <p class="vazio" *ngIf="materiaisEnviados.length === 0">Nenhum material publicado ainda. 📚</p>
+                <div class="tarefas-grid">
+                    <div class="tarefa-card" *ngFor="let m of materiaisEnviados">
+                        <img *ngIf="m.banner && isValidUrl(m.banner)" class="tarefa-banner" [src]="m.banner"
+                            alt="Banner" />
+                        <div class="tarefa-body">
+                            <span class="tarefa-materia">{{ m.materia || 'Geral' }} • {{ getTipoLabel(m.tipo) }}</span>
+                            <h3>{{ m.titulo }}</h3>
+                            <p>{{ m.descricao }}</p>
+                            <div class="tarefa-stats"><span>👥 {{ m.totalAlunos }} alunos</span></div>
+                            <a [href]="m.url" target="_blank" class="link-forms">🔗 Acessar material</a>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+
+        </main>
+    </div>
+</div>
+
+<!-- MODAIS (mantidos sem alteração) -->
+<div class="modal-overlay" *ngIf="modalTarefaAberto">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>📋 Nova Tarefa</h2>
+            <button class="close-btn" (click)="fecharModalTarefa()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="text" placeholder="Título da tarefa *" [(ngModel)]="novaTarefa.titulo" />
+            <div class="select-wrap">
+                <select [(ngModel)]="novaTarefa.materia" class="modal-select">
+                    <option value="">Selecione a matéria *</option>
+                    <option value="Português">Português</option>
+                    <option value="Matemática">Matemática</option>
+                    <option value="História">História</option>
+                    <option value="Geografia">Geografia</option>
+                    <option value="Ciências">Ciências</option>
+                    <option value="Inglês">Inglês</option>
+                    <option value="Educação Física">Educação Física</option>
+                    <option value="Artes">Artes</option>
+                </select>
+            </div>
+            <textarea placeholder="Descrição (opcional)" [(ngModel)]="novaTarefa.descricao"></textarea>
+            <input type="url" placeholder="Link do Google Forms *" [(ngModel)]="novaTarefa.link" />
+            <input type="url" placeholder="URL da imagem de banner (opcional)" [(ngModel)]="novaTarefa.banner" />
+            <div class="selecao-alunos">
+                <label class="label-alunos">Enviar para quais alunos? *</label>
+                <div class="serie-filter-row">
+                    <button class="chip-serie-mini" [class.ativo]="serieFiltroModal === ''"
+                        (click)="serieFiltroModal = ''">Todas</button>
+                    <button class="chip-serie-mini" *ngFor="let s of seriesDisponiveis"
+                        [class.ativo]="serieFiltroModal === s" (click)="serieFiltroModal = s">{{ s }}</button>
+                </div>
+                <div class="alunos-checkboxes">
+                    <label class="checkbox-aluno" *ngFor="let aluno of alunosParaTarefa">
+                        <input type="checkbox" [value]="aluno.id" (change)="toggleAluno(aluno.id, $event)"
+                            [checked]="alunosSelecionados.includes(aluno.id)" />
+                        <span class="aluno-avatar-sm">{{ aluno.nome[0] }}</span>
+                        <span>{{ aluno.nome }}</span>
+                        <span class="chip-serie-xs" *ngIf="aluno.serie">{{ abreviarSerie(aluno.serie) }}</span>
+                    </label>
+                </div>
+                <p class="vazio" *ngIf="alunos.length === 0">Você não tem alunos cadastrados ainda.</p>
+                <button class="btn-selecionar-todos" (click)="selecionarTodos()" *ngIf="alunos.length > 0">
+                    {{ todosSelecionados ? 'Desmarcar todos' : 'Selecionar todos' }}
+                </button>
+            </div>
+            <p class="msg-feedback" *ngIf="msgFeedbackTarefa" [class.erro]="erroTarefa">{{ msgFeedbackTarefa }}</p>
+            <button class="btn-publicar" (click)="criarTarefa()" [disabled]="carregandoTarefa">
+                {{ carregandoTarefa ? 'Enviando...' : '🚀 Publicar tarefa' }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" *ngIf="modalRecadoAberto">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>✉️ Novo Recado</h2>
+            <button class="close-btn" (click)="fecharModalRecado()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="select-wrap">
+                <select [(ngModel)]="novoRecado.alunoId" class="modal-select">
+                    <option [ngValue]="null">📢 Para todos os alunos</option>
+                    <option *ngFor="let a of alunos" [ngValue]="a.id">{{ a.nome }}</option>
+                </select>
+            </div>
+            <input type="text" placeholder="Título do recado *" [(ngModel)]="novoRecado.titulo" />
+            <textarea rows="5" placeholder="Mensagem *" [(ngModel)]="novoRecado.mensagem"></textarea>
+            <p class="msg-feedback" *ngIf="msgFeedbackRecado" [class.erro]="erroRecado">{{ msgFeedbackRecado }}</p>
+            <button class="btn-publicar" (click)="enviarRecado()" [disabled]="carregandoRecado">
+                {{ carregandoRecado ? 'Enviando...' : '📤 Enviar recado' }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" *ngIf="modalMaterialAberto">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>📚 Novo Material</h2>
+            <button class="close-btn" (click)="fecharModalMaterial()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="text" placeholder="Título *" [(ngModel)]="novoMaterial.titulo" />
+            <div class="select-wrap">
+                <select [(ngModel)]="novoMaterial.tipo" class="modal-select">
+                    <option value="">Tipo de material *</option>
+                    <option value="pdf">📄 PDF</option>
+                    <option value="video">🎬 Vídeo (YouTube)</option>
+                    <option value="link">🔗 Link</option>
+                    <option value="imagem">🖼️ Imagem</option>
+                    <option value="outro">📎 Outro</option>
+                </select>
+            </div>
+            <div class="select-wrap">
+                <select [(ngModel)]="novoMaterial.materia" class="modal-select">
+                    <option value="">Matéria (opcional)</option>
+                    <option value="Português">Português</option>
+                    <option value="Matemática">Matemática</option>
+                    <option value="História">História</option>
+                    <option value="Geografia">Geografia</option>
+                    <option value="Ciências">Ciências</option>
+                    <option value="Inglês">Inglês</option>
+                    <option value="Educação Física">Educação Física</option>
+                    <option value="Artes">Artes</option>
+                </select>
+            </div>
+            <textarea placeholder="Descrição (opcional)" [(ngModel)]="novoMaterial.descricao"></textarea>
+            <input type="url" placeholder="URL do material *" [(ngModel)]="novoMaterial.url" />
+            <input type="url" placeholder="URL do banner (opcional)" [(ngModel)]="novoMaterial.banner" />
+            <div class="selecao-alunos">
+                <label class="label-alunos">Enviar para quais alunos? *</label>
+                <div class="serie-filter-row">
+                    <button class="chip-serie-mini" [class.ativo]="serieFiltroMaterial === ''"
+                        (click)="serieFiltroMaterial = ''">Todas</button>
+                    <button class="chip-serie-mini" *ngFor="let s of seriesDisponiveis"
+                        [class.ativo]="serieFiltroMaterial === s" (click)="serieFiltroMaterial = s">{{ s }}</button>
+                </div>
+                <div class="alunos-checkboxes">
+                    <label class="checkbox-aluno" *ngFor="let aluno of alunosParaMaterial">
+                        <input type="checkbox" [value]="aluno.id" (change)="toggleAlunoMaterial(aluno.id, $event)"
+                            [checked]="alunosMaterialSelecionados.includes(aluno.id)" />
+                        <span class="aluno-avatar-sm">{{ aluno.nome[0] }}</span>
+                        <span>{{ aluno.nome }}</span>
+                        <span class="chip-serie-xs" *ngIf="aluno.serie">{{ abreviarSerie(aluno.serie) }}</span>
+                    </label>
+                </div>
+                <p class="vazio" *ngIf="alunos.length === 0">Você não tem alunos cadastrados ainda.</p>
+                <button class="btn-selecionar-todos" (click)="selecionarTodosMaterial()" *ngIf="alunos.length > 0">
+                    {{ todosMaterialSelecionados ? 'Desmarcar todos' : 'Selecionar todos' }}
+                </button>
+            </div>
+            <p class="msg-feedback" *ngIf="msgFeedbackMaterial" [class.erro]="erroMaterial">{{ msgFeedbackMaterial }}
+            </p>
+            <button class="btn-publicar" (click)="publicarMaterial()" [disabled]="carregandoMaterial">
+                {{ carregandoMaterial ? 'Publicando...' : '📤 Publicar material' }}
+            </button>
+        </div>
+    </div>
+</div>

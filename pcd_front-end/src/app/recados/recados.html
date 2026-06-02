@@ -1,0 +1,125 @@
+<!-- SIDEBAR -->
+<aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <div class="sidebar-header">
+        <div class="logo">
+            <div class="logo-icon">🌟</div>
+            <span class="logo-text" *ngIf="!sidebarCollapsed">Educa<span>Inclusiva</span></span>
+        </div>
+        <button class="toggle-btn" (click)="toggleSidebar()">
+            <i class="ti" [class.ti-layout-sidebar-left-collapse]="!sidebarCollapsed"
+                [class.ti-layout-sidebar-right-collapse]="sidebarCollapsed"></i>
+        </button>
+    </div>
+    <div class="sidebar-profile" *ngIf="!sidebarCollapsed">
+        <div class="avatar">{{ iniciais }}</div>
+        <div class="profile-info">
+            <span class="profile-name">{{ usuario?.nome?.split(' ')[0] }}</span>
+            <span class="profile-badge">Aluno • Nível {{ usuario?.nivel }}</span>
+        </div>
+    </div>
+    <div class="sidebar-avatar-mini" *ngIf="sidebarCollapsed">
+        <div class="avatar mini">{{ iniciais }}</div>
+    </div>
+    <nav class="sidebar-nav">
+        <p class="nav-label" *ngIf="!sidebarCollapsed">PRINCIPAL</p>
+        <a class="nav-item" routerLink="/painel" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+            <i class="ti ti-home"></i><span *ngIf="!sidebarCollapsed">Home</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/informacoes" routerLinkActive="active">
+            <i class="ti ti-user-circle"></i><span *ngIf="!sidebarCollapsed">Informações</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/tarefas" routerLinkActive="active">
+            <i class="ti ti-clipboard-list"></i><span *ngIf="!sidebarCollapsed">Tarefas</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/boletim" routerLinkActive="active">
+            <i class="ti ti-chart-bar"></i><span *ngIf="!sidebarCollapsed">Boletim</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/recados" routerLinkActive="active">
+            <i class="ti ti-mail"></i>
+            <span *ngIf="!sidebarCollapsed">Recados</span>
+            <span class="badge" *ngIf="totalNaoLidos > 0 && !sidebarCollapsed">{{ totalNaoLidos }}</span>
+        </a>
+        <p class="nav-label" *ngIf="!sidebarCollapsed">APRENDIZADO</p>
+        <a class="nav-item" routerLink="/painel/materiais" routerLinkActive="active">
+            <i class="ti ti-books"></i><span *ngIf="!sidebarCollapsed">Materiais Digitais</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/tutoriais" routerLinkActive="active">
+            <i class="ti ti-video"></i><span *ngIf="!sidebarCollapsed">Tutoriais</span>
+        </a>
+        <p class="nav-label" *ngIf="!sidebarCollapsed">CONTA</p>
+
+        <a class="nav-item" routerLink="/painel/configuracoes" routerLinkActive="active">
+            <i class="ti ti-settings"></i>
+            <span *ngIf="!sidebarCollapsed">Configurações</span>
+        </a>
+        <a class="nav-item logout" (click)="sair()">
+            <i class="ti ti-logout"></i><span *ngIf="!sidebarCollapsed">Sair</span>
+        </a>
+    </nav>
+</aside>
+
+<!-- CONTEÚDO -->
+<div class="content" [class.expanded]="sidebarCollapsed">
+
+    <header class="topbar">
+        <div class="topbar-left">
+            <a class="back-btn" routerLink="/painel"><i class="ti ti-arrow-left"></i></a>
+            <h1 class="page-title">Recados</h1>
+        </div>
+        <div class="topbar-right" *ngIf="totalNaoLidos > 0">
+            <div class="nao-lidos-chip">
+                <i class="ti ti-mail"></i>
+                {{ totalNaoLidos }} não lido{{ totalNaoLidos > 1 ? 's' : '' }}
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+
+        <!-- LOADING -->
+        <div class="loading-box" *ngIf="carregando">
+            <p>Carregando recados...</p>
+        </div>
+
+        <!-- VAZIO -->
+        <div class="vazio-box" *ngIf="!carregando && recados.length === 0">
+            <div class="vazio-icon">📬</div>
+            <p>Nenhum recado recebido ainda.</p>
+            <span>Quando seu professor enviar um recado, ele aparecerá aqui!</span>
+        </div>
+
+        <!-- LISTA DE RECADOS -->
+        <div class="recados-lista" *ngIf="!carregando && recados.length > 0">
+
+            <div class="recado-card" *ngFor="let r of recados" [class.nao-lido]="!r.lido" (click)="marcarLido(r)">
+
+                <div class="recado-top">
+                    <div class="recado-avatar">
+                        {{ r.professor ? r.professor[0] : 'P' }}
+                    </div>
+                    <div class="recado-meta">
+                        <span class="recado-titulo">{{ r.titulo }}</span>
+                        <span class="recado-professor">De: {{ r.professor }}</span>
+                    </div>
+                    <div class="recado-side">
+                        <span class="recado-data">{{ formatarData(r.criado_em) }}</span>
+                        <span class="lido-indicator nao-lido" *ngIf="!r.lido">
+                            <i class="ti ti-mail"></i> Novo
+                        </span>
+                        <span class="lido-indicator lido" *ngIf="r.lido">
+                            <i class="ti ti-check"></i> Lido
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Mensagem expandida ao clicar -->
+                <div class="recado-body" [class.aberto]="r.aberto">
+                    <p>{{ r.mensagem }}</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+</div>

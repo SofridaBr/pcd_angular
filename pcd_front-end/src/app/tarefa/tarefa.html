@@ -1,142 +1,186 @@
-<!-- TOPO -->
-<header class="topbar">
-    <div class="page-title">
-      <span class="icon">📚</span>
-      <h1>Tarefas</h1>
+<!-- SIDEBAR -->
+<aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+
+  <div class="sidebar-header">
+    <div class="logo">
+      <div class="logo-icon">🌟</div>
+      <span class="logo-text" *ngIf="!sidebarCollapsed">Educa<span>Inclusiva</span></span>
     </div>
-  
-    <div class="top-actions">
-      <div class="date-box">
-        📅 Sexta-feira, 29 de Maio de 2026
+    <button class="toggle-btn" (click)="toggleSidebar()">
+      <i class="ti" [class.ti-layout-sidebar-left-collapse]="!sidebarCollapsed"
+        [class.ti-layout-sidebar-right-collapse]="sidebarCollapsed"></i>
+    </button>
+  </div>
+
+  <div class="sidebar-profile" *ngIf="!sidebarCollapsed">
+    <div class="avatar">{{ iniciais }}</div>
+    <div class="profile-info">
+      <span class="profile-name">{{ usuario?.nome?.split(' ')[0] }}</span>
+      <span class="profile-badge">Aluno • Nível {{ usuario?.nivel }}</span>
+    </div>
+  </div>
+  <div class="sidebar-avatar-mini" *ngIf="sidebarCollapsed">
+    <div class="avatar mini">{{ iniciais }}</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <p class="nav-label" *ngIf="!sidebarCollapsed">PRINCIPAL</p>
+
+    <a class="nav-item" routerLink="/painel" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+      <i class="ti ti-home"></i>
+      <span *ngIf="!sidebarCollapsed">Home</span>
+    </a>
+
+    <a class="nav-item" routerLink="/painel/informacoes" routerLinkActive="active">
+      <i class="ti ti-user-circle"></i>
+      <span *ngIf="!sidebarCollapsed">Informações</span>
+    </a>
+
+    <a class="nav-item" routerLink="/painel/tarefas" routerLinkActive="active">
+      <i class="ti ti-clipboard-list"></i>
+      <span *ngIf="!sidebarCollapsed">Tarefas</span>
+      <span class="badge" *ngIf="totalPendentes > 0 && !sidebarCollapsed">{{ totalPendentes }}</span>
+    </a>
+
+    <a class="nav-item" routerLink="/painel/boletim" routerLinkActive="active">
+      <i class="ti ti-chart-bar"></i>
+      <span *ngIf="!sidebarCollapsed">Boletim</span>
+    </a>
+
+    <a class="nav-item" routerLink="/painel/recados" routerLinkActive="active">
+      <i class="ti ti-mail"></i>
+      <span *ngIf="!sidebarCollapsed">Recados</span>
+    </a>
+
+    <p class="nav-label" *ngIf="!sidebarCollapsed">APRENDIZADO</p>
+
+    <a class="nav-item" routerLink="/painel/materiais" routerLinkActive="active">
+      <i class="ti ti-books"></i>
+      <span *ngIf="!sidebarCollapsed">Materiais Digitais</span>
+    </a>
+
+    <a class="nav-item" routerLink="/painel/tutoriais" routerLinkActive="active">
+      <i class="ti ti-video"></i><span *ngIf="!sidebarCollapsed">Tutoriais</span>
+    </a>
+
+    <p class="nav-label" *ngIf="!sidebarCollapsed">CONTA</p>
+
+    <a class="nav-item" routerLink="/painel/configuracoes" routerLinkActive="active">
+      <i class="ti ti-settings"></i>
+      <span *ngIf="!sidebarCollapsed">Configurações</span>
+    </a>
+
+    <a class="nav-item logout" (click)="sair()">
+      <i class="ti ti-logout"></i>
+      <span *ngIf="!sidebarCollapsed">Sair</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- CONTEÚDO PRINCIPAL -->
+<div class="content" [class.expanded]="sidebarCollapsed">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1 class="page-title">Tarefas</h1>
+    </div>
+    <div class="topbar-right">
+      <div class="date-chip">
+        <i class="ti ti-calendar"></i>
+        {{ dataAtual }}
       </div>
-  
-      <!-- APENAS PROFESSOR -->
-      <button class="btn-criar" *ngIf="tipoUsuario === 'professor'" (click)="abrirModal()">
+      <button class="btn-nova-tarefa" *ngIf="tipoUsuario === 'professor'" (click)="abrirModal()">
         + Nova tarefa
       </button>
     </div>
   </header>
-  
-  <!-- FILTROS -->
-  <section class="filters">
-    <select>
-      <option>Todas as matérias</option>
-      <option>Matemática</option>
-      <option>Português</option>
-      <option>História</option>
-    </select>
-  
-    <select>
-      <option>Todas</option>
-      <option>Pendentes</option>
-      <option>Concluídas</option>
-    </select>
-  </section>
-  
-  <!-- LISTA -->
-  <section class="tarefas-grid">
-  
-    <div class="task-card" *ngFor="let tarefa of tarefas">
-  
-      <!-- STATUS -->
-      <div class="task-top">
-        <span class="materia">{{ tarefa.materia }}</span>
-  
-        <span class="status" [class.concluida]="tarefa.concluida">
-          {{ tarefa.concluida ? 'Concluída' : 'Pendente' }}
-        </span>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- FILTROS -->
+    <div class="filters-bar">
+      <div class="filter-wrap">
+        <i class="ti ti-books"></i>
+        <select [(ngModel)]="filtroMateria" (change)="aplicarFiltros()">
+          <option value="">Todas as matérias</option>
+          <option *ngFor="let m of materias" [value]="m">{{ m }}</option>
+        </select>
       </div>
-  
-      <!-- BANNER -->
-      <img
-        class="task-banner"
-        [src]="tarefa.banner"
-        alt="Banner da tarefa"
-      />
-  
-      <!-- TITULO -->
-      <h2>{{ tarefa.titulo }}</h2>
-  
-      <!-- DESCRIÇÃO -->
-      <p>{{ tarefa.descricao }}</p>
-  
-      <!-- BOTÕES -->
-      <div class="task-actions">
-  
-        <!-- ABRIR GOOGLE FORMS -->
-        <a
-          class="btn-abrir"
-          [href]="tarefa.link"
-          target="_blank"
-        >
-          Abrir atividade
-        </a>
-  
-        <!-- SOMENTE ALUNO -->
-        <button
-          *ngIf="tipoUsuario === 'aluno'"
-          class="btn-feito"
-          (click)="marcarConcluida(tarefa)"
-        >
-          ✔ Finalizar
-        </button>
-  
+      <div class="filter-wrap">
+        <i class="ti ti-filter"></i>
+        <select [(ngModel)]="filtroStatus" (change)="aplicarFiltros()">
+          <option value="">Todas</option>
+          <option value="pendente">Pendentes</option>
+          <option value="concluida">Concluídas</option>
+        </select>
       </div>
-  
     </div>
-  
-  </section>
-  
-  <!-- MODAL PROFESSOR -->
-  <div class="modal-overlay" *ngIf="modalAberto">
-  
-    <div class="modal-box">
-  
-      <div class="modal-header">
-        <h2>Nova tarefa</h2>
-  
-        <button class="close-btn" (click)="fecharModal()">
-          ✕
-        </button>
-      </div>
-  
-      <div class="modal-body">
-  
-        <input
-          type="text"
-          placeholder="Título da tarefa"
-          [(ngModel)]="novaTarefa.titulo"
-        />
-  
-        <input
-          type="text"
-          placeholder="Matéria"
-          [(ngModel)]="novaTarefa.materia"
-        />
-  
-        <textarea
-          placeholder="Descrição"
-          [(ngModel)]="novaTarefa.descricao"
-        ></textarea>
-  
-        <input
-          type="text"
-          placeholder="Link do Google Forms"
-          [(ngModel)]="novaTarefa.link"
-        />
-  
-        <input
-          type="text"
-          placeholder="Banner da tarefa (URL da imagem)"
-          [(ngModel)]="novaTarefa.banner"
-        />
-  
-        <button class="btn-publicar" (click)="criarTarefa()">
-          Publicar tarefa
-        </button>
-  
-      </div>
-  
+
+    <!-- CONTAGEM -->
+    <div class="results-info" *ngIf="tarefasFiltradas.length > 0">
+      <span>{{ tarefasFiltradas.length }} tarefa{{ tarefasFiltradas.length !== 1 ? 's' : '' }} encontrada{{
+        tarefasFiltradas.length !== 1 ? 's' : '' }}</span>
+      <span class="pendentes-chip" *ngIf="totalPendentes > 0">
+        <i class="ti ti-clock"></i> {{ totalPendentes }} pendente{{ totalPendentes !== 1 ? 's' : '' }}
+      </span>
     </div>
-  
+
+    <!-- VAZIO -->
+    <div class="empty-state" *ngIf="tarefasFiltradas.length === 0">
+      <div class="empty-icon">🎉</div>
+      <h3>Nenhuma tarefa aqui!</h3>
+      <p>{{ filtroMateria || filtroStatus ? 'Tente mudar os filtros.' : 'Você está em dia com tudo.' }}</p>
+    </div>
+
+    <!-- GRID DE TAREFAS -->
+    <div class="tarefas-grid">
+      <div class="task-card" *ngFor="let tarefa of tarefasFiltradas" [class.concluida-card]="tarefa.concluida">
+
+        <div class="task-top">
+          <span class="materia-chip">{{ tarefa.materia }}</span>
+          <span class="status-chip" [class.concluida]="tarefa.concluida">
+            {{ tarefa.concluida ? '✅ Concluída' : '⏳ Pendente' }}
+          </span>
+        </div>
+
+        <img class="task-banner" [src]="tarefa.banner" alt="Banner"
+          *ngIf="tarefa.banner && isValidUrl(tarefa.banner)" />
+
+        <h2 class="task-titulo">{{ tarefa.titulo }}</h2>
+        <p class="task-desc">{{ tarefa.descricao }}</p>
+
+        <div class="task-actions">
+          <a class="btn-abrir" [href]="tarefa.link" target="_blank">
+            <i class="ti ti-external-link"></i> Abrir atividade
+          </a>
+          <button *ngIf="tipoUsuario === 'aluno' && !tarefa.concluida" class="btn-feito"
+            (click)="marcarConcluida(tarefa)">
+            <i class="ti ti-check"></i> Finalizar
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL PROFESSOR -->
+<div class="modal-overlay" *ngIf="modalAberto">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>📋 Nova Tarefa</h2>
+      <button class="close-btn" (click)="fecharModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="text" placeholder="Título da tarefa *" [(ngModel)]="novaTarefa.titulo" />
+      <input type="text" placeholder="Matéria *" [(ngModel)]="novaTarefa.materia" />
+      <textarea placeholder="Descrição (opcional)" [(ngModel)]="novaTarefa.descricao"></textarea>
+      <input type="url" placeholder="Link do Google Forms *" [(ngModel)]="novaTarefa.link" />
+      <input type="url" placeholder="URL da imagem de banner (opcional)" [(ngModel)]="novaTarefa.banner" />
+      <button class="btn-publicar" (click)="criarTarefa()">🚀 Publicar tarefa</button>
+    </div>
   </div>
+</div>
