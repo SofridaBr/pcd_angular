@@ -212,8 +212,11 @@ export class Login {
 
       localStorage.setItem('usuario', JSON.stringify(usuario));
 
-      window.location.href = '/professor'; // ← só isso mudou
-
+      if (usuario.tipo === 'coordenador') {
+        window.location.href = '/coordenador';
+      } else {
+        window.location.href = '/professor';
+      }
     } catch (error) {
       alert('Erro ao conectar ao servidor.');
     }

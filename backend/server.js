@@ -205,6 +205,23 @@ app.get("/aluno/:id", (req, res) => {
 });
 
 // ════════════════════════════════════════════════
+// BUSCAR TODOS OS ALUNOS (coordenador)
+// ════════════════════════════════════════════════
+app.get("/alunos/todos", (req, res) => {
+    const sql = `
+        SELECT id, nome, email, serie, tipo, nivel, pontos,
+               progresso, condicao, tipoEscola, nivelAutismo
+        FROM usuarios
+        WHERE tipo = 'aluno'
+        ORDER BY nome ASC
+    `;
+    conexao.query(sql, (erro, resultado) => {
+        if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+        res.json({ alunos: resultado });
+    });
+});
+
+// ════════════════════════════════════════════════
 // BUSCAR ALUNOS DO PROFESSOR / RESPONSÁVEL
 // ════════════════════════════════════════════════
 app.get("/alunos/:professorId", (req, res) => {

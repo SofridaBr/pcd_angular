@@ -1,0 +1,219 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-coordenador',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './coordenador.html',
+  styleUrl: './coordenador.scss'
+})
+export class Coordenador implements OnInit {
+
+  constructor(private router: Router) { }
+
+  // ═══════════════════════════════════════
+  // USUÁRIO
+  // ═══════════════════════════════════════
+
+  usuario: any = null;
+  dataHoje: string = '';
+
+  // ═══════════════════════════════════════
+  // DADOS DA ESCOLA
+  // ═══════════════════════════════════════
+
+  stats: any = {
+    totalAlunos: 0,
+    totalProfessores: 0,
+    progressoMedio: 0,
+    condicoes: {
+      Visual: 0,
+      Auditiva: 0,
+      Cognitiva: 0,
+      Fisica: 0,
+      Nenhuma: 0
+    }
+  };
+
+  turmas: any[] = [];
+  alunos: any[] = [];
+  alunosFiltrados: any[] = [];
+  mensagens: any[] = [];
+
+  carregandoStats = true;
+  carregandoAlunos = true;
+  carregandoTurmas = true;
+  carregandoMensagens = true;
+
+  filtroAtual: string = 'Todos';
+  sidebarAberta = true;
+
+  // ═══════════════════════════════════════
+  // INIT
+  // ═══════════════════════════════════════
+
+  ngOnInit(): void {
+    const raw = localStorage.getItem('usuario');
+    if (!raw) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    this.usuario = JSON.parse(raw);
+
+    if (this.usuario.tipo !== 'coordenador') {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    // Data formatada
+    const agora = new Date();
+    this.dataHoje = agora.toLocaleDateString('pt-BR', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    });
+
+    this.carregarStats();
+    this.carregarTurmas();
+    this.carregarAlunos();
+    this.carregarMensagens();
+  }
+
+  // ═══════════════════════════════════════
+  // CARREGAR DADOS
+  // ═══════════════════════════════════════
+
+  async carregarStats(): Promise<void> {
+    try {
+      const res = await fetch('http://localhost:3000/escola/stats');
+      const dados = await res.json();
+      this.stats = dados;
+    } catch {
+      console.error('Erro ao carregar stats');
+    } finally {
+      this.carregandoStats = false;
+    }
+  }
+
+  async carregarTurmas(): Promise<void> {
+    try {
+      const res = await fetch('http://localhost:3000/escola/turmas');
+      const dados = await res.json();
+      this.turmas = dados.turmas || [];
+    } catch {
+      console.error('Erro ao carregar turmas');
+    } finally {
+      this.carregandoTurmas = false;
+    }
+  }
+
+  async carregarAlunos(): Promise<void> {
+    try {
+      const res = await fetch('http://localhost:3000/alunos/todos');
+      const dados = await res.json();
+      this.alunos = dados.alunos || [];
+      this.alunosFiltrados = [...this.alunos];
+    } catch {
+      console.error('Erro ao carregar alunos');
+    } finally {
+      this.carregandoAlunos = false;
+    }
+  }
+
+  async carregarMensagens(): Promise<void> {
+    try {
+      const res = await fetch(`http://localhost:3000/recados/professor/${this.usuario.id}`);
+      const dados = await res.json();
+      this.mensagens = (dados.recados || []).slice(0, 5);
+    } catch {
+      console.error('Erro ao carregar mensagens');
+    } finally {
+      this.carregandoMensagens = false;
+    }
+  }
+
+  // ═══════════════════════════════════════
+  // FILTROS DE ALUNOS
+  // ═══════════════════════════════════════
+
+  filtrarAlunos(filtro: string): void {
+    this.filtroAtual = filtro;
+    if (filtro === 'Todos') {
+      this.alunosFiltrados = [...this.alunos];
+    } else if (filtro === 'Ativos') {
+      this.alunosFiltrados = this.alunos.filter(a => a.progresso > 0);
+    } else if (filtro === 'Críticos') {
+      this.alunosFiltrados = this.alunos.filter(a => a.progresso < 40);
+    }
+  }
+
+  // ═══════════════════════════════════════
+  // UTILITÁRIOS
+  // ═══════════════════════════════════════
+
+  getProgressoClass(progresso: number): string {
+    if (progresso >= 70) return 'bom';
+    if (progresso >= 40) return 'medio';
+    return 'critico';
+  }
+
+  getCondicaoBadgeClass(condicao: string): string {
+    const map: any = {
+      'TEA': 'badge-tea',
+      'Autismo Nível 1': 'badge-tea',
+      'Autismo Nível 2': 'badge-tea',
+      'Autismo Nível 3': 'badge-tea',
+      'Deficiência Visual': 'badge-visual',
+      'Deficiência Auditiva': 'badge-auditiva',
+      'Deficiência Física': 'badge-fisica',
+      'Deficiência Intelectual': 'badge-cognitiva',
+      'TDAH': 'badge-tdah',
+      'Dislexia': 'badge-dislexia',
+      'Síndrome de Down': 'badge-down',
+      'Paralisia Cerebral': 'badge-pc',
+      'Nenhuma': 'badge-nenhuma'
+    };
+    return map[condicao] || 'badge-outra';
+  }
+
+  getCondicaoAbrev(condicao: string): string {
+    const map: any = {
+      'Autismo Nível 1': 'TEA N1',
+      'Autismo Nível 2': 'TEA N2',
+      'Autismo Nível 3': 'TEA N3',
+      'Deficiência Visual': 'D.Visual',
+      'Deficiência Auditiva': 'D.Audit.',
+      'Deficiência Física': 'D.Física',
+      'Deficiência Intelectual': 'D.Intel.',
+      'Paralisia Cerebral': 'PC',
+      'Síndrome de Down': 'SD',
+    };
+    return map[condicao] || condicao;
+  }
+
+  getIniciais(nome: string): string {
+    return nome?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || '??';
+  }
+
+  formatarHora(data: string): string {
+    if (!data) return '';
+    return new Date(data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  toggleSidebar(): void {
+    this.sidebarAberta = !this.sidebarAberta;
+  }
+
+  sair(): void {
+    localStorage.removeItem('usuario');
+    this.router.navigate(['/login']);
+  }
+
+  navegarPara(rota: string): void {
+    this.router.navigate([rota]);
+  }
+}

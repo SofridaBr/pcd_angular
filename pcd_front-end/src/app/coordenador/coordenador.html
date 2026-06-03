@@ -1,0 +1,347 @@
+<!-- ══════════════════════════════════════════════ -->
+<!-- WRAPPER PRINCIPAL                             -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="app-wrapper" [class.sidebar-fechada]="!sidebarAberta">
+
+  <!-- ══════════════════════ SIDEBAR ══════════════════════ -->
+  <aside class="sidebar">
+
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <div class="logo-icon">🌟</div>
+      <span class="logo-text" *ngIf="sidebarAberta">Educa<span>Inclusiva</span></span>
+    </div>
+
+    <!-- Nav Principal -->
+    <nav class="sidebar-nav">
+      <p class="nav-label" *ngIf="sidebarAberta">PRINCIPAL</p>
+
+      <a class="nav-item active" (click)="navegarPara('/coordenador')">
+        <i class="ti ti-layout-dashboard"></i>
+        <span *ngIf="sidebarAberta">Dashboard</span>
+      </a>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/alunos')">
+        <i class="ti ti-users"></i>
+        <span *ngIf="sidebarAberta">Todos os alunos</span>
+        <span class="nav-badge" *ngIf="sidebarAberta && stats.totalAlunos > 0">{{ stats.totalAlunos }}</span>
+      </a>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/adicionar')">
+        <i class="ti ti-user-plus"></i>
+        <span *ngIf="sidebarAberta">Adicionar aluno</span>
+      </a>
+
+      <p class="nav-label" *ngIf="sidebarAberta">PEDAGÓGICO</p>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/acessibilidade')">
+        <i class="ti ti-accessibility"></i>
+        <span *ngIf="sidebarAberta">Acessibilidade</span>
+      </a>
+
+      <p class="nav-label" *ngIf="sidebarAberta">ESCOLAR</p>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/professores')">
+        <i class="ti ti-school"></i>
+        <span *ngIf="sidebarAberta">Professores</span>
+      </a>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/comunicacao')">
+        <i class="ti ti-message-2"></i>
+        <span *ngIf="sidebarAberta">Comunicação</span>
+        <span class="nav-badge nav-badge-alert" *ngIf="sidebarAberta && mensagens.length > 0">
+          {{ mensagens.length }}
+        </span>
+      </a>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/responsaveis')">
+        <i class="ti ti-heart-handshake"></i>
+        <span *ngIf="sidebarAberta">Responsáveis</span>
+      </a>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/turmas')">
+        <i class="ti ti-building-school"></i>
+        <span *ngIf="sidebarAberta">Turmas</span>
+      </a>
+
+      <p class="nav-label" *ngIf="sidebarAberta">SISTEMA</p>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/configuracoes')">
+        <i class="ti ti-settings"></i>
+        <span *ngIf="sidebarAberta">Configurações</span>
+      </a>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/suporte')">
+        <i class="ti ti-help-circle"></i>
+        <span *ngIf="sidebarAberta">Suporte</span>
+      </a>
+    </nav>
+
+    <!-- Sair -->
+    <div class="sidebar-footer">
+      <button class="btn-sair" (click)="sair()">
+        <i class="ti ti-logout"></i>
+        <span *ngIf="sidebarAberta">Sair</span>
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- ══════════════════════ CONTEÚDO ══════════════════════ -->
+  <div class="content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn-toggle-sidebar" (click)="toggleSidebar()">
+          <i class="ti ti-menu-2"></i>
+        </button>
+        <div class="search-wrap">
+          <i class="ti ti-search"></i>
+          <input type="text" placeholder="Buscar aluno, turma..." class="search-input" />
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <button class="topbar-icon-btn">
+          <i class="ti ti-bell"></i>
+          <span class="notif-dot"></span>
+        </button>
+
+        <div class="topbar-user">
+          <div class="user-info">
+            <span class="user-role">Coordenação</span>
+            <span class="user-escola">Escola</span>
+          </div>
+          <div class="user-avatar">
+            {{ getIniciais(usuario?.nome || '') }}
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="main-content">
+
+      <!-- SAUDAÇÃO -->
+      <div class="greeting-row">
+        <div>
+          <h1 class="greeting-title">Olá, {{ usuario?.nome?.split(' ')[0] }}!</h1>
+          <p class="greeting-sub">Coordenação Pedagógica</p>
+        </div>
+        <div class="greeting-date">
+          <span class="date-label">{{ dataHoje | titlecase }}</span>
+        </div>
+      </div>
+
+      <!-- CARDS STATS -->
+      <div class="stats-grid">
+
+        <!-- Total alunos PcD -->
+        <div class="stat-card stat-blue">
+          <div class="stat-icon">
+            <i class="ti ti-users-group"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-badge">+3 este mês</span>
+            <p class="stat-value">{{ carregandoStats ? '...' : stats.totalAlunos }}</p>
+            <p class="stat-label">Alunos com PcD cadastrados</p>
+            <div class="stat-bar">
+              <div class="stat-bar-fill blue-fill" [style.width.%]="100"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total professores -->
+        <div class="stat-card stat-green">
+          <div class="stat-icon">
+            <i class="ti ti-school"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-badge green-badge">Ativos</span>
+            <p class="stat-value">{{ carregandoStats ? '...' : stats.totalProfessores }}</p>
+            <p class="stat-label">Professores ativos</p>
+            <div class="stat-bar">
+              <div class="stat-bar-fill green-fill" [style.width.%]="100"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progresso médio -->
+        <div class="stat-card stat-purple">
+          <div class="stat-icon">
+            <i class="ti ti-chart-line"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-badge purple-badge">Geral</span>
+            <p class="stat-value">{{ carregandoStats ? '...' : stats.progressoMedio }}%</p>
+            <p class="stat-label">Progresso médio dos alunos</p>
+            <div class="stat-bar">
+              <div class="stat-bar-fill purple-fill"
+                [style.width.%]="carregandoStats ? 0 : stats.progressoMedio"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- GRID INFERIOR -->
+      <div class="bottom-grid">
+
+        <!-- TABELA DE ALUNOS -->
+        <div class="card card-alunos">
+          <div class="card-header">
+            <div class="card-title-row">
+              <span class="card-dot blue-dot"></span>
+              <h2 class="card-title">Alunos com PcD</h2>
+            </div>
+            <button class="btn-novo">
+              <i class="ti ti-plus"></i> Novo
+            </button>
+          </div>
+
+          <!-- Filtros -->
+          <div class="filtros-row">
+            <button class="filtro-btn" [class.ativo]="filtroAtual === 'Todos'"
+              (click)="filtrarAlunos('Todos')">
+              Todos ({{ alunos.length }})
+            </button>
+            <button class="filtro-btn" [class.ativo]="filtroAtual === 'Ativos'"
+              (click)="filtrarAlunos('Ativos')">
+              Ativos
+            </button>
+            <button class="filtro-btn" [class.ativo]="filtroAtual === 'Críticos'"
+              (click)="filtrarAlunos('Críticos')">
+              Críticos
+            </button>
+          </div>
+
+          <!-- Tabela -->
+          <div class="tabela-wrap">
+            <table class="tabela">
+              <thead>
+                <tr>
+                  <th>ALUNO</th>
+                  <th>NECESSIDADE</th>
+                  <th>PROGRESSO</th>
+                  <th>SÉRIE</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let aluno of alunosFiltrados">
+                  <td>
+                    <div class="aluno-cell">
+                      <div class="aluno-avatar">{{ getIniciais(aluno.nome) }}</div>
+                      <div class="aluno-info">
+                        <span class="aluno-nome">{{ aluno.nome }}</span>
+                        <span class="aluno-email">{{ aluno.email }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="getCondicaoBadgeClass(aluno.condicao)">
+                      {{ getCondicaoAbrev(aluno.condicao) }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="progresso-cell">
+                      <div class="progresso-bar-wrap">
+                        <div class="progresso-bar" [ngClass]="getProgressoClass(aluno.progresso)"
+                          [style.width.%]="aluno.progresso"></div>
+                      </div>
+                      <span class="progresso-num">{{ aluno.progresso }}%</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="serie-text">{{ aluno.serie || '—' }}</span>
+                  </td>
+                </tr>
+
+                <!-- Estado vazio -->
+                <tr *ngIf="!carregandoAlunos && alunosFiltrados.length === 0">
+                  <td colspan="4" class="empty-row">
+                    <i class="ti ti-mood-empty"></i> Nenhum aluno encontrado
+                  </td>
+                </tr>
+
+                <!-- Loading -->
+                <tr *ngIf="carregandoAlunos">
+                  <td colspan="4" class="loading-row">
+                    <div class="spinner"></div> Carregando alunos...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- COLUNA DIREITA -->
+        <div class="right-col">
+
+          <!-- PROFESSORES / TURMAS -->
+          <div class="card card-turmas">
+            <div class="card-header">
+              <div class="card-title-row">
+                <span class="card-dot green-dot"></span>
+                <h2 class="card-title">Professores</h2>
+              </div>
+            </div>
+
+            <div class="turmas-list" *ngIf="!carregandoTurmas">
+              <div class="turma-item" *ngFor="let turma of turmas.slice(0, 5)">
+                <div class="turma-avatar">{{ getIniciais(turma.professor) }}</div>
+                <div class="turma-info">
+                  <span class="turma-nome">{{ turma.professor }}</span>
+                  <span class="turma-disc">{{ turma.disciplina || 'Sem disciplina' }}</span>
+                </div>
+                <div class="turma-meta">
+                  <span class="turma-alunos">{{ turma.totalAlunos }} alunos</span>
+                </div>
+              </div>
+              <div class="empty-list" *ngIf="turmas.length === 0">
+                <i class="ti ti-mood-empty"></i> Nenhum professor cadastrado
+              </div>
+            </div>
+
+            <div class="loading-block" *ngIf="carregandoTurmas">
+              <div class="spinner"></div>
+            </div>
+          </div>
+
+          <!-- MENSAGENS -->
+          <div class="card card-mensagens">
+            <div class="card-header">
+              <div class="card-title-row">
+                <span class="card-dot orange-dot"></span>
+                <h2 class="card-title">Mensagens</h2>
+              </div>
+              <span class="badge-count" *ngIf="mensagens.length > 0">
+                {{ mensagens.length }} novas
+              </span>
+            </div>
+
+            <div class="msgs-list" *ngIf="!carregandoMensagens">
+              <div class="msg-item" *ngFor="let msg of mensagens" [class.nao-lida]="!msg.lido">
+                <div class="msg-avatar">{{ getIniciais(msg.aluno || 'U') }}</div>
+                <div class="msg-body">
+                  <span class="msg-nome">{{ msg.aluno }}</span>
+                  <span class="msg-texto">{{ msg.titulo }}</span>
+                </div>
+                <span class="msg-hora">{{ formatarHora(msg.criado_em) }}</span>
+              </div>
+              <div class="empty-list" *ngIf="mensagens.length === 0">
+                <i class="ti ti-mail-off"></i> Sem mensagens
+              </div>
+            </div>
+
+            <div class="loading-block" *ngIf="carregandoMensagens">
+              <div class="spinner"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>

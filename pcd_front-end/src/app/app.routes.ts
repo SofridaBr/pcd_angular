@@ -10,11 +10,14 @@ import { Tutoriais } from './tutoriais/tutoriais';
 import { Configuracoes } from './configuracoes/configuracoes';
 import { Materiais } from './materiais/materiais';
 import { ProfessorConfiguracoes } from './professor-configuracoes/professor-configuracoes';
-
+import { Coordenador } from './coordenador/coordenador';
+import { TodosAlunos } from './coordenador/todos-alunos/todos-alunos';  // ← NOVO
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: Login },
+
+  // ── ALUNO ──────────────────────────────
   { path: 'painel', component: Home },
   { path: 'painel/informacoes', component: Informacoes },
   { path: 'painel/tarefas', component: Tarefa },
@@ -23,8 +26,16 @@ export const routes: Routes = [
   { path: 'painel/tutoriais', component: Tutoriais },
   { path: 'painel/configuracoes', component: Configuracoes },
   { path: 'painel/materiais', component: Materiais },
+
+  // ── PROFESSOR / APOIO / RESPONSÁVEL ────
   { path: 'professor', component: Professor },
-  { path: 'professor/configuracoes', component: ProfessorConfiguracoes }, // ← só uma vez
+  { path: 'professor/configuracoes', component: ProfessorConfiguracoes },
+
+  // ── COORDENADOR ────────────────────────
+  { path: 'coordenador', component: Coordenador },
+  { path: 'coordenador/alunos', component: TodosAlunos },  // ← NOVO
+
+  // ── ALIASES ────────────────────────────
   { path: 'home', redirectTo: 'painel', pathMatch: 'full' },
   { path: 'info', redirectTo: 'painel/informacoes', pathMatch: 'full' },
   { path: 'tarefa', redirectTo: 'painel/tarefas', pathMatch: 'full' },

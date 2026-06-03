@@ -1,0 +1,180 @@
+<div class="app-wrapper">
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🌟</div>
+      <span class="logo-text">Educa<span>Inclusiva</span></span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <p class="nav-label">PRINCIPAL</p>
+      <a class="nav-item" (click)="navegarPara('/coordenador')">
+        <i class="ti ti-layout-dashboard"></i><span>Dashboard</span>
+      </a>
+      <a class="nav-item active" (click)="navegarPara('/coordenador/alunos')">
+        <i class="ti ti-users"></i><span>Todos os alunos</span>
+        <span class="nav-badge">{{ alunos.length }}</span>
+      </a>
+      <a class="nav-item" (click)="navegarPara('/coordenador/adicionar')">
+        <i class="ti ti-user-plus"></i><span>Adicionar aluno</span>
+      </a>
+
+      <p class="nav-label">PEDAGÓGICO</p>
+      <a class="nav-item" (click)="navegarPara('/coordenador/acessibilidade')">
+        <i class="ti ti-accessibility"></i><span>Acessibilidade</span>
+      </a>
+
+      <p class="nav-label">ESCOLAR</p>
+      <a class="nav-item" (click)="navegarPara('/coordenador/professores')">
+        <i class="ti ti-school"></i><span>Professores</span>
+      </a>
+      <a class="nav-item" (click)="navegarPara('/coordenador/comunicacao')">
+        <i class="ti ti-message-2"></i><span>Comunicação</span>
+      </a>
+      <a class="nav-item" (click)="navegarPara('/coordenador/responsaveis')">
+        <i class="ti ti-heart-handshake"></i><span>Responsáveis</span>
+      </a>
+      <a class="nav-item" (click)="navegarPara('/coordenador/turmas')">
+        <i class="ti ti-building-school"></i><span>Turmas</span>
+      </a>
+
+      <p class="nav-label">SISTEMA</p>
+      <a class="nav-item" (click)="navegarPara('/coordenador/configuracoes')">
+        <i class="ti ti-settings"></i><span>Configurações</span>
+      </a>
+      <a class="nav-item" (click)="navegarPara('/coordenador/suporte')">
+        <i class="ti ti-help-circle"></i><span>Suporte</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-sair" (click)="sair()">
+        <i class="ti ti-logout"></i><span>Sair</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ══════════ CONTEÚDO ══════════ -->
+  <div class="content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn-voltar" (click)="voltarDashboard()">
+          <i class="ti ti-arrow-left"></i>
+        </button>
+        <div class="search-wrap">
+          <i class="ti ti-search"></i>
+          <input
+            type="text"
+            placeholder="Buscar por nome ou e-mail..."
+            class="search-input"
+            [(ngModel)]="busca"
+            (input)="onBusca()"
+          />
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="user-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+      <!-- TÍTULO -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Todos os Alunos</h1>
+          <p class="page-sub">
+            {{ carregando ? 'Carregando...' : alunosFiltrados.length + ' aluno(s) encontrado(s)' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- FILTROS POR SÉRIE -->
+      <div class="series-row" *ngIf="!carregando">
+        <button
+          class="serie-chip"
+          [class.ativo]="filtroSerie === 'Todas'"
+          (click)="selecionarSerie('Todas')"
+        >
+          Todas as séries
+        </button>
+        <button
+          class="serie-chip"
+          *ngFor="let s of series"
+          [class.ativo]="filtroSerie === s"
+          (click)="selecionarSerie(s)"
+        >
+          {{ s }}
+        </button>
+      </div>
+
+      <!-- LOADING -->
+      <div class="loading-wrap" *ngIf="carregando">
+        <div class="spinner"></div>
+        <p>Carregando alunos...</p>
+      </div>
+
+      <!-- GRID DE CARDS -->
+      <div class="alunos-grid" *ngIf="!carregando">
+
+        <div class="aluno-card" *ngFor="let aluno of alunosFiltrados">
+
+          <!-- Cabeçalho do card -->
+          <div class="card-top">
+            <div class="card-avatar">{{ getIniciais(aluno.nome) }}</div>
+            <div class="card-info">
+              <span class="card-nome">{{ aluno.nome }}</span>
+              <span class="card-email">{{ aluno.email }}</span>
+            </div>
+            <div class="card-progresso-label">
+              <span class="prog-title">Progresso</span>
+              <span class="prog-value" [ngClass]="getProgressoClass(aluno.progresso)">
+                {{ aluno.progresso }}%
+              </span>
+            </div>
+          </div>
+
+          <!-- Barra de progresso -->
+          <div class="prog-bar-wrap">
+            <div
+              class="prog-bar"
+              [ngClass]="getProgressoClass(aluno.progresso)"
+              [style.width.%]="aluno.progresso"
+            ></div>
+          </div>
+
+          <!-- Tags info -->
+          <div class="card-tags">
+            <span class="tag tag-serie" *ngIf="aluno.serie">
+              <i class="ti ti-school"></i> {{ aluno.serie }}
+            </span>
+            <span class="tag tag-escola" *ngIf="aluno.tipoEscola">
+              <i class="ti ti-building"></i> {{ aluno.tipoEscola }}
+            </span>
+            <span
+              class="tag badge"
+              [ngClass]="getCondicaoBadgeClass(aluno.condicao)"
+              *ngIf="aluno.condicao && aluno.condicao !== 'Nenhuma'"
+            >
+              {{ aluno.condicao }}
+            </span>
+          </div>
+
+        </div>
+
+        <!-- Estado vazio -->
+        <div class="empty-state" *ngIf="alunosFiltrados.length === 0">
+          <span class="empty-icon">🔍</span>
+          <p>Nenhum aluno encontrado</p>
+          <span>Tente ajustar os filtros ou a busca</span>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+</div>
