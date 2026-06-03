@@ -214,9 +214,12 @@ export class Login {
 
       if (usuario.tipo === 'coordenador') {
         window.location.href = '/coordenador';
+      } else if (usuario.tipo === 'responsavel') {
+        window.location.href = '/responsavel';  // ← ADICIONAR
       } else {
         window.location.href = '/professor';
       }
+      
     } catch (error) {
       alert('Erro ao conectar ao servidor.');
     }

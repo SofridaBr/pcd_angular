@@ -27,9 +27,9 @@
         <span class="nav-badge" *ngIf="sidebarAberta && stats.totalAlunos > 0">{{ stats.totalAlunos }}</span>
       </a>
 
-      <a class="nav-item" (click)="navegarPara('/coordenador/adicionar')">
+      <a class="nav-item" (click)="navegarPara('/coordenador/contas')">
         <i class="ti ti-user-plus"></i>
-        <span *ngIf="sidebarAberta">Adicionar aluno</span>
+        <span *ngIf="sidebarAberta">Alterar contas</span>
       </a>
 
       <p class="nav-label" *ngIf="sidebarAberta">PEDAGÓGICO</p>
@@ -59,11 +59,7 @@
         <span *ngIf="sidebarAberta">Responsáveis</span>
       </a>
 
-      <a class="nav-item" (click)="navegarPara('/coordenador/turmas')">
-        <i class="ti ti-building-school"></i>
-        <span *ngIf="sidebarAberta">Turmas</span>
-      </a>
-
+    
       <p class="nav-label" *ngIf="sidebarAberta">SISTEMA</p>
 
       <a class="nav-item" (click)="navegarPara('/coordenador/configuracoes')">

@@ -11,7 +11,8 @@ import { Configuracoes } from './configuracoes/configuracoes';
 import { Materiais } from './materiais/materiais';
 import { ProfessorConfiguracoes } from './professor-configuracoes/professor-configuracoes';
 import { Coordenador } from './coordenador/coordenador';
-import { TodosAlunos } from './coordenador/todos-alunos/todos-alunos';  // ← NOVO
+import { TodosAlunos } from './coordenador/todos-alunos/todos-alunos';
+import { Familiar } from './responsavel/familiar/familiar';  // ← NOVO
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -27,13 +28,16 @@ export const routes: Routes = [
   { path: 'painel/configuracoes', component: Configuracoes },
   { path: 'painel/materiais', component: Materiais },
 
-  // ── PROFESSOR / APOIO / RESPONSÁVEL ────
+  // ── PROFESSOR / APOIO ──────────────────
   { path: 'professor', component: Professor },
   { path: 'professor/configuracoes', component: ProfessorConfiguracoes },
 
   // ── COORDENADOR ────────────────────────
   { path: 'coordenador', component: Coordenador },
-  { path: 'coordenador/alunos', component: TodosAlunos },  // ← NOVO
+  { path: 'coordenador/alunos', component: TodosAlunos },
+
+  // ── RESPONSÁVEL ────────────────────────
+  { path: 'responsavel', component: Familiar },  // ← NOVO
 
   // ── ALIASES ────────────────────────────
   { path: 'home', redirectTo: 'painel', pathMatch: 'full' },

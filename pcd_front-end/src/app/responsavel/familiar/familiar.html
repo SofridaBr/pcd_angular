@@ -1,0 +1,429 @@
+<div class="painel-wrapper">
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- SIDEBAR                                    -->
+    <!-- ══════════════════════════════════════════ -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">🌟</div>
+            <span class="brand-text">Educa<span class="brand-accent">Inclusiva</span></span>
+        </div>
+
+        <div class="sidebar-user">
+            <div class="user-avatar">{{ inicialNome }}</div>
+            <div class="user-info">
+                <span class="user-nome">{{ usuario?.nome }}</span>
+                <span class="user-tipo">Responsável / Familiar</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <span class="nav-group-label">PRINCIPAL</span>
+            <a class="nav-item" [class.active]="abaAtual === 'home'" (click)="setAba('home')">
+                <i class="ti ti-home"></i> Home
+            </a>
+            <a class="nav-item" [class.active]="abaAtual === 'alunos'" (click)="setAba('alunos')">
+                <i class="ti ti-users"></i> Meus Alunos
+                <span class="nav-badge" *ngIf="alunos.length > 0">{{ alunos.length }}</span>
+            </a>
+
+            <span class="nav-group-label">ACOMPANHAMENTO</span>
+            <a class="nav-item" [class.active]="abaAtual === 'progresso'" (click)="setAba('progresso')">
+                <i class="ti ti-chart-bar"></i> Progresso
+            </a>
+            <a class="nav-item" [class.active]="abaAtual === 'boletim'" (click)="setAba('boletim')">
+                <i class="ti ti-clipboard-list"></i> Boletim
+            </a>
+            <a class="nav-item" [class.active]="abaAtual === 'recados'" (click)="setAba('recados')">
+                <i class="ti ti-message"></i> Recados
+                <span class="nav-badge badge-red" *ngIf="recadosNaoLidos > 0">{{ recadosNaoLidos }}</span>
+            </a>
+
+            <span class="nav-group-label">CONTA</span>
+            <a class="nav-item nav-logout" (click)="logout()">
+                <i class="ti ti-logout"></i> Sair
+            </a>
+        </nav>
+    </aside>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- CONTEÚDO PRINCIPAL                         -->
+    <!-- ══════════════════════════════════════════ -->
+    <main class="painel-main">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="topbar-search">
+                <i class="ti ti-search"></i>
+                <input type="text" placeholder="Buscar aluno..." [(ngModel)]="buscaAluno" name="busca">
+            </div>
+            <div class="topbar-right">
+                <div class="topbar-date">
+                    <i class="ti ti-calendar"></i>
+                    {{ dataAtual }}
+                </div>
+                <div class="topbar-avatar">{{ inicialNome }}</div>
+            </div>
+        </header>
+
+        <!-- ── ABA: HOME ────────────────────────── -->
+        <div *ngIf="abaAtual === 'home'" class="aba-content">
+
+            <!-- Banner boas-vindas -->
+            <div class="banner-boas-vindas">
+                <div class="banner-info">
+                    <div class="banner-avatar">{{ inicialNome }}</div>
+                    <div>
+                        <h2 class="banner-titulo">Bom dia, {{ primeiroNome }}! 👋</h2>
+                        <p class="banner-sub">{{ dataAtual }}</p>
+                    </div>
+                </div>
+                <button class="btn-add-aluno" (click)="abrirModalAdicionarAluno()">
+                    <i class="ti ti-user-plus"></i> Adicionar Aluno
+                </button>
+            </div>
+
+            <!-- Cards de resumo -->
+            <div class="stats-grid">
+                <div class="stat-card stat-blue">
+                    <div class="stat-icon"><i class="ti ti-users"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-valor">{{ alunos.length }}</span>
+                        <span class="stat-label">Alunos vinculados</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-orange">
+                    <div class="stat-icon"><i class="ti ti-clipboard-check"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-valor">{{ totalTarefasConcluidas }}</span>
+                        <span class="stat-label">Tarefas concluídas</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-purple">
+                    <div class="stat-icon"><i class="ti ti-heart"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-valor">{{ totalPcD }}</span>
+                        <span class="stat-label">Alunos PcD ativos</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista rápida de alunos -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3><i class="ti ti-users"></i> Alunos — Visão Rápida</h3>
+                    <div class="section-tabs">
+                        <button [class.active]="filtroAlunos === 'todos'"
+                            (click)="filtroAlunos = 'todos'">Todos</button>
+                        <button [class.active]="filtroAlunos === 'pcd'" (click)="filtroAlunos = 'pcd'">PcD</button>
+                    </div>
+                </div>
+
+                <div class="alunos-empty" *ngIf="alunosFiltrados.length === 0">
+                    <i class="ti ti-user-off"></i>
+                    <p>Nenhum aluno encontrado</p>
+                    <button class="btn-link" (click)="abrirModalAdicionarAluno()">+ Adicionar aluno pelo e-mail</button>
+                </div>
+
+                <table class="alunos-table" *ngIf="alunosFiltrados.length > 0">
+                    <thead>
+                        <tr>
+                            <th>ALUNO</th>
+                            <th>SÉRIE</th>
+                            <th>CONDIÇÃO</th>
+                            <th>PROGRESSO</th>
+                            <th>BOLETIM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let a of alunosFiltrados" (click)="verAluno(a)" class="aluno-row">
+                            <td>
+                                <div class="aluno-nome-cell">
+                                    <div class="mini-avatar">{{ a.nome[0] }}</div>
+                                    {{ a.nome }}
+                                </div>
+                            </td>
+                            <td class="td-serie">{{ a.serie || '—' }}</td>
+                            <td>
+                                <span class="badge-condicao" [class]="badgeCondicao(a.condicao)">
+                                    {{ a.condicao || 'Nenhuma' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="mini-progress">
+                                    <div class="mini-progress-bar" [style.width.%]="a.progresso || 0"></div>
+                                </div>
+                                <span class="progress-pct">{{ a.progresso || 0 }}%</span>
+                            </td>
+                            <td>
+                                <button class="btn-ver-boletim" (click)="$event.stopPropagation(); verBoletimAluno(a)">
+                                    Ver boletim
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ── ABA: ALUNOS ───────────────────────── -->
+        <div *ngIf="abaAtual === 'alunos'" class="aba-content">
+            <div class="aba-header">
+                <h2>Meus Alunos</h2>
+                <button class="btn-primary-sm" (click)="abrirModalAdicionarAluno()">
+                    <i class="ti ti-user-plus"></i> Adicionar Aluno
+                </button>
+            </div>
+
+            <div class="alunos-grid" *ngIf="alunos.length > 0">
+                <div class="aluno-card" *ngFor="let a of alunos" (click)="verAluno(a)">
+                    <div class="aluno-card-header">
+                        <div class="aluno-card-avatar">{{ a.nome[0] }}</div>
+                        <div>
+                            <p class="aluno-card-nome">{{ a.nome }}</p>
+                            <p class="aluno-card-serie">{{ a.serie || 'Série não informada' }}</p>
+                        </div>
+                    </div>
+                    <div class="aluno-card-stats">
+                        <div class="aluno-stat">
+                            <span class="aluno-stat-val">{{ a.pontos || 0 }}</span>
+                            <span class="aluno-stat-label">Pontos</span>
+                        </div>
+                        <div class="aluno-stat">
+                            <span class="aluno-stat-val">Nv. {{ a.nivel || 1 }}</span>
+                            <span class="aluno-stat-label">Nível</span>
+                        </div>
+                        <div class="aluno-stat">
+                            <span class="aluno-stat-val">{{ a.progresso || 0 }}%</span>
+                            <span class="aluno-stat-label">Progresso</span>
+                        </div>
+                    </div>
+                    <div class="aluno-card-progress">
+                        <div class="aluno-card-bar" [style.width.%]="a.progresso || 0"></div>
+                    </div>
+                    <span class="badge-condicao" [class]="badgeCondicao(a.condicao)">
+                        {{ a.condicao || 'Nenhuma' }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="alunos-empty" *ngIf="alunos.length === 0">
+                <i class="ti ti-user-off"></i>
+                <p>Nenhum aluno vinculado ainda</p>
+                <button class="btn-link" (click)="abrirModalAdicionarAluno()">+ Adicionar pelo e-mail do aluno</button>
+            </div>
+        </div>
+
+        <!-- ── ABA: PROGRESSO ───────────────────── -->
+        <div *ngIf="abaAtual === 'progresso'" class="aba-content">
+            <div class="aba-header">
+                <h2>Acompanhar Progresso</h2>
+                <p class="aba-sub">Monitoramento de desempenho do aluno</p>
+            </div>
+
+            <div class="alunos-empty" *ngIf="alunos.length === 0">
+                <i class="ti ti-chart-off"></i>
+                <p>Adicione um aluno para acompanhar o progresso</p>
+            </div>
+
+            <div *ngFor="let a of alunos" class="progresso-card">
+                <div class="progresso-banner">
+                    <div class="progresso-banner-left">
+                        <div class="prog-avatar">{{ a.nome[0] }}</div>
+                        <div>
+                            <p class="prog-nome">{{ a.nome }}</p>
+                            <p class="prog-desc">
+                                Nível {{ a.nivel || 1 }} · {{ a.pontos || 0 }} pontos acumulados
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progresso-stats">
+                    <div class="prog-stat-card">
+                        <span class="prog-stat-val">{{ a.progresso || 0 }}%</span>
+                        <span class="prog-stat-label">Progresso geral</span>
+                    </div>
+                    <div class="prog-stat-card">
+                        <span class="prog-stat-val">{{ a.pontos || 0 }}</span>
+                        <span class="prog-stat-label">Pontos</span>
+                    </div>
+                    <div class="prog-stat-card">
+                        <span class="prog-stat-val">Nv. {{ a.nivel || 1 }}</span>
+                        <span class="prog-stat-label">Nível atual</span>
+                    </div>
+                </div>
+
+                <div class="progresso-barra-section">
+                    <p class="prog-barra-label">Progresso geral</p>
+                    <div class="prog-barra-bg">
+                        <div class="prog-barra-fill" [style.width.%]="a.progresso || 0"></div>
+                    </div>
+                    <span class="prog-barra-pct">{{ a.progresso || 0 }}%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── ABA: BOLETIM ──────────────────────── -->
+        <div *ngIf="abaAtual === 'boletim'" class="aba-content">
+            <div class="aba-header">
+                <h2>Boletim Escolar</h2>
+                <div class="bimestre-select">
+                    <label>Bimestre:</label>
+                    <select [(ngModel)]="bimestreSelecionado" (change)="carregarBoletins()" name="bimestre">
+                        <option [value]="1">1º Bimestre</option>
+                        <option [value]="2">2º Bimestre</option>
+                        <option [value]="3">3º Bimestre</option>
+                        <option [value]="4">4º Bimestre</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="alunos-empty" *ngIf="alunos.length === 0">
+                <i class="ti ti-clipboard-off"></i>
+                <p>Adicione um aluno para ver o boletim</p>
+            </div>
+
+            <div *ngFor="let a of alunos" class="boletim-section">
+                <h3 class="boletim-aluno-nome">
+                    <div class="mini-avatar">{{ a.nome[0] }}</div> {{ a.nome }}
+                </h3>
+
+                <div *ngIf="getBoletim(a.id).length === 0" class="boletim-vazio">
+                    Nenhuma nota lançada ainda.
+                </div>
+
+                <table class="boletim-table" *ngIf="getBoletim(a.id).length > 0">
+                    <thead>
+                        <tr>
+                            <th>MATÉRIA</th>
+                            <th>NOTA</th>
+                            <th>SITUAÇÃO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let b of getBoletim(a.id)">
+                            <td>{{ b.materia }}</td>
+                            <td class="nota-val" [class.nota-ok]="b.nota >= 5"
+                                [class.nota-ruim]="b.nota !== null && b.nota < 5">
+                                {{ b.nota !== null ? b.nota : '—' }}
+                            </td>
+                            <td>
+                                <span class="badge-situacao" *ngIf="b.nota !== null"
+                                    [class.badge-aprovado]="b.nota >= 5" [class.badge-reprovado]="b.nota < 5">
+                                    {{ b.nota >= 5 ? 'Aprovado' : 'Atenção' }}
+                                </span>
+                                <span class="badge-situacao badge-pendente" *ngIf="b.nota === null">Pendente</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ── ABA: RECADOS ──────────────────────── -->
+        <div *ngIf="abaAtual === 'recados'" class="aba-content">
+            <div class="aba-header">
+                <h2>Recados dos Professores</h2>
+            </div>
+
+            <div class="alunos-empty" *ngIf="recados.length === 0">
+                <i class="ti ti-message-off"></i>
+                <p>Nenhum recado recebido ainda</p>
+            </div>
+
+            <div class="recados-list">
+                <div class="recado-card" *ngFor="let r of recados" [class.nao-lido]="!r.lido" (click)="lerRecado(r)">
+                    <div class="recado-header">
+                        <span class="recado-titulo">{{ r.titulo }}</span>
+                        <span class="recado-data">{{ r.criado_em | date:'dd/MM/yyyy HH:mm' }}</span>
+                    </div>
+                    <p class="recado-aluno">Aluno: <strong>{{ r.aluno }}</strong></p>
+                    <p class="recado-professor">Prof. {{ r.professor }}</p>
+                    <p class="recado-msg">{{ r.mensagem }}</p>
+                    <span class="recado-badge" *ngIf="!r.lido">Novo</span>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- MODAL ADICIONAR ALUNO                      -->
+<!-- ══════════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="modalAdicionarAberto">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span class="modal-title">👨‍👩‍👧 Vincular Aluno</span>
+            <button class="modal-close" (click)="fecharModalAdicionar()">✕</button>
+        </div>
+        <p class="modal-sub">Digite o e-mail do aluno para vinculá-lo à sua conta</p>
+
+        <div class="modal-alert" *ngIf="alertaAdicionar"
+            [class.error]="alertaAdicionar !== 'Aluno adicionado com sucesso!'"
+            [class.success]="alertaAdicionar === 'Aluno adicionado com sucesso!'">
+            {{ alertaAdicionar }}
+        </div>
+
+        <div class="modal-form">
+            <div>
+                <label class="label"><i class="ti ti-mail"></i> E-mail do aluno</label>
+                <div class="input-wrap">
+                    <i class="ti ti-mail field-icon"></i>
+                    <input class="ei-input" type="email" placeholder="aluno@escola.com"
+                        [(ngModel)]="emailAlunoParaAdicionar" name="emailAluno">
+                </div>
+            </div>
+            <button class="btn-primary" (click)="adicionarAluno()">
+                <i class="ti ti-user-plus"></i> Vincular Aluno
+            </button>
+            <button class="btn-secondary" (click)="fecharModalAdicionar()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- MODAL DETALHE ALUNO                        -->
+<!-- ══════════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="alunoSelecionado">
+    <div class="modal-box modal-lg">
+        <div class="modal-header">
+            <span class="modal-title">👤 {{ alunoSelecionado?.nome }}</span>
+            <button class="modal-close" (click)="alunoSelecionado = null">✕</button>
+        </div>
+
+        <div class="detalhe-grid">
+            <div class="detalhe-item">
+                <span class="detalhe-label">Série</span>
+                <span class="detalhe-val">{{ alunoSelecionado?.serie || '—' }}</span>
+            </div>
+            <div class="detalhe-item">
+                <span class="detalhe-label">Condição</span>
+                <span class="detalhe-val">{{ alunoSelecionado?.condicao || 'Nenhuma' }}</span>
+            </div>
+            <div class="detalhe-item">
+                <span class="detalhe-label">Nível</span>
+                <span class="detalhe-val">{{ alunoSelecionado?.nivel || 1 }}</span>
+            </div>
+            <div class="detalhe-item">
+                <span class="detalhe-label">Pontos</span>
+                <span class="detalhe-val">{{ alunoSelecionado?.pontos || 0 }}</span>
+            </div>
+            <div class="detalhe-item">
+                <span class="detalhe-label">Tipo de Escola</span>
+                <span class="detalhe-val">{{ alunoSelecionado?.tipoEscola || '—' }}</span>
+            </div>
+            <div class="detalhe-item">
+                <span class="detalhe-label">Progresso</span>
+                <span class="detalhe-val">{{ alunoSelecionado?.progresso || 0 }}%</span>
+            </div>
+        </div>
+
+        <div class="prog-barra-section" style="margin-top: 16px">
+            <div class="prog-barra-bg">
+                <div class="prog-barra-fill" [style.width.%]="alunoSelecionado?.progresso || 0"></div>
+            </div>
+        </div>
+    </div>
+</div>

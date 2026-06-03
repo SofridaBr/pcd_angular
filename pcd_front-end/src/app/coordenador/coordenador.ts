@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -11,7 +11,11 @@ import { Router } from '@angular/router';
 })
 export class Coordenador implements OnInit {
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   // ═══════════════════════════════════════
   // USUÁRIO
@@ -68,7 +72,6 @@ export class Coordenador implements OnInit {
       return;
     }
 
-    // Data formatada
     const agora = new Date();
     this.dataHoje = agora.toLocaleDateString('pt-BR', {
       weekday: 'long',
@@ -91,11 +94,17 @@ export class Coordenador implements OnInit {
     try {
       const res = await fetch('http://localhost:3000/escola/stats');
       const dados = await res.json();
-      this.stats = dados;
+      this.ngZone.run(() => {
+        this.stats = dados;
+        this.carregandoStats = false;
+        this.cdr.detectChanges();
+      });
     } catch {
+      this.ngZone.run(() => {
+        this.carregandoStats = false;
+        this.cdr.detectChanges();
+      });
       console.error('Erro ao carregar stats');
-    } finally {
-      this.carregandoStats = false;
     }
   }
 
@@ -103,11 +112,17 @@ export class Coordenador implements OnInit {
     try {
       const res = await fetch('http://localhost:3000/escola/turmas');
       const dados = await res.json();
-      this.turmas = dados.turmas || [];
+      this.ngZone.run(() => {
+        this.turmas = dados.turmas || [];
+        this.carregandoTurmas = false;
+        this.cdr.detectChanges();
+      });
     } catch {
+      this.ngZone.run(() => {
+        this.carregandoTurmas = false;
+        this.cdr.detectChanges();
+      });
       console.error('Erro ao carregar turmas');
-    } finally {
-      this.carregandoTurmas = false;
     }
   }
 
@@ -115,12 +130,18 @@ export class Coordenador implements OnInit {
     try {
       const res = await fetch('http://localhost:3000/alunos/todos');
       const dados = await res.json();
-      this.alunos = dados.alunos || [];
-      this.alunosFiltrados = [...this.alunos];
+      this.ngZone.run(() => {
+        this.alunos = dados.alunos || [];
+        this.alunosFiltrados = [...this.alunos];
+        this.carregandoAlunos = false;
+        this.cdr.detectChanges();
+      });
     } catch {
+      this.ngZone.run(() => {
+        this.carregandoAlunos = false;
+        this.cdr.detectChanges();
+      });
       console.error('Erro ao carregar alunos');
-    } finally {
-      this.carregandoAlunos = false;
     }
   }
 
@@ -128,11 +149,17 @@ export class Coordenador implements OnInit {
     try {
       const res = await fetch(`http://localhost:3000/recados/professor/${this.usuario.id}`);
       const dados = await res.json();
-      this.mensagens = (dados.recados || []).slice(0, 5);
+      this.ngZone.run(() => {
+        this.mensagens = (dados.recados || []).slice(0, 5);
+        this.carregandoMensagens = false;
+        this.cdr.detectChanges();
+      });
     } catch {
+      this.ngZone.run(() => {
+        this.carregandoMensagens = false;
+        this.cdr.detectChanges();
+      });
       console.error('Erro ao carregar mensagens');
-    } finally {
-      this.carregandoMensagens = false;
     }
   }
 

@@ -693,6 +693,110 @@ app.get("/materiais/professor/:professorId", (req, res) => {
     });
 });
 
+// ════════════════════════════════════════════════
+// RESPONSÁVEL
+// ════════════════════════════════════════════════
+
+// Buscar alunos vinculados ao responsável
+app.get("/responsavel/alunos/:id", (req, res) => {
+    const { id } = req.params;
+
+    const sql = `
+        SELECT u.id, u.nome, u.email, u.serie, u.nivel, u.pontos,
+               u.progresso, u.condicao, u.tipoEscola, u.nivelAutismo
+        FROM usuarios u
+        INNER JOIN responsavel_aluno ra ON u.id = ra.aluno_id
+        WHERE ra.responsavel_id = ? AND u.tipo = 'aluno'
+        ORDER BY u.nome ASC
+    `;
+
+    conexao.query(sql, [id], (erro, resultado) => {
+        if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+        res.json(resultado);
+    });
+});
+
+// Vincular aluno pelo e-mail
+app.post("/responsavel/vincular", (req, res) => {
+    const { responsavel_id, email_aluno } = req.body;
+
+    if (!responsavel_id || !email_aluno) {
+        return res.status(400).json({ mensagem: "Dados incompletos." });
+    }
+
+    conexao.query(
+        `SELECT id FROM usuarios WHERE email = ? AND tipo = 'aluno'`,
+        [email_aluno],
+        (erro, resultado) => {
+            if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+            if (resultado.length === 0)
+                return res.status(404).json({ mensagem: "Aluno não encontrado com esse e-mail." });
+
+            const aluno_id = resultado[0].id;
+
+            conexao.query(
+                `SELECT id FROM responsavel_aluno WHERE responsavel_id = ? AND aluno_id = ?`,
+                [responsavel_id, aluno_id],
+                (erro, resultado) => {
+                    if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+                    if (resultado.length > 0)
+                        return res.status(400).json({ mensagem: "Este aluno já está vinculado." });
+
+                    conexao.query(
+                        `INSERT INTO responsavel_aluno (responsavel_id, aluno_id) VALUES (?, ?)`,
+                        [responsavel_id, aluno_id],
+                        (erro) => {
+                            if (erro) return res.status(500).json({ mensagem: "Erro ao vincular aluno." });
+                            res.json({ mensagem: "Aluno vinculado com sucesso!" });
+                        }
+                    );
+                }
+            );
+        }
+    );
+});
+
+// Recados dos alunos vinculados ao responsável
+app.get("/recados/responsavel", (req, res) => {
+    const ids = req.query.alunos;
+
+    if (!ids) return res.status(400).json({ mensagem: "Informe os IDs dos alunos." });
+
+    const idsArray = ids.split(',').map(Number).filter(Boolean);
+
+    if (idsArray.length === 0) return res.json([]);
+
+    const placeholders = idsArray.map(() => '?').join(',');
+
+    const sql = `
+        SELECT r.id, r.titulo, r.mensagem, r.lido, r.criado_em,
+               al.nome AS aluno,
+               pr.nome AS professor
+        FROM recados r
+        INNER JOIN usuarios al ON r.aluno_id = al.id
+        INNER JOIN usuarios pr ON r.professor_id = pr.id
+        WHERE r.aluno_id IN (${placeholders})
+        ORDER BY r.criado_em DESC
+    `;
+
+    conexao.query(sql, idsArray, (erro, resultado) => {
+        if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+        res.json(resultado);
+    });
+});
+
+// Marcar recado como lido (PATCH)
+app.patch("/recados/:id/lido", (req, res) => {
+    conexao.query(
+        `UPDATE recados SET lido = 1 WHERE id = ?`,
+        [req.params.id],
+        (erro) => {
+            if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+            res.json({ mensagem: "Recado marcado como lido." });
+        }
+    );
+});
+
 
 // ════════════════════════════════════════════════
 // SERVIDOR
