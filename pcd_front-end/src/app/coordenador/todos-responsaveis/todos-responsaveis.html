@@ -1,0 +1,156 @@
+<div class="app-wrapper">
+
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-icon">🌟</div>
+            <span class="logo-text">Educa<span>Inclusiva</span></span>
+        </div>
+        <nav class="sidebar-nav">
+            <p class="nav-label">PRINCIPAL</p>
+            <a class="nav-item" (click)="navegarPara('/coordenador')">
+                <i class="ti ti-layout-dashboard"></i><span>Dashboard</span>
+            </a>
+            <a class="nav-item" (click)="navegarPara('/coordenador/alunos')">
+                <i class="ti ti-users"></i><span>Todos os alunos</span>
+            </a>
+            <p class="nav-label">ESCOLAR</p>
+            <a class="nav-item" (click)="navegarPara('/coordenador/professores')">
+                <i class="ti ti-school"></i><span>Professores</span>
+            </a>
+            <a class="nav-item" (click)="navegarPara('/coordenador/comunicacao')">
+                <i class="ti ti-message-2"></i><span>Comunicação</span>
+            </a>
+            <a class="nav-item active" (click)="navegarPara('/coordenador/responsaveis')">
+                <i class="ti ti-heart-handshake"></i><span>Responsáveis</span>
+                <span class="nav-badge">{{ responsaveis.length }}</span>
+            </a>
+
+            <a class="nav-item" (click)="navegarPara('/coordenador/cuidadores')">
+                <i class="ti ti-accessible"></i>
+                <span>Apoio & Cuidadores</span>
+            </a>
+            <p class="nav-label">SISTEMA</p>
+            <a class="nav-item" (click)="navegarPara('/coordenador/configuracoes')">
+                <i class="ti ti-settings"></i><span>Configurações</span>
+            </a>
+            <a class="nav-item" (click)="navegarPara('/coordenador/suporte')">
+                <i class="ti ti-help-circle"></i><span>Suporte</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="btn-sair" (click)="sair()">
+                <i class="ti ti-logout"></i><span>Sair</span>
+            </button>
+        </div>
+    </aside>
+
+    <div class="content">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="btn-voltar" (click)="voltarDashboard()">
+                    <i class="ti ti-arrow-left"></i>
+                </button>
+                <div class="search-wrap">
+                    <i class="ti ti-search"></i>
+                    <input type="text" placeholder="Buscar por nome ou e-mail..." class="search-input"
+                        [(ngModel)]="busca" (input)="onBusca()" />
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="user-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Responsáveis</h1>
+                    <p class="page-sub">
+                        {{ carregando ? 'Carregando...' : responsaveisFiltrados.length + ' responsável(is)
+                        encontrado(s)' }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="loading-wrap" *ngIf="carregando">
+                <div class="spinner"></div>
+                <p>Carregando responsáveis...</p>
+            </div>
+
+            <div class="alunos-grid" *ngIf="!carregando">
+                <div class="aluno-card" *ngFor="let resp of responsaveisFiltrados" (click)="verResponsavel(resp)">
+                    <div class="card-top">
+                        <div class="card-avatar">{{ getIniciais(resp.nome) }}</div>
+                        <div class="card-info">
+                            <span class="card-nome">{{ resp.nome }}</span>
+                            <span class="card-email">{{ resp.email }}</span>
+                        </div>
+                    </div>
+                    <div class="card-tags">
+                        <span class="tag badge-responsavel">
+                            <i class="ti ti-heart-handshake"></i> Responsável
+                        </span>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-apagar" (click)="$event.stopPropagation(); confirmarApagar(resp)">
+                            <i class="ti ti-trash"></i> Apagar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="empty-state" *ngIf="responsaveisFiltrados.length === 0">
+                    <span class="empty-icon">🔍</span>
+                    <p>Nenhum responsável encontrado</p>
+                    <span>Tente ajustar a busca</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL DETALHE -->
+    <div class="modal-overlay" *ngIf="responsavelSelecionado" (click)="responsavelSelecionado = null">
+        <div class="modal-box" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">👤 {{ responsavelSelecionado?.nome }}</span>
+                <button class="modal-close" (click)="responsavelSelecionado = null">✕</button>
+            </div>
+            <div class="detalhe-grid">
+                <div class="detalhe-item">
+                    <span class="detalhe-label">E-mail</span>
+                    <span class="detalhe-val">{{ responsavelSelecionado?.email || '—' }}</span>
+                </div>
+                <div class="detalhe-item">
+                    <span class="detalhe-label">Telefone</span>
+                    <span class="detalhe-val">{{ responsavelSelecionado?.telefone || '—' }}</span>
+                </div>
+                <div class="detalhe-item">
+                    <span class="detalhe-label">CPF</span>
+                    <span class="detalhe-val">{{ responsavelSelecionado?.cpf || '—' }}</span>
+                </div>
+                <div class="detalhe-item">
+                    <span class="detalhe-label">RG</span>
+                    <span class="detalhe-val">{{ responsavelSelecionado?.rg || '—' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAÇÃO APAGAR -->
+    <div class="modal-overlay" *ngIf="responsavelParaApagar" (click)="cancelarApagar()">
+        <div class="modal-box modal-confirmacao" (click)="$event.stopPropagation()">
+            <div class="modal-icon">⚠️</div>
+            <h2 class="modal-titulo">Apagar responsável?</h2>
+            <p class="modal-texto">
+                Tem certeza que deseja apagar <strong>{{ responsavelParaApagar?.nome }}</strong>?
+                Esta ação é permanente.
+            </p>
+            <div class="modal-actions">
+                <button class="btn-cancelar" (click)="cancelarApagar()">Cancelar</button>
+                <button class="btn-confirmar" (click)="apagarResponsavel()" [disabled]="apagando">
+                    {{ apagando ? 'Apagando...' : 'Sim, apagar' }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>

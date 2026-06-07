@@ -361,13 +361,24 @@
       <button class="modal-close" (click)="fecharModalRecado()">✕</button>
     </div>
     <p class="modal-sub">Envie um recado para o professor do aluno</p>
+
     <div class="modal-alert error" *ngIf="alertaRecado && alertaRecado !== 'Recado enviado com sucesso!'">
       {{ alertaRecado }}
     </div>
     <div class="modal-alert success" *ngIf="alertaRecado === 'Recado enviado com sucesso!'">
       {{ alertaRecado }}
     </div>
+
     <div class="modal-form">
+      <div>
+        <label class="label"><i class="ti ti-user"></i> Para qual aluno</label>
+        <div class="input-wrap">
+          <select class="ei-input" [(ngModel)]="recadoAlunoId" name="alunoId" style="padding-left: 12px;">
+            <option value="">Para todos os alunos</option>
+            <option *ngFor="let a of alunos" [value]="a.id">{{ a.nome }}</option>
+          </select>
+        </div>
+      </div>
       <div>
         <label class="label"><i class="ti ti-pencil"></i> Título</label>
         <div class="input-wrap">

@@ -582,3 +582,24 @@
   color: #1565C0;
   font-size: 15px;
 }
+
+.tag-disciplina { background: #FFF3E0; color: #E65100; }
+
+.badge-professor  { background: #E3F2FD; color: #1565C0; }
+.badge-apoio      { background: #E8F5E9; color: #2E7D32; }
+.badge-coordenador{ background: #F3E5F5; color: #6A1B9A; }
+
+.disciplina-chip {
+  border-color: #FFF3E0;
+  color: #E65100;
+
+  &.ativo {
+    background: #E65100;
+    border-color: #E65100;
+    color: #fff;
+  }
+}
+
+.modal-confirmacao {
+  text-align: center;
+}

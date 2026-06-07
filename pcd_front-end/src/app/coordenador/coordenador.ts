@@ -31,7 +31,7 @@ export class Coordenador implements OnInit {
   stats: any = {
     totalAlunos: 0,
     totalProfessores: 0,
-    progressoMedio: 0,
+    totalResponsaveis: 0,
     condicoes: {
       Visual: 0,
       Auditiva: 0,
@@ -173,8 +173,6 @@ export class Coordenador implements OnInit {
       this.alunosFiltrados = [...this.alunos];
     } else if (filtro === 'Ativos') {
       this.alunosFiltrados = this.alunos.filter(a => a.progresso > 0);
-    } else if (filtro === 'Críticos') {
-      this.alunosFiltrados = this.alunos.filter(a => a.progresso < 40);
     }
   }
 

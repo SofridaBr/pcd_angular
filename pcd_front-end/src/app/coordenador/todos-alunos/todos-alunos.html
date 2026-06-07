@@ -16,14 +16,6 @@
         <i class="ti ti-users"></i><span>Todos os alunos</span>
         <span class="nav-badge">{{ alunos.length }}</span>
       </a>
-      <a class="nav-item" (click)="navegarPara('/coordenador/adicionar')">
-        <i class="ti ti-user-plus"></i><span>Adicionar aluno</span>
-      </a>
-
-      <p class="nav-label">PEDAGÓGICO</p>
-      <a class="nav-item" (click)="navegarPara('/coordenador/acessibilidade')">
-        <i class="ti ti-accessibility"></i><span>Acessibilidade</span>
-      </a>
 
       <p class="nav-label">ESCOLAR</p>
       <a class="nav-item" (click)="navegarPara('/coordenador/professores')">
@@ -35,7 +27,11 @@
       <a class="nav-item" (click)="navegarPara('/coordenador/responsaveis')">
         <i class="ti ti-heart-handshake"></i><span>Responsáveis</span>
       </a>
-      
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/cuidadores')">
+        <i class="ti ti-accessible"></i>
+        <span>Apoio & Cuidadores</span>
+      </a>
 
       <p class="nav-label">SISTEMA</p>
       <a class="nav-item" (click)="navegarPara('/coordenador/configuracoes')">
@@ -64,13 +60,8 @@
         </button>
         <div class="search-wrap">
           <i class="ti ti-search"></i>
-          <input
-            type="text"
-            placeholder="Buscar por nome ou e-mail..."
-            class="search-input"
-            [(ngModel)]="busca"
-            (input)="onBusca()"
-          />
+          <input type="text" placeholder="Buscar por nome ou e-mail..." class="search-input" [(ngModel)]="busca"
+            (input)="onBusca()" />
         </div>
       </div>
       <div class="topbar-right">
@@ -93,19 +84,11 @@
 
       <!-- FILTROS POR SÉRIE -->
       <div class="series-row" *ngIf="!carregando">
-        <button
-          class="serie-chip"
-          [class.ativo]="filtroSerie === 'Todas'"
-          (click)="selecionarSerie('Todas')"
-        >
+        <button class="serie-chip" [class.ativo]="filtroSerie === 'Todas'" (click)="selecionarSerie('Todas')">
           Todas as séries
         </button>
-        <button
-          class="serie-chip"
-          *ngFor="let s of series"
-          [class.ativo]="filtroSerie === s"
-          (click)="selecionarSerie(s)"
-        >
+        <button class="serie-chip" *ngFor="let s of series" [class.ativo]="filtroSerie === s"
+          (click)="selecionarSerie(s)">
           {{ s }}
         </button>
       </div>
@@ -119,33 +102,23 @@
       <!-- GRID DE CARDS -->
       <div class="alunos-grid" *ngIf="!carregando">
 
-        <div class="aluno-card" *ngFor="let aluno of alunosFiltrados">
+        <div class="aluno-card" *ngFor="let aluno of alunosFiltrados" (click)="verAluno(aluno)">
 
-          <!-- Cabeçalho do card -->
+
           <div class="card-top">
             <div class="card-avatar">{{ getIniciais(aluno.nome) }}</div>
             <div class="card-info">
               <span class="card-nome">{{ aluno.nome }}</span>
               <span class="card-email">{{ aluno.email }}</span>
             </div>
-            <div class="card-progresso-label">
-              <span class="prog-title">Progresso</span>
-              <span class="prog-value" [ngClass]="getProgressoClass(aluno.progresso)">
-                {{ aluno.progresso }}%
-              </span>
+
+          </div>
+
+          <div class="prog-bar-wrap">
+            <div class="prog-bar" [ngClass]="getProgressoClass(aluno.progresso)" [style.width.%]="aluno.progresso">
             </div>
           </div>
 
-          <!-- Barra de progresso -->
-          <div class="prog-bar-wrap">
-            <div
-              class="prog-bar"
-              [ngClass]="getProgressoClass(aluno.progresso)"
-              [style.width.%]="aluno.progresso"
-            ></div>
-          </div>
-
-          <!-- Tags info -->
           <div class="card-tags">
             <span class="tag tag-serie" *ngIf="aluno.serie">
               <i class="ti ti-school"></i> {{ aluno.serie }}
@@ -153,13 +126,16 @@
             <span class="tag tag-escola" *ngIf="aluno.tipoEscola">
               <i class="ti ti-building"></i> {{ aluno.tipoEscola }}
             </span>
-            <span
-              class="tag badge"
-              [ngClass]="getCondicaoBadgeClass(aluno.condicao)"
-              *ngIf="aluno.condicao && aluno.condicao !== 'Nenhuma'"
-            >
+            <span class="tag badge" [ngClass]="getCondicaoBadgeClass(aluno.condicao)"
+              *ngIf="aluno.condicao && aluno.condicao !== 'Nenhuma'">
               {{ aluno.condicao }}
             </span>
+          </div>
+
+          <div class="card-actions">
+            <button class="btn-apagar" (click)="$event.stopPropagation(); confirmarApagar(aluno)">
+              <i class="ti ti-trash"></i> Apagar aluno
+            </button>
           </div>
 
         </div>
@@ -175,4 +151,64 @@
 
     </main>
   </div>
+
+  <!-- MODAL DETALHE ALUNO -->
+  <div class="modal-overlay" *ngIf="alunoSelecionado" (click)="alunoSelecionado = null">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">👤 {{ alunoSelecionado?.nome }}</span>
+        <button class="modal-close" (click)="alunoSelecionado = null">✕</button>
+      </div>
+
+      <div class="detalhe-grid">
+        <div class="detalhe-item">
+          <span class="detalhe-label">Série</span>
+          <span class="detalhe-val">{{ alunoSelecionado?.serie || '—' }}</span>
+        </div>
+        <div class="detalhe-item">
+          <span class="detalhe-label">Condição</span>
+          <span class="detalhe-val">{{ alunoSelecionado?.condicao || 'Nenhuma' }}</span>
+        </div>
+        <div class="detalhe-item">
+          <span class="detalhe-label">E-mail</span>
+          <span class="detalhe-val">{{ alunoSelecionado?.email || '—' }}</span>
+        </div>
+        <div class="detalhe-item">
+          <span class="detalhe-label">Telefone</span>
+          <span class="detalhe-val">{{ alunoSelecionado?.telefone || '—' }}</span>
+        </div>
+        <div class="detalhe-item">
+          <span class="detalhe-label">CPF</span>
+          <span class="detalhe-val">{{ alunoSelecionado?.cpf || '—' }}</span>
+        </div>
+        <div class="detalhe-item">
+          <span class="detalhe-label">RG</span>
+          <span class="detalhe-val">{{ alunoSelecionado?.rg || '—' }}</span>
+        </div>
+        <div class="detalhe-item">
+          <span class="detalhe-label">Tipo de Escola</span>
+          <span class="detalhe-val">{{ alunoSelecionado?.tipoEscola || '—' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMAÇÃO -->
+  <div class="modal-overlay" *ngIf="alunoParaApagar" (click)="cancelarApagar()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-icon">⚠️</div>
+      <h2 class="modal-titulo">Apagar aluno?</h2>
+      <p class="modal-texto">
+        Tem certeza que deseja apagar <strong>{{ alunoParaApagar?.nome }}</strong>?
+        Esta ação é permanente e remove todos os dados do aluno.
+      </p>
+      <div class="modal-actions">
+        <button class="btn-cancelar" (click)="cancelarApagar()">Cancelar</button>
+        <button class="btn-confirmar" (click)="apagarAluno()" [disabled]="apagando">
+          {{ apagando ? 'Apagando...' : 'Sim, apagar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>

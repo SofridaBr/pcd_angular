@@ -27,17 +27,10 @@
         <span class="nav-badge" *ngIf="sidebarAberta && stats.totalAlunos > 0">{{ stats.totalAlunos }}</span>
       </a>
 
-      <a class="nav-item" (click)="navegarPara('/coordenador/contas')">
-        <i class="ti ti-user-plus"></i>
-        <span *ngIf="sidebarAberta">Alterar contas</span>
-      </a>
 
-      <p class="nav-label" *ngIf="sidebarAberta">PEDAGÓGICO</p>
 
-      <a class="nav-item" (click)="navegarPara('/coordenador/acessibilidade')">
-        <i class="ti ti-accessibility"></i>
-        <span *ngIf="sidebarAberta">Acessibilidade</span>
-      </a>
+
+
 
       <p class="nav-label" *ngIf="sidebarAberta">ESCOLAR</p>
 
@@ -59,7 +52,12 @@
         <span *ngIf="sidebarAberta">Responsáveis</span>
       </a>
 
-    
+      <a class="nav-item" (click)="navegarPara('/coordenador/cuidadores')">
+        <i class="ti ti-accessible"></i>
+        <span *ngIf="sidebarAberta">Apoio & Cuidadores</span>
+      </a>
+
+
       <p class="nav-label" *ngIf="sidebarAberta">SISTEMA</p>
 
       <a class="nav-item" (click)="navegarPara('/coordenador/configuracoes')">
@@ -163,18 +161,17 @@
           </div>
         </div>
 
-        <!-- Progresso médio -->
+        <!-- Total responsáveis -->
         <div class="stat-card stat-purple">
           <div class="stat-icon">
-            <i class="ti ti-chart-line"></i>
+            <i class="ti ti-heart-handshake"></i>
           </div>
           <div class="stat-info">
-            <span class="stat-badge purple-badge">Geral</span>
-            <p class="stat-value">{{ carregandoStats ? '...' : stats.progressoMedio }}%</p>
-            <p class="stat-label">Progresso médio dos alunos</p>
+            <span class="stat-badge purple-badge">Cadastrados</span>
+            <p class="stat-value">{{ carregandoStats ? '...' : stats.totalResponsaveis }}</p>
+            <p class="stat-label">Responsáveis cadastrados</p>
             <div class="stat-bar">
-              <div class="stat-bar-fill purple-fill"
-                [style.width.%]="carregandoStats ? 0 : stats.progressoMedio"></div>
+              <div class="stat-bar-fill purple-fill" [style.width.%]="100"></div>
             </div>
           </div>
         </div>
@@ -198,18 +195,13 @@
 
           <!-- Filtros -->
           <div class="filtros-row">
-            <button class="filtro-btn" [class.ativo]="filtroAtual === 'Todos'"
-              (click)="filtrarAlunos('Todos')">
+            <button class="filtro-btn" [class.ativo]="filtroAtual === 'Todos'" (click)="filtrarAlunos('Todos')">
               Todos ({{ alunos.length }})
             </button>
-            <button class="filtro-btn" [class.ativo]="filtroAtual === 'Ativos'"
-              (click)="filtrarAlunos('Ativos')">
+            <button class="filtro-btn" [class.ativo]="filtroAtual === 'Ativos'" (click)="filtrarAlunos('Ativos')">
               Ativos
             </button>
-            <button class="filtro-btn" [class.ativo]="filtroAtual === 'Críticos'"
-              (click)="filtrarAlunos('Críticos')">
-              Críticos
-            </button>
+
           </div>
 
           <!-- Tabela -->
@@ -219,7 +211,7 @@
                 <tr>
                   <th>ALUNO</th>
                   <th>NECESSIDADE</th>
-                  <th>PROGRESSO</th>
+
                   <th>SÉRIE</th>
                 </tr>
               </thead>
@@ -239,15 +231,7 @@
                       {{ getCondicaoAbrev(aluno.condicao) }}
                     </span>
                   </td>
-                  <td>
-                    <div class="progresso-cell">
-                      <div class="progresso-bar-wrap">
-                        <div class="progresso-bar" [ngClass]="getProgressoClass(aluno.progresso)"
-                          [style.width.%]="aluno.progresso"></div>
-                      </div>
-                      <span class="progresso-num">{{ aluno.progresso }}%</span>
-                    </div>
-                  </td>
+
                   <td>
                     <span class="serie-text">{{ aluno.serie || '—' }}</span>
                   </td>

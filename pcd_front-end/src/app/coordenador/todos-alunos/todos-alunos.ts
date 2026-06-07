@@ -91,6 +91,13 @@ export class TodosAlunos implements OnInit {
     this.filtrar();
   }
 
+
+
+  alunoParaApagar: any = null;
+  apagando = false;
+
+  alunoSelecionado: any = null;
+
   onBusca(): void {
     this.filtrar();
   }
@@ -138,5 +145,49 @@ export class TodosAlunos implements OnInit {
 
   navegarPara(rota: string): void {
     this.router.navigate([rota]);
+  }
+
+  // ═══════════════════════════════════════
+  // APAGAR ALUNO
+  // ═══════════════════════════════════════
+
+  confirmarApagar(aluno: any): void {
+    this.alunoParaApagar = aluno;
+  }
+
+  cancelarApagar(): void {
+    this.alunoParaApagar = null;
+    this.apagando = false;
+  }
+
+  async apagarAluno(): Promise<void> {
+    if (!this.alunoParaApagar) return;
+    this.apagando = true;
+    try {
+      const res = await fetch(`http://localhost:3000/alunos/${this.alunoParaApagar.id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        this.alunos = this.alunos.filter(a => a.id !== this.alunoParaApagar.id);
+        this.filtrar();
+        this.series = [...new Set<string>(
+          this.alunos.map(a => a.serie).filter(Boolean)
+        )].sort();
+        this.cancelarApagar();
+      } else {
+        alert('Erro ao apagar aluno.');
+      }
+    } catch {
+      alert('Erro de conexão.');
+    } finally {
+      this.apagando = false;
+      this.cdr.detectChanges();
+    }
+
+
+  }
+  verAluno(aluno: any): void {
+    this.alunoSelecionado = aluno;
+
   }
 }

@@ -175,12 +175,14 @@ export class Apoio implements OnInit {
 
   modalRecadoAberto = false;
   alertaRecado = '';
+  recadoAlunoId: string = '';
   novoRecado = { titulo: '', mensagem: '' };
 
   abrirModalRecado(): void {
     this.modalRecadoAberto = true;
     this.alertaRecado = '';
     this.novoRecado = { titulo: '', mensagem: '' };
+    this.recadoAlunoId = '';
   }
 
   fecharModalRecado(): void {
@@ -200,7 +202,7 @@ export class Apoio implements OnInit {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           professorId: this.usuario.id,
-          alunoId: this.aluno?.id ?? null,
+          alunoId: this.recadoAlunoId || null,
           titulo: this.novoRecado.titulo,
           mensagem: this.novoRecado.mensagem
         })

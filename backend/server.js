@@ -205,11 +205,43 @@ app.get("/aluno/:id", (req, res) => {
 });
 
 // ════════════════════════════════════════════════
+// APAGAR ALUNO (coordenador) — cascata em todas as tabelas
+// ════════════════════════════════════════════════
+app.delete("/alunos/:id", (req, res) => {
+    const { id } = req.params;
+
+    // Deleta em cascata nas tabelas relacionadas, depois o usuário
+    const tabelas = [
+        `DELETE FROM tarefa_aluno      WHERE aluno_id = ?`,
+        `DELETE FROM material_aluno    WHERE aluno_id = ?`,
+        `DELETE FROM recados           WHERE aluno_id = ?`,
+        `DELETE FROM boletim           WHERE aluno_id = ?`,
+        `DELETE FROM professor_aluno   WHERE aluno_id = ?`,
+        `DELETE FROM responsavel_aluno WHERE aluno_id = ?`,
+        `DELETE FROM usuarios          WHERE id = ? AND tipo = 'aluno'`
+    ];
+
+    const executar = (index) => {
+        if (index >= tabelas.length) {
+            return res.json({ mensagem: "Aluno apagado com sucesso." });
+        }
+        conexao.query(tabelas[index], [id], (erro) => {
+            if (erro) return res.status(500).json({ mensagem: `Erro ao apagar dados (passo ${index + 1}).` });
+            executar(index + 1);
+        });
+    };
+
+    executar(0);
+});
+
+
+
+// ════════════════════════════════════════════════
 // BUSCAR TODOS OS ALUNOS (coordenador)
 // ════════════════════════════════════════════════
 app.get("/alunos/todos", (req, res) => {
     const sql = `
-        SELECT id, nome, email, serie, tipo, nivel, pontos,
+        SELECT id, nome, email, cpf, rg, telefone, serie, tipo, nivel, pontos,
                progresso, condicao, tipoEscola, nivelAutismo
         FROM usuarios
         WHERE tipo = 'aluno'
@@ -412,28 +444,37 @@ app.get("/escola/stats", (req, res) => {
         WHERE tipo IN ('professor', 'coordenador', 'apoio')
     `;
 
+    const sqlResponsaveis = `
+        SELECT COUNT(*) AS totalResponsaveis FROM usuarios
+        WHERE tipo = 'responsavel'
+    `;
+
     conexao.query(sqlAlunos, (erro, resAlunos) => {
         if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
 
         conexao.query(sqlProfessores, (erro, resProfs) => {
             if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
 
-            res.json({
-                totalAlunos: resAlunos[0].totalAlunos,
-                totalProfessores: resProfs[0].totalProfessores,
-                progressoMedio: Math.round(resAlunos[0].progressoMedio || 0),
-                condicoes: {
-                    Visual: resAlunos[0].visual,
-                    Auditiva: resAlunos[0].auditiva,
-                    Cognitiva: resAlunos[0].cognitiva,
-                    Fisica: resAlunos[0].fisica,
-                    Nenhuma: resAlunos[0].nenhuma
-                }
+            conexao.query(sqlResponsaveis, (erro, resResp) => {
+                if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+
+                res.json({
+                    totalAlunos: resAlunos[0].totalAlunos,
+                    totalProfessores: resProfs[0].totalProfessores,
+                    totalResponsaveis: resResp[0].totalResponsaveis,
+                    progressoMedio: Math.round(resAlunos[0].progressoMedio || 0),
+                    condicoes: {
+                        Visual: resAlunos[0].visual,
+                        Auditiva: resAlunos[0].auditiva,
+                        Cognitiva: resAlunos[0].cognitiva,
+                        Fisica: resAlunos[0].fisica,
+                        Nenhuma: resAlunos[0].nenhuma
+                    }
+                });
             });
         });
     });
 });
-
 // ════════════════════════════════════════════════
 // TURMAS POR EDUCADOR
 // ════════════════════════════════════════════════
@@ -894,6 +935,102 @@ app.post("/apoio/vincular", (req, res) => {
         }
     );
 });
+
+// ════════════════════════════════════════════════
+// BUSCAR TODOS OS EDUCADORES (coordenador)
+// ════════════════════════════════════════════════
+app.get("/usuarios/educadores", (req, res) => {
+    const sql = `
+        SELECT id, nome, email, cpf, rg, telefone, disciplina, tipoEscola, tipo
+        FROM usuarios
+        WHERE tipo IN ('professor', 'apoio', 'coordenador')
+        ORDER BY tipo, nome ASC
+    `;
+    conexao.query(sql, (erro, resultado) => {
+        if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+        res.json({ educadores: resultado });
+    });
+});
+
+
+
+// ════════════════════════════════════════════════
+// BUSCAR SÓ PROFESSORES (coordenador)         ← ADICIONA AQUI
+// ════════════════════════════════════════════════
+app.get("/usuarios/professores", (req, res) => {
+    const sql = `
+        SELECT id, nome, email, cpf, rg, telefone, disciplina, tipoEscola, tipo
+        FROM usuarios
+        WHERE tipo = 'professor'
+        ORDER BY nome ASC
+    `;
+    conexao.query(sql, (erro, resultado) => {
+        if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+        res.json({ professores: resultado });
+    });
+});
+
+// ════════════════════════════════════════════════
+// APAGAR EDUCADOR (coordenador)
+// ════════════════════════════════════════════════
+app.delete("/usuarios/:id", (req, res) => {
+    const { id } = req.params;
+
+    const tabelas = [
+        `DELETE FROM professor_aluno WHERE professor_id = ?`,
+        `DELETE FROM recados         WHERE professor_id = ?`,
+        `DELETE FROM tarefas         WHERE professor_id = ?`,
+        `DELETE FROM materiais       WHERE professor_id = ?`,
+        `DELETE FROM boletim         WHERE professor_id = ?`,
+        `DELETE FROM usuarios        WHERE id = ?`
+    ];
+
+    const executar = (index) => {
+        if (index >= tabelas.length) {
+            return res.json({ mensagem: "Membro apagado com sucesso." });
+        }
+        conexao.query(tabelas[index], [id], (erro) => {
+            if (erro) return res.status(500).json({ mensagem: `Erro ao apagar dados (passo ${index + 1}).` });
+            executar(index + 1);
+        });
+    };
+
+    executar(0);
+});
+
+
+// ════════════════════════════════════════════════
+// BUSCAR TODOS OS RESPONSÁVEIS (coordenador)
+// ════════════════════════════════════════════════
+app.get("/usuarios/responsaveis", (req, res) => {
+    const sql = `
+        SELECT id, nome, email, cpf, rg, telefone, tipoEscola, tipo
+        FROM usuarios
+        WHERE tipo = 'responsavel'
+        ORDER BY nome ASC
+    `;
+    conexao.query(sql, (erro, resultado) => {
+        if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+        res.json({ responsaveis: resultado });
+    });
+});
+
+// ════════════════════════════════════════════════
+// BUSCAR TODOS OS CUIDADORES/APOIO (coordenador)
+// ════════════════════════════════════════════════
+app.get("/usuarios/cuidadores", (req, res) => {
+    const sql = `
+        SELECT id, nome, email, cpf, rg, telefone, disciplina, tipoEscola, tipo
+        FROM usuarios
+        WHERE tipo = 'apoio'
+        ORDER BY nome ASC
+    `;
+    conexao.query(sql, (erro, resultado) => {
+        if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+        res.json({ cuidadores: resultado });
+    });
+});
+
 
 
 // ════════════════════════════════════════════════

@@ -14,6 +14,10 @@ import { Coordenador } from './coordenador/coordenador';
 import { TodosAlunos } from './coordenador/todos-alunos/todos-alunos';
 import { Familiar } from './responsavel/familiar/familiar';
 import { Apoio } from './apoio/apoio';
+import { TodosProfessores } from './coordenador/todos-professores/todos-professores';
+import { TodosResponsaveis } from './coordenador/todos-responsaveis/todos-responsaveis';
+import { TodosCuidadores } from './coordenador/todos-cuidadores/todos-cuidadores';
+
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -48,4 +52,14 @@ export const routes: Routes = [
   // - apoio
 
   { path: 'apoio', component: Apoio },
+
+  // - coordenador
+  { path: 'coordenador/professores', component: TodosProfessores },
+
+  // - coordenador - responsáveis
+  { path: 'coordenador/responsaveis', component: TodosResponsaveis },
+
+
+  // - coordenador - cuidadores
+  { path: 'coordenador/cuidadores', component: TodosCuidadores },
 ];
