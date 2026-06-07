@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -19,6 +19,7 @@ export class Familiar implements OnInit {
 
   usuario: any = null;
   dataAtual: string = '';
+  constructor(private ngZone: NgZone, private cdr: ChangeDetectorRef) { }
 
   get inicialNome(): string {
     return this.usuario?.nome?.[0]?.toUpperCase() ?? '?';
@@ -33,6 +34,7 @@ export class Familiar implements OnInit {
   // ═══════════════════════════════════════
 
   abaAtual: string = 'home';
+  abaConfig: string = 'sobre';
 
   setAba(aba: string): void {
     this.abaAtual = aba;
@@ -83,13 +85,27 @@ export class Familiar implements OnInit {
       const dados = await res.json();
 
       if (res.ok) {
-        this.alunos = dados;
+        for (const aluno of dados) {
+          const r = await fetch(`${this.API}/tarefas/pendentes/${aluno.id}`);
+          const d = await r.json();
+          aluno.tarefasPendentes = d.pendentes;
+
+          const r2 = await fetch(`${this.API}/tarefas/concluidas/${aluno.id}`);
+          const d2 = await r2.json();
+          aluno.tarefasConcluidas = d2.concluidas;
+        }
+
+        this.ngZone.run(() => {
+          this.alunos = [...dados];
+          this.cdr.detectChanges();
+        });
+
+        await this.carregarRecados();
       }
     } catch {
       console.error('Erro ao carregar alunos');
     }
   }
-
   // ═══════════════════════════════════════
   // DETALHE DO ALUNO (modal)
   // ═══════════════════════════════════════
@@ -131,6 +147,7 @@ export class Familiar implements OnInit {
     if (!email) {
       this.alertaAdicionar = 'Informe o e-mail do aluno.';
       return;
+
     }
 
     try {
@@ -151,9 +168,15 @@ export class Familiar implements OnInit {
       }
 
       this.alertaAdicionar = 'Aluno adicionado com sucesso!';
-      await this.carregarAlunos();
 
-      setTimeout(() => this.fecharModalAdicionar(), 1800);
+      setTimeout(async () => {
+        await this.carregarAlunos();
+        this.ngZone.run(() => {
+          this.modalAdicionarAberto = false;
+          this.abaAtual = 'alunos'; // ← muda para outra aba
+          setTimeout(() => this.abaAtual = 'home', 50); // ← volta para home (força re-render)
+        });
+      }, 1200);
 
     } catch {
       this.alertaAdicionar = 'Erro ao conectar ao servidor.';
@@ -167,23 +190,29 @@ export class Familiar implements OnInit {
   boletins: Record<number, any[] | undefined> = {};
   bimestreSelecionado: number = 1;
 
-  getBoletim(alunoId: number): any[] {       
+  getBoletim(alunoId: number): any[] {
     return this.boletins[alunoId] ?? [];
   }
 
   async carregarBoletins(): Promise<void> {
-    for (const aluno of this.alunos) {
-      try {
-        const res = await fetch(
-          `${this.API}/boletim/${aluno.id}?bimestre=${this.bimestreSelecionado}`
-        );
-        const dados = await res.json();
-        this.boletins[aluno.id] = res.ok ? dados : [];
-      } catch {
-        this.boletins[aluno.id] = [];
-      }
+  const bimestre = Number(this.bimestreSelecionado);
+  this.boletins = {}; // ← limpa o cache antes de recarregar
+  for (const aluno of this.alunos) {
+    try {
+      const res = await fetch(
+        `${this.API}/boletim/${aluno.id}?bimestre=${bimestre}`
+      );
+      const dados = await res.json();
+      this.boletins = {
+        ...this.boletins,
+        [aluno.id]: res.ok ? dados.boletim : []
+      };
+      this.cdr.detectChanges(); // ← força atualização após cada aluno
+    } catch {
+      this.boletins[aluno.id] = [];
     }
   }
+}
 
   // ═══════════════════════════════════════
   // RECADOS
@@ -211,17 +240,19 @@ export class Familiar implements OnInit {
       console.error('Erro ao carregar recados');
     }
   }
+recadoSelecionado: any = null;
 
-  async lerRecado(recado: any): Promise<void> {
-    if (recado.lido) return;
-
-    try {
-      await fetch(`${this.API}/recados/${recado.id}/lido`, { method: 'PATCH' });
-      recado.lido = true;
-    } catch {
-      console.error('Erro ao marcar recado como lido');
-    }
+lerRecado(recado: any): void {
+  this.recadoSelecionado = recado;
+  if (!recado.lido) {
+    fetch(`${this.API}/recados/${recado.id}/lido`, { method: 'PATCH' });
+    recado.lido = true;
   }
+}
+
+fecharRecado(): void {
+  this.recadoSelecionado = null;
+}
 
   // ═══════════════════════════════════════
   // BADGE DE CONDIÇÃO
@@ -232,11 +263,11 @@ export class Familiar implements OnInit {
 
     const c = condicao.toLowerCase();
     if (c.includes('autismo') || c.includes('tea')) return 'bc-autismo';
-    if (c.includes('visual'))   return 'bc-visual';
+    if (c.includes('visual')) return 'bc-visual';
     if (c.includes('auditiva')) return 'bc-auditiva';
-    if (c.includes('tdah'))     return 'bc-tdah';
+    if (c.includes('tdah')) return 'bc-tdah';
     if (c.includes('dislexia')) return 'bc-dislexia';
-    if (c.includes('down'))     return 'bc-down';
+    if (c.includes('down')) return 'bc-down';
 
     return 'bc-outra';
   }
@@ -249,6 +280,8 @@ export class Familiar implements OnInit {
     localStorage.removeItem('usuario');
     window.location.href = '/login';
   }
+
+    
 
   // ═══════════════════════════════════════
   // INIT
@@ -278,6 +311,6 @@ export class Familiar implements OnInit {
     });
 
     this.carregarAlunos();
-    this.carregarRecados();
+    
   }
 }

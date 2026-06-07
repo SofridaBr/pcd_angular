@@ -12,7 +12,8 @@ import { Materiais } from './materiais/materiais';
 import { ProfessorConfiguracoes } from './professor-configuracoes/professor-configuracoes';
 import { Coordenador } from './coordenador/coordenador';
 import { TodosAlunos } from './coordenador/todos-alunos/todos-alunos';
-import { Familiar } from './responsavel/familiar/familiar';  // ← NOVO
+import { Familiar } from './responsavel/familiar/familiar';
+import { Apoio } from './apoio/apoio';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -43,4 +44,8 @@ export const routes: Routes = [
   { path: 'home', redirectTo: 'painel', pathMatch: 'full' },
   { path: 'info', redirectTo: 'painel/informacoes', pathMatch: 'full' },
   { path: 'tarefa', redirectTo: 'painel/tarefas', pathMatch: 'full' },
+
+  // - apoio
+
+  { path: 'apoio', component: Apoio },
 ];

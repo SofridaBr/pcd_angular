@@ -703,7 +703,8 @@ app.get("/responsavel/alunos/:id", (req, res) => {
 
     const sql = `
         SELECT u.id, u.nome, u.email, u.serie, u.nivel, u.pontos,
-               u.progresso, u.condicao, u.tipoEscola, u.nivelAutismo
+               u.progresso, u.condicao, u.tipoEscola, u.nivelAutismo,
+               u.cpf, u.rg, u.telefone 
         FROM usuarios u
         INNER JOIN responsavel_aluno ra ON u.id = ra.aluno_id
         WHERE ra.responsavel_id = ? AND u.tipo = 'aluno'
@@ -793,6 +794,103 @@ app.patch("/recados/:id/lido", (req, res) => {
         (erro) => {
             if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
             res.json({ mensagem: "Recado marcado como lido." });
+        }
+    );
+});
+
+// Tarefas pendentes do aluno
+app.get("/tarefas/pendentes/:alunoId", (req, res) => {
+    const { alunoId } = req.params;
+
+    const sql = `
+        SELECT COUNT(*) AS pendentes
+        FROM tarefa_aluno ta
+        WHERE ta.aluno_id = ? AND ta.concluida = 0
+    `;
+
+    conexao.query(sql, [alunoId], (erro, resultado) => {
+        if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+        res.json({ pendentes: resultado[0].pendentes });
+    });
+});
+
+// Tarefas concluídas do aluno
+app.get("/tarefas/concluidas/:alunoId", (req, res) => {
+    const { alunoId } = req.params;
+
+    const sql = `
+        SELECT COUNT(*) AS concluidas
+        FROM tarefa_aluno ta
+        WHERE ta.aluno_id = ? AND ta.concluida = 1
+    `;
+
+    conexao.query(sql, [alunoId], (erro, resultado) => {
+        if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+        res.json({ concluidas: resultado[0].concluidas });
+    });
+});
+
+
+// ════════════════════════════════════════════════
+// APOIO
+// ════════════════════════════════════════════════
+
+// Buscar aluno vinculado ao apoio
+app.get("/apoio/aluno/:id", (req, res) => {
+    const { id } = req.params;
+
+    const sql = `
+        SELECT u.id, u.nome, u.email, u.serie, u.nivel, u.pontos,
+               u.progresso, u.condicao, u.tipoEscola, u.nivelAutismo,
+               u.cpf, u.rg, u.telefone
+        FROM usuarios u
+        INNER JOIN professor_aluno pa ON u.id = pa.aluno_id
+        WHERE pa.professor_id = ? AND u.tipo = 'aluno'
+    `;
+
+    conexao.query(sql, [id], (erro, resultado) => {
+        if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+        res.json({ alunos: resultado });
+    });
+});
+
+// Vincular aluno ao apoio pelo e-mail
+app.post("/apoio/vincular", (req, res) => {
+    console.log('Body recebido:', req.body);
+    const { apoioId, emailAluno } = req.body;
+
+    if (!apoioId || !emailAluno) {
+        return res.status(400).json({ mensagem: "Dados incompletos." });
+    }
+
+    conexao.query(
+        `SELECT id FROM usuarios WHERE email = ? AND tipo = 'aluno'`,
+        [emailAluno],
+        (erro, resultado) => {
+            if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+            if (resultado.length === 0)
+                return res.status(404).json({ mensagem: "Aluno não encontrado com esse e-mail." });
+
+            const alunoId = resultado[0].id;
+
+            conexao.query(
+                `SELECT id FROM professor_aluno WHERE professor_id = ? AND aluno_id = ?`,
+                [apoioId, alunoId],
+                (erro, resultado) => {
+                    if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+                    if (resultado.length > 0)
+                        return res.status(400).json({ mensagem: "Este aluno já está vinculado à sua conta." });
+
+                    conexao.query(
+                        `INSERT INTO professor_aluno (professor_id, aluno_id) VALUES (?, ?)`,
+                        [apoioId, alunoId],
+                        (erro) => {
+                            if (erro) return res.status(500).json({ mensagem: "Erro ao vincular aluno." });
+                            res.json({ mensagem: "Aluno vinculado com sucesso!" });
+                        }
+                    );
+                }
+            );
         }
     );
 });

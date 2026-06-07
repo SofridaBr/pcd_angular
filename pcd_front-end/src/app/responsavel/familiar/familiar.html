@@ -38,11 +38,15 @@
                 <i class="ti ti-message"></i> Recados
                 <span class="nav-badge badge-red" *ngIf="recadosNaoLidos > 0">{{ recadosNaoLidos }}</span>
             </a>
+<span class="nav-group-label">CONTA</span>
+<a class="nav-item" [class.active]="abaAtual === 'configuracoes'" (click)="setAba('configuracoes')">
+    <i class="ti ti-settings"></i> Configurações
+</a>
+<a class="nav-item nav-logout" (click)="logout()">
+    <i class="ti ti-logout"></i> Sair
+</a>
 
-            <span class="nav-group-label">CONTA</span>
-            <a class="nav-item nav-logout" (click)="logout()">
-                <i class="ti ti-logout"></i> Sair
-            </a>
+            
         </nav>
     </aside>
 
@@ -131,7 +135,7 @@
                             <th>ALUNO</th>
                             <th>SÉRIE</th>
                             <th>CONDIÇÃO</th>
-                            <th>PROGRESSO</th>
+                            <th>TAREFAS PENDENTES</th>
                             <th>BOLETIM</th>
                         </tr>
                     </thead>
@@ -150,10 +154,7 @@
                                 </span>
                             </td>
                             <td>
-                                <div class="mini-progress">
-                                    <div class="mini-progress-bar" [style.width.%]="a.progresso || 0"></div>
-                                </div>
-                                <span class="progress-pct">{{ a.progresso || 0 }}%</span>
+                                <span class="progress-pct">{{ a.tarefasPendentes ?? '—' }}</span>
                             </td>
                             <td>
                                 <button class="btn-ver-boletim" (click)="$event.stopPropagation(); verBoletimAluno(a)">
@@ -171,7 +172,7 @@
             <div class="aba-header">
                 <h2>Meus Alunos</h2>
                 <button class="btn-primary-sm" (click)="abrirModalAdicionarAluno()">
-                    <i class="ti ti-user-plus"></i> Adicionar Aluno
+                    <i class="ti ti-user-plus"></i> Adicionar Aluno/ filho
                 </button>
             </div>
 
@@ -185,22 +186,15 @@
                         </div>
                     </div>
                     <div class="aluno-card-stats">
-                        <div class="aluno-stat">
-                            <span class="aluno-stat-val">{{ a.pontos || 0 }}</span>
-                            <span class="aluno-stat-label">Pontos</span>
-                        </div>
-                        <div class="aluno-stat">
-                            <span class="aluno-stat-val">Nv. {{ a.nivel || 1 }}</span>
-                            <span class="aluno-stat-label">Nível</span>
-                        </div>
-                        <div class="aluno-stat">
-                            <span class="aluno-stat-val">{{ a.progresso || 0 }}%</span>
-                            <span class="aluno-stat-label">Progresso</span>
-                        </div>
-                    </div>
-                    <div class="aluno-card-progress">
-                        <div class="aluno-card-bar" [style.width.%]="a.progresso || 0"></div>
-                    </div>
+    <div class="aluno-stat">
+        <span class="aluno-stat-val">{{ a.tarefasConcluidas ?? 0 }}</span>
+        <span class="aluno-stat-label">Concluídas</span>
+    </div>
+    <div class="aluno-stat">
+        <span class="aluno-stat-val">{{ a.tarefasPendentes ?? 0 }}</span>
+        <span class="aluno-stat-label">Pendentes</span>
+    </div>
+</div>
                     <span class="badge-condicao" [class]="badgeCondicao(a.condicao)">
                         {{ a.condicao || 'Nenhuma' }}
                     </span>
@@ -232,35 +226,23 @@
                         <div class="prog-avatar">{{ a.nome[0] }}</div>
                         <div>
                             <p class="prog-nome">{{ a.nome }}</p>
-                            <p class="prog-desc">
-                                Nível {{ a.nivel || 1 }} · {{ a.pontos || 0 }} pontos acumulados
-                            </p>
+                           <p class="prog-desc">
+    {{ a.tarefasConcluidas ?? 0 }} concluídas · {{ a.tarefasPendentes ?? 0 }} pendentes
+</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="progresso-stats">
-                    <div class="prog-stat-card">
-                        <span class="prog-stat-val">{{ a.progresso || 0 }}%</span>
-                        <span class="prog-stat-label">Progresso geral</span>
-                    </div>
-                    <div class="prog-stat-card">
-                        <span class="prog-stat-val">{{ a.pontos || 0 }}</span>
-                        <span class="prog-stat-label">Pontos</span>
-                    </div>
-                    <div class="prog-stat-card">
-                        <span class="prog-stat-val">Nv. {{ a.nivel || 1 }}</span>
-                        <span class="prog-stat-label">Nível atual</span>
-                    </div>
-                </div>
-
-                <div class="progresso-barra-section">
-                    <p class="prog-barra-label">Progresso geral</p>
-                    <div class="prog-barra-bg">
-                        <div class="prog-barra-fill" [style.width.%]="a.progresso || 0"></div>
-                    </div>
-                    <span class="prog-barra-pct">{{ a.progresso || 0 }}%</span>
-                </div>
+    <div class="prog-stat-card">
+        <span class="prog-stat-val">{{ a.tarefasConcluidas ?? 0 }}</span>
+        <span class="prog-stat-label">Concluídas</span>
+    </div>
+    <div class="prog-stat-card">
+        <span class="prog-stat-val">{{ a.tarefasPendentes ?? 0 }}</span>
+        <span class="prog-stat-label">Pendentes</span>
+    </div>
+</div>
             </div>
         </div>
 
@@ -270,12 +252,14 @@
                 <h2>Boletim Escolar</h2>
                 <div class="bimestre-select">
                     <label>Bimestre:</label>
-                    <select [(ngModel)]="bimestreSelecionado" (change)="carregarBoletins()" name="bimestre">
-                        <option [value]="1">1º Bimestre</option>
-                        <option [value]="2">2º Bimestre</option>
-                        <option [value]="3">3º Bimestre</option>
-                        <option [value]="4">4º Bimestre</option>
-                    </select>
+                    <select [(ngModel)]="bimestreSelecionado"
+        (change)="bimestreSelecionado = +$any($event.target).value; carregarBoletins()"
+        name="bimestre">
+    <option [value]="1">1º Bimestre</option>
+    <option [value]="2">2º Bimestre</option>
+    <option [value]="3">3º Bimestre</option>
+    <option [value]="4">4º Bimestre</option>
+</select>
                 </div>
             </div>
 
@@ -324,7 +308,7 @@
         <!-- ── ABA: RECADOS ──────────────────────── -->
         <div *ngIf="abaAtual === 'recados'" class="aba-content">
             <div class="aba-header">
-                <h2>Recados dos Professores</h2>
+                <h2>Recados dos Professores e coordenadores</h2>
             </div>
 
             <div class="alunos-empty" *ngIf="recados.length === 0">
@@ -346,6 +330,88 @@
             </div>
         </div>
 
+        <!-- ── ABA: CONFIGURAÇÕES ─────────────── -->
+<div *ngIf="abaAtual === 'configuracoes'" class="aba-content">
+    <div class="config-layout">
+        <nav class="config-nav">
+            <button class="config-tab" [class.ativa]="abaConfig === 'sobre'" (click)="abaConfig = 'sobre'">
+                <i class="ti ti-info-circle"></i> Sobre
+            </button>
+            <button class="config-tab" [class.ativa]="abaConfig === 'privacidade'" (click)="abaConfig = 'privacidade'">
+                <i class="ti ti-shield"></i> Política de Privacidade
+            </button>
+            <button class="config-tab" [class.ativa]="abaConfig === 'termos'" (click)="abaConfig = 'termos'">
+                <i class="ti ti-file-text"></i> Termos de Uso
+            </button>
+            <button class="config-tab" [class.ativa]="abaConfig === 'suporte'" (click)="abaConfig = 'suporte'">
+                <i class="ti ti-help-circle"></i> Suporte
+            </button>
+        </nav>
+
+        <div class="config-body">
+            <div *ngIf="abaConfig === 'sobre'">
+                <h2>Sobre o EducaInclusiva</h2>
+                <p>O <strong>EducaInclusiva</strong> nasceu para transformar a experiência educacional, conectando alunos, professores e responsáveis em uma plataforma acessível e inclusiva.</p>
+                <h3>Benefícios para estudantes</h3>
+                <ul>
+                    <li><strong>Acesso centralizado:</strong> tarefas, boletim, recados e materiais em um só lugar.</li>
+                    <li><strong>Recursos educativos:</strong> materiais digitais e tutoriais em vídeo.</li>
+                    <li><strong>Praticidade:</strong> acompanhe seu progresso e desempenho facilmente.</li>
+                </ul>
+                <h3>Benefícios para professores</h3>
+                <ul>
+                    <li><strong>Gestão de alunos:</strong> adicione e acompanhe seus alunos.</li>
+                    <li><strong>Envio de tarefas:</strong> envie atividades diretamente para os alunos.</li>
+                    <li><strong>Comunicação:</strong> envie recados e acompanhe a leitura.</li>
+                </ul>
+            </div>
+
+            <div *ngIf="abaConfig === 'privacidade'">
+                <h2>Política de Privacidade</h2>
+                <p>Seus dados são tratados com total segurança e confidencialidade. Não compartilhamos informações pessoais com terceiros.</p>
+                <h3>Dados coletados</h3>
+                <ul>
+                    <li>Nome, e-mail e informações escolares para personalizar a experiência.</li>
+                    <li>Progresso e desempenho para gerar relatórios educacionais.</li>
+                </ul>
+                <h3>Uso dos dados</h3>
+                <ul>
+                    <li>Exclusivamente para fins educacionais dentro da plataforma.</li>
+                    <li>Nunca vendidos ou compartilhados com anunciantes.</li>
+                </ul>
+            </div>
+
+            <div *ngIf="abaConfig === 'termos'">
+                <h2>Termos de Uso</h2>
+                <p>Ao usar o EducaInclusiva, você concorda com os seguintes termos:</p>
+                <ul>
+                    <li>Usar a plataforma apenas para fins educacionais.</li>
+                    <li>Não compartilhar suas credenciais de acesso.</li>
+                    <li>Respeitar os outros usuários da plataforma.</li>
+                    <li>Não publicar conteúdo inadequado ou ofensivo.</li>
+                </ul>
+            </div>
+
+            <div *ngIf="abaConfig === 'suporte'">
+                <h2>Suporte</h2>
+                <p>Encontrou algum problema ou tem alguma dúvida? Entre em contato:</p>
+                <div class="suporte-cards">
+                    <div class="suporte-card">
+                        <i class="ti ti-mail"></i>
+                        <strong>E-mail</strong>
+                        <span>suporte&#64;educainclusiva.com</span>
+                    </div>
+                    <div class="suporte-card">
+                        <i class="ti ti-help-circle"></i>
+                        <strong>FAQ</strong>
+                        <span>Acesse as perguntas frequentes</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
     </main>
 </div>
 
@@ -359,6 +425,8 @@
             <button class="modal-close" (click)="fecharModalAdicionar()">✕</button>
         </div>
         <p class="modal-sub">Digite o e-mail do aluno para vinculá-lo à sua conta</p>
+
+
 
         <div class="modal-alert" *ngIf="alertaAdicionar"
             [class.error]="alertaAdicionar !== 'Aluno adicionado com sucesso!'"
@@ -383,6 +451,7 @@
     </div>
 </div>
 
+
 <!-- ══════════════════════════════════════════ -->
 <!-- MODAL DETALHE ALUNO                        -->
 <!-- ══════════════════════════════════════════ -->
@@ -403,27 +472,60 @@
                 <span class="detalhe-val">{{ alunoSelecionado?.condicao || 'Nenhuma' }}</span>
             </div>
             <div class="detalhe-item">
-                <span class="detalhe-label">Nível</span>
-                <span class="detalhe-val">{{ alunoSelecionado?.nivel || 1 }}</span>
+                <span class="detalhe-label">E-mail</span>
+                <span class="detalhe-val">{{ alunoSelecionado?.email || '—' }}</span>
             </div>
             <div class="detalhe-item">
-                <span class="detalhe-label">Pontos</span>
-                <span class="detalhe-val">{{ alunoSelecionado?.pontos || 0 }}</span>
+                <span class="detalhe-label">Telefone</span>
+                <span class="detalhe-val">{{ alunoSelecionado?.telefone || '—' }}</span>
+            </div>
+            <div class="detalhe-item">
+                <span class="detalhe-label">CPF</span>
+                <span class="detalhe-val">{{ alunoSelecionado?.cpf || '—' }}</span>
+            </div>
+            <div class="detalhe-item">
+                <span class="detalhe-label">RG</span>
+                <span class="detalhe-val">{{ alunoSelecionado?.rg || '—' }}</span>
             </div>
             <div class="detalhe-item">
                 <span class="detalhe-label">Tipo de Escola</span>
                 <span class="detalhe-val">{{ alunoSelecionado?.tipoEscola || '—' }}</span>
             </div>
-            <div class="detalhe-item">
-                <span class="detalhe-label">Progresso</span>
-                <span class="detalhe-val">{{ alunoSelecionado?.progresso || 0 }}%</span>
-            </div>
         </div>
 
-        <div class="prog-barra-section" style="margin-top: 16px">
-            <div class="prog-barra-bg">
-                <div class="prog-barra-fill" [style.width.%]="alunoSelecionado?.progresso || 0"></div>
+    </div>
+</div>
+
+<!-- MODAL DETALHE RECADO -->
+<div class="modal-overlay" *ngIf="recadoSelecionado">
+    <div class="modal-box modal-lg">
+        <div class="modal-header">
+            <span class="modal-title">💬 {{ recadoSelecionado?.titulo }}</span>
+            <button class="modal-close" (click)="fecharRecado()">✕</button>
+        </div>
+        <div class="detalhe-grid">
+            <div class="detalhe-item">
+                <span class="detalhe-label">Aluno</span>
+                <span class="detalhe-val">{{ recadoSelecionado?.aluno }}</span>
             </div>
+            <div class="detalhe-item">
+                <span class="detalhe-label">Professor</span>
+                <span class="detalhe-val">{{ recadoSelecionado?.professor }}</span>
+            </div>
+            <div class="detalhe-item">
+                <span class="detalhe-label">Data</span>
+                <span class="detalhe-val">{{ recadoSelecionado?.criado_em | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="detalhe-item">
+                <span class="detalhe-label">Status</span>
+                <span class="detalhe-val">{{ recadoSelecionado?.lido ? 'Lido' : 'Não lido' }}</span>
+            </div>
+        </div>
+        <div class="detalhe-item" style="margin-top: 8px;">
+            <span class="detalhe-label">Mensagem</span>
+            <span class="detalhe-val" style="font-size: 14px; line-height: 1.6;">
+                {{ recadoSelecionado?.mensagem }}
+            </span>
         </div>
     </div>
 </div>

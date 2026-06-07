@@ -212,13 +212,16 @@ export class Login {
 
       localStorage.setItem('usuario', JSON.stringify(usuario));
 
-      if (usuario.tipo === 'coordenador') {
-        window.location.href = '/coordenador';
-      } else if (usuario.tipo === 'responsavel') {
-        window.location.href = '/responsavel';  // ← ADICIONAR
-      } else {
-        window.location.href = '/professor';
-      }
+      
+if (usuario.tipo === 'coordenador') {
+  window.location.href = '/coordenador';
+} else if (usuario.tipo === 'responsavel') {
+  window.location.href = '/responsavel';
+} else if (usuario.tipo === 'apoio') {
+  window.location.href = '/apoio';
+} else {
+  window.location.href = '/professor';
+}
       
     } catch (error) {
       alert('Erro ao conectar ao servidor.');
