@@ -1,0 +1,184 @@
+<div class="app-wrapper" [class.sidebar-fechada]="!sidebarAberta">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🌟</div>
+      <span class="logo-text" *ngIf="sidebarAberta">Educa<span>Inclusiva</span></span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <p class="nav-label" *ngIf="sidebarAberta">PRINCIPAL</p>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador')">
+        <i class="ti ti-layout-dashboard"></i>
+        <span *ngIf="sidebarAberta">Home</span>
+      </a>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/alunos')">
+        <i class="ti ti-users"></i>
+        <span *ngIf="sidebarAberta">Todos os alunos</span>
+      </a>
+
+      <p class="nav-label" *ngIf="sidebarAberta">ESCOLAR</p>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/professores')">
+        <i class="ti ti-school"></i>
+        <span *ngIf="sidebarAberta">Professores</span>
+      </a>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/comunicacao')">
+        <i class="ti ti-message-2"></i>
+        <span *ngIf="sidebarAberta">Recados</span>
+      </a>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/responsaveis')">
+        <i class="ti ti-heart-handshake"></i>
+        <span *ngIf="sidebarAberta">Responsáveis</span>
+      </a>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/cuidadores')">
+        <i class="ti ti-accessible"></i>
+        <span *ngIf="sidebarAberta">Apoio & Cuidadores</span>
+      </a>
+
+      <p class="nav-label" *ngIf="sidebarAberta">SISTEMA</p>
+
+      <a class="nav-item active" (click)="navegarPara('/coordenador/configuracoes')">
+        <i class="ti ti-settings"></i>
+        <span *ngIf="sidebarAberta">Configurações</span>
+      </a>
+
+      
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-sair" (click)="sair()">
+        <i class="ti ti-logout"></i>
+        <span *ngIf="sidebarAberta">Sair</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- CONTEÚDO -->
+  <div class="content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn-toggle-sidebar" (click)="toggleSidebar()">
+          <i class="ti ti-menu-2"></i>
+        </button>
+        <h1 class="page-title">
+          <i class="ti ti-settings"></i> Configurações
+        </h1>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-user">
+          <div class="user-info">
+            <span class="user-role">Coordenação</span>
+            <span class="user-escola">Escola</span>
+          </div>
+          <div class="user-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main-content">
+      <div class="config-layout">
+
+        <!-- MENU LATERAL -->
+        <nav class="config-nav">
+          <button class="config-tab" [class.ativa]="abaAtiva === 'sobre'" (click)="abaAtiva = 'sobre'">
+            <i class="ti ti-info-circle"></i> Sobre
+          </button>
+          <button class="config-tab" [class.ativa]="abaAtiva === 'privacidade'" (click)="abaAtiva = 'privacidade'">
+            <i class="ti ti-shield"></i> Política de Privacidade
+          </button>
+          <button class="config-tab" [class.ativa]="abaAtiva === 'termos'" (click)="abaAtiva = 'termos'">
+            <i class="ti ti-file-text"></i> Termos de Uso
+          </button>
+         
+        </nav>
+
+        <!-- CONTEÚDO DA ABA -->
+        <div class="config-body">
+
+          <!-- SOBRE -->
+          <div *ngIf="abaAtiva === 'sobre'">
+            <h2>Sobre o EducaInclusiva</h2>
+            <p>O <strong>EducaInclusiva</strong> nasceu para transformar a experiência educacional, conectando alunos,
+              professores e responsáveis em uma plataforma acessível e inclusiva.</p>
+            <h3>Benefícios para estudantes</h3>
+            <ul>
+              <li><strong>Acesso centralizado:</strong> tarefas, boletim, recados e materiais em um só lugar.</li>
+              <li><strong>Recursos educativos:</strong> materiais digitais e tutoriais em vídeo.</li>
+              <li><strong>Praticidade:</strong> acompanhe seu progresso e desempenho facilmente.</li>
+            </ul>
+            <h3>Benefícios para professores</h3>
+            <ul>
+              <li><strong>Gestão de alunos:</strong> adicione e acompanhe seus alunos.</li>
+              <li><strong>Envio de tarefas:</strong> envie atividades diretamente para os alunos.</li>
+              <li><strong>Comunicação:</strong> envie recados e acompanhe a leitura.</li>
+            </ul>
+            <h3>Benefícios para coordenadores</h3>
+            <ul>
+              <li><strong>Visão geral:</strong> acompanhe todos os alunos, professores e responsáveis.</li>
+              <li><strong>Gestão pedagógica:</strong> monitore o progresso e necessidades especiais.</li>
+              <li><strong>Comunicação centralizada:</strong> receba mensagens e coordene a equipe escolar.</li>
+            </ul>
+          </div>
+
+          <!-- PRIVACIDADE -->
+          <div *ngIf="abaAtiva === 'privacidade'">
+            <h2>Política de Privacidade</h2>
+            <p>Seus dados são tratados com total segurança e confidencialidade. Não compartilhamos informações pessoais
+              com terceiros.</p>
+            <h3>Dados coletados</h3>
+            <ul>
+              <li>Nome, e-mail e informações escolares para personalizar a experiência.</li>
+              <li>Progresso e desempenho para gerar relatórios educacionais.</li>
+            </ul>
+            <h3>Uso dos dados</h3>
+            <ul>
+              <li>Exclusivamente para fins educacionais dentro da plataforma.</li>
+              <li>Nunca vendidos ou compartilhados com anunciantes.</li>
+            </ul>
+          </div>
+
+          <!-- TERMOS -->
+          <div *ngIf="abaAtiva === 'termos'">
+            <h2>Termos de Uso</h2>
+            <p>Ao usar o EducaInclusiva, você concorda com os seguintes termos:</p>
+            <ul>
+              <li>Usar a plataforma apenas para fins educacionais.</li>
+              <li>Não compartilhar suas credenciais de acesso.</li>
+              <li>Respeitar os outros usuários da plataforma.</li>
+              <li>Não publicar conteúdo inadequado ou ofensivo.</li>
+            </ul>
+          </div>
+
+          <!-- SUPORTE -->
+          <div *ngIf="abaAtiva === 'suporte'">
+            <h2>Suporte</h2>
+            <p>Encontrou algum problema ou tem alguma dúvida? Entre em contato:</p>
+            <div class="suporte-cards">
+              <div class="suporte-card">
+                <i class="ti ti-mail"></i>
+                <strong>E-mail</strong>
+                <span>suporte&#64;educainclusiva.com</span>
+              </div>
+              <div class="suporte-card">
+                <i class="ti ti-help-circle"></i>
+                <strong>FAQ</strong>
+                <span>Acesse as perguntas frequentes</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

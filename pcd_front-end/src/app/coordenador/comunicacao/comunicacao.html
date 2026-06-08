@@ -1,0 +1,154 @@
+<div class="app-wrapper">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🌟</div>
+      <span class="logo-text">Educa<span>Inclusiva</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <p class="nav-label">PRINCIPAL</p>
+      <a class="nav-item" (click)="navegarPara('/coordenador')">
+        <i class="ti ti-layout-dashboard"></i><span>Home</span>
+      </a>
+      <a class="nav-item" (click)="navegarPara('/coordenador/alunos')">
+        <i class="ti ti-users"></i><span>Todos os alunos</span>
+      </a>
+      <p class="nav-label">ESCOLAR</p>
+      <a class="nav-item" (click)="navegarPara('/coordenador/professores')">
+        <i class="ti ti-school"></i><span>Professores</span>
+      </a>
+      <a class="nav-item active" (click)="navegarPara('/coordenador/comunicacao')">
+        <i class="ti ti-message-2"></i><span>Recados</span>
+      </a>
+      <a class="nav-item" (click)="navegarPara('/coordenador/responsaveis')">
+        <i class="ti ti-heart-handshake"></i><span>Responsáveis</span>
+      </a>
+      <a class="nav-item" (click)="navegarPara('/coordenador/cuidadores')">
+        <i class="ti ti-accessible"></i><span>Apoio & Cuidadores</span>
+      </a>
+      <p class="nav-label">SISTEMA</p>
+      <a class="nav-item" (click)="navegarPara('/coordenador/configuracoes')">
+        <i class="ti ti-settings"></i><span>Configurações</span>
+      </a>
+      
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-sair" (click)="sair()">
+        <i class="ti ti-logout"></i><span>Sair</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn-voltar" (click)="voltarDashboard()">
+          <i class="ti ti-arrow-left"></i>
+        </button>
+        <div class="search-wrap">
+          <i class="ti ti-search"></i>
+          <input type="text" placeholder="Buscar recados..." class="search-input" />
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="user-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
+      </div>
+    </header>
+
+    <main class="main-content">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Comunicação</h1>
+          <p class="page-sub">{{ recadosEnviados.length }} recado(s) enviado(s)</p>
+        </div>
+        <button class="btn-novo-recado" (click)="abrirModal()">
+          <i class="ti ti-send"></i> Novo Recado
+        </button>
+      </div>
+
+      <!-- LOADING -->
+      <div class="loading-wrap" *ngIf="carregando">
+        <div class="spinner"></div>
+        <p>Carregando recados...</p>
+      </div>
+
+      <!-- VAZIO -->
+      <div class="empty-state" *ngIf="!carregando && recadosEnviados.length === 0">
+        <span class="empty-icon">📬</span>
+        <p>Nenhum recado enviado ainda</p>
+        <span>Clique em "Novo Recado" para começar!</span>
+      </div>
+
+      <!-- LISTA -->
+      <div class="recados-lista" *ngIf="!carregando && recadosEnviados.length > 0">
+        <div class="recado-card" *ngFor="let r of recadosEnviados">
+          <div class="recado-top">
+            <div class="recado-avatar">{{ getIniciais(r.aluno || 'U') }}</div>
+            <div class="recado-info">
+              <span class="recado-titulo">{{ r.titulo }}</span>
+              <span class="recado-para">Para: <strong>{{ r.aluno || 'Todos' }}</strong></span>
+            </div>
+            <div class="recado-side">
+              <span class="recado-data">{{ formatarData(r.criado_em) }}</span>
+              <span class="lido-badge" [class.lido]="r.lido">
+                {{ r.lido ? '✓ Lido' : '⏳ Não lido' }}
+              </span>
+            </div>
+          </div>
+          <p class="recado-msg">{{ r.mensagem }}</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODAL NOVO RECADO -->
+  <div class="modal-overlay" *ngIf="modalAberto" (click)="fecharModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">✉️ Novo Recado</span>
+        <button class="modal-close" (click)="fecharModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- FILTRO TIPO -->
+        <div class="tipo-tabs">
+          <button class="tipo-tab" [class.ativo]="filtroTipo === 'aluno'"
+            (click)="filtroTipo = 'aluno'; onFiltroTipoChange()">
+            <i class="ti ti-users"></i> Alunos
+          </button>
+          <button class="tipo-tab" [class.ativo]="filtroTipo === 'professor'"
+            (click)="filtroTipo = 'professor'; onFiltroTipoChange()">
+            <i class="ti ti-school"></i> Professores
+          </button>
+          <button class="tipo-tab" [class.ativo]="filtroTipo === 'responsavel'"
+            (click)="filtroTipo = 'responsavel'; onFiltroTipoChange()">
+            <i class="ti ti-heart-handshake"></i> Responsáveis
+          </button>
+        </div>
+
+        <!-- SELECT DESTINATÁRIO -->
+        <select class="modal-select" [(ngModel)]="novoRecado.destinatarioId">
+          <option [ngValue]="null">📢 Para todos</option>
+          <option *ngFor="let d of destinatarios" [ngValue]="d.id">{{ d.nome }}</option>
+        </select>
+
+        <input type="text" class="modal-input" placeholder="Título do recado *"
+          [(ngModel)]="novoRecado.titulo" />
+
+        <textarea class="modal-textarea" placeholder="Mensagem *" rows="4"
+          [(ngModel)]="novoRecado.mensagem"></textarea>
+
+        <p class="msg-feedback" *ngIf="msgFeedback" [class.erro]="erro">{{ msgFeedback }}</p>
+
+        <button class="btn-enviar" (click)="enviarRecado()" [disabled]="enviando">
+          <i class="ti ti-send"></i>
+          {{ enviando ? 'Enviando...' : 'Enviar recado' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

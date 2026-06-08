@@ -18,13 +18,13 @@
 
       <a class="nav-item active" (click)="navegarPara('/coordenador')">
         <i class="ti ti-layout-dashboard"></i>
-        <span *ngIf="sidebarAberta">Dashboard</span>
+        <span *ngIf="sidebarAberta">Home</span>
       </a>
 
       <a class="nav-item" (click)="navegarPara('/coordenador/alunos')">
         <i class="ti ti-users"></i>
         <span *ngIf="sidebarAberta">Todos os alunos</span>
-        <span class="nav-badge" *ngIf="sidebarAberta && stats.totalAlunos > 0">{{ stats.totalAlunos }}</span>
+       
       </a>
 
 
@@ -41,10 +41,8 @@
 
       <a class="nav-item" (click)="navegarPara('/coordenador/comunicacao')">
         <i class="ti ti-message-2"></i>
-        <span *ngIf="sidebarAberta">Comunicação</span>
-        <span class="nav-badge nav-badge-alert" *ngIf="sidebarAberta && mensagens.length > 0">
-          {{ mensagens.length }}
-        </span>
+        <span *ngIf="sidebarAberta">Recados</span>
+        
       </a>
 
       <a class="nav-item" (click)="navegarPara('/coordenador/responsaveis')">
@@ -65,10 +63,7 @@
         <span *ngIf="sidebarAberta">Configurações</span>
       </a>
 
-      <a class="nav-item" (click)="navegarPara('/coordenador/suporte')">
-        <i class="ti ti-help-circle"></i>
-        <span *ngIf="sidebarAberta">Suporte</span>
-      </a>
+      
     </nav>
 
     <!-- Sair -->

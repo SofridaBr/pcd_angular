@@ -17,6 +17,8 @@ import { Apoio } from './apoio/apoio';
 import { TodosProfessores } from './coordenador/todos-professores/todos-professores';
 import { TodosResponsaveis } from './coordenador/todos-responsaveis/todos-responsaveis';
 import { TodosCuidadores } from './coordenador/todos-cuidadores/todos-cuidadores';
+import { Comunicacao } from './coordenador/comunicacao/comunicacao';
+import { CoordenadorConfiguracoes } from './coordenador/coordenador-configuracoes/coordenador-configuracoes';
 
 
 export const routes: Routes = [
@@ -62,4 +64,11 @@ export const routes: Routes = [
 
   // - coordenador - cuidadores
   { path: 'coordenador/cuidadores', component: TodosCuidadores },
+
+
+  // - coordenador - comunicação
+  { path: 'coordenador/comunicacao', component: Comunicacao },
+
+  // - coordenador - configurações
+  { path: 'coordenador/configuracoes', component: CoordenadorConfiguracoes },
 ];
