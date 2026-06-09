@@ -105,6 +105,13 @@ export class Professor implements OnInit {
   msgFeedbackRecado: string = '';
   erroRecado: boolean = false;
 
+  recadosRecebidos: any[] = [];
+  abaRecados: 'enviados' | 'recebidos' = 'enviados';
+
+  get totalNaoLidos(): number {
+    return this.recadosRecebidos.filter(r => !r.lido).length;
+  }
+
   novoRecado: { alunoId: number | null; titulo: string; mensagem: string } = {
     alunoId: null, titulo: '', mensagem: '',
   };
@@ -160,6 +167,8 @@ export class Professor implements OnInit {
     this.carregarTarefasEnviadas();
     this.carregarRecadosEnviados();
     this.carregarMateriaisEnviados();
+    this.carregarRecadosRecebidos();
+
   }
 
   sair(): void {
@@ -346,6 +355,24 @@ export class Professor implements OnInit {
     });
   }
 
+
+  carregarRecadosRecebidos(): void {
+    this.http.get<any>(`${API}/recados/recebidos/professor/${this.professorId}`).subscribe({
+      next: (res) => { this.recadosRecebidos = res.recados; this.cdr.detectChanges(); },
+      error: () => console.error('Erro ao carregar recados recebidos')
+    });
+  }
+
+  marcarRecadoLido(id: number): void {
+    this.http.patch<any>(`${API}/recados/${id}/lido`, {}).subscribe({
+      next: () => {
+        const r = this.recadosRecebidos.find(x => x.id === id);
+        if (r) { r.lido = 1; this.cdr.detectChanges(); }
+      },
+      error: () => { }
+    });
+  }
+
   abrirModalRecado(): void {
     this.novoRecado = { alunoId: null, titulo: '', mensagem: '' };
     this.msgFeedbackRecado = '';
@@ -479,10 +506,13 @@ export class Professor implements OnInit {
 
   irParaRecados(): void {
     this.abaAtiva = 'recados';
+    this.abaRecados = 'enviados';
+
   }
 
   get isRecadosAtivo(): boolean {
     return this.abaAtiva === 'recados';
+    
   }
 }
 

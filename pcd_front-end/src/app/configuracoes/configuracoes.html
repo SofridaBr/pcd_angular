@@ -14,7 +14,7 @@
         <div class="avatar">{{ iniciais }}</div>
         <div class="profile-info">
             <span class="profile-name">{{ usuario?.nome?.split(' ')[0] }}</span>
-            <span class="profile-badge">{{ isProfessor ? 'Professor(a)' : 'Aluno • Nível ' + usuario?.nivel }}</span>
+            <span class="profile-badge">{{ isProfessor ? 'Professor(a)' : 'Aluno: ' + usuario?.nome }}</span>
         </div>
     </div>
     <div class="sidebar-avatar-mini" *ngIf="sidebarCollapsed">

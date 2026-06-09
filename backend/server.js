@@ -1031,6 +1031,43 @@ app.get("/usuarios/cuidadores", (req, res) => {
     });
 });
 
+// Coordenador envia recado para professor
+app.post("/recados/coordenador", (req, res) => {
+    const { remetenteId, professorId, titulo, mensagem } = req.body;
+
+    if (!remetenteId || !professorId || !titulo || !mensagem) {
+        return res.status(400).json({ mensagem: "Campos obrigatórios faltando." });
+    }
+
+    const sql = `
+        INSERT INTO recados (professor_id, destinatario_professor_id, titulo, mensagem)
+        VALUES (?, ?, ?, ?)
+    `;
+
+    conexao.query(sql, [remetenteId, professorId, titulo, mensagem], (erro, resultado) => {
+        if (erro) return res.status(500).json({ mensagem: "Erro ao enviar recado." });
+        res.json({ mensagem: "Recado enviado ao professor!", id: resultado.insertId });
+    });
+});
+
+// Professor busca recados recebidos (do coordenador)
+app.get("/recados/recebidos/professor/:professorId", (req, res) => {
+    const { professorId } = req.params;
+
+    const sql = `
+        SELECT r.id, r.titulo, r.mensagem, r.lido, r.criado_em,
+               u.nome AS remetente
+        FROM recados r
+        INNER JOIN usuarios u ON r.professor_id = u.id
+        WHERE r.destinatario_professor_id = ?
+        ORDER BY r.criado_em DESC
+    `;
+
+    conexao.query(sql, [professorId], (erro, resultado) => {
+        if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+        res.json({ recados: resultado });
+    });
+});
 
 
 // ════════════════════════════════════════════════

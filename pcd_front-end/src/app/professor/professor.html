@@ -43,7 +43,7 @@
             <p class="nav-label">COMUNICAÇÃO</p>
             <a class="nav-item" [class.active]="abaAtiva === 'recados'" (click)="abaAtiva = 'recados'">
                 <i class="ti ti-mail"></i> <span>Recados</span>
-                <span class="nav-badge" *ngIf="recadosEnviados.length > 0">{{ recadosEnviados.length }}</span>
+                <span class="nav-badge" *ngIf="totalNaoLidos > 0">{{ totalNaoLidos }}</span>
             </a>
 
             <p class="nav-label">CONTA</p>
@@ -227,11 +227,9 @@
                                     {{ aluno.condicao }}</span>
                             </div>
                             <div class="aluno-progresso">
-                                <span class="progresso-label">Progresso</span>
-                                <div class="barra-fundo">
-                                    <div class="barra-fill" [style.width.%]="aluno.progresso"></div>
-                                </div>
-                                <span class="progresso-num">{{ aluno.progresso }}%</span>
+
+
+
                                 <button class="btn-mini" (click)="abrirBoletimAluno(aluno)">📊</button>
                             </div>
                         </div>
@@ -324,22 +322,68 @@
 
             <!-- ══ ABA: RECADOS ══ -->
             <ng-container *ngIf="abaAtiva === 'recados'">
+
                 <div class="recados-header">
-                    <h2 class="section-title">Recados Enviados</h2>
+                    <h2 class="section-title">Recados</h2>
                     <button class="btn-nova-tarefa" (click)="abrirModalRecado()">✉️ Novo Recado</button>
                 </div>
-                <p class="vazio" *ngIf="recadosEnviados.length === 0">Nenhum recado enviado ainda. 📬</p>
-                <div class="recados-lista">
-                    <div class="recado-card" *ngFor="let r of recadosEnviados">
-                        <div class="recado-header">
-                            <span class="recado-titulo">{{ r.titulo }}</span>
-                            <span class="recado-destinatario">Para: <strong>{{ r.aluno }}</strong></span>
-                            <span class="recado-data">{{ formatarData(r.criado_em) }}</span>
-                        </div>
-                        <p class="recado-msg">{{ r.mensagem }}</p>
-                        <span class="lido-badge" [class.lido]="r.lido">{{ r.lido ? '✓ Lido' : '⏳ Não lido' }}</span>
-                    </div>
+
+                <!-- Sub-abas Enviados / Recebidos -->
+                <div class="inner-tabs" style="margin-bottom: 8px;">
+                    <button class="inner-tab" [class.active]="abaRecados === 'enviados'"
+                        (click)="abaRecados = 'enviados'">
+                        <i class="ti ti-send"></i> Enviados
+                        <span class="nav-badge" style="background:#1565C0;color:#fff;margin-left:4px"
+                            *ngIf="recadosEnviados.length > 0">{{ recadosEnviados.length }}</span>
+                    </button>
+                    <button class="inner-tab" [class.active]="abaRecados === 'recebidos'"
+                        (click)="abaRecados = 'recebidos'">
+                        <i class="ti ti-inbox"></i> Recebidos
+                        <span class="nav-badge" style="background:#e53935;color:#fff;margin-left:4px"
+                            *ngIf="totalNaoLidos > 0">{{ totalNaoLidos }}</span>
+                    </button>
                 </div>
+
+                <!-- ENVIADOS -->
+                <ng-container *ngIf="abaRecados === 'enviados'">
+                    <p class="vazio" *ngIf="recadosEnviados.length === 0">Nenhum recado enviado ainda. 📬</p>
+                    <div class="recados-lista">
+                        <div class="recado-card" *ngFor="let r of recadosEnviados">
+                            <div class="recado-header">
+                                <span class="recado-titulo">{{ r.titulo }}</span>
+                                <span class="recado-destinatario">Para: <strong>{{ r.aluno }}</strong></span>
+                                <span class="recado-data">{{ formatarData(r.criado_em) }}</span>
+                            </div>
+                            <p class="recado-msg">{{ r.mensagem }}</p>
+                            <span class="lido-badge" [class.lido]="r.lido">{{ r.lido ? '✓ Lido' : '⏳ Não lido' }}</span>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <!-- RECEBIDOS -->
+                <ng-container *ngIf="abaRecados === 'recebidos'">
+                    <p class="vazio" *ngIf="recadosRecebidos.length === 0">Nenhum recado recebido ainda. 📭</p>
+                    <div class="recados-lista">
+                        <div class="recado-card" *ngFor="let r of recadosRecebidos"
+                            [style.border-color]="!r.lido ? '#1565C0' : '#E3F2FD'">
+                            <div class="recado-header">
+                                <span class="recado-titulo">{{ r.titulo }}</span>
+                                <span class="recado-destinatario">De: <strong>{{ r.remetente }}</strong></span>
+                                <span class="recado-data">{{ formatarData(r.criado_em) }}</span>
+                            </div>
+                            <p class="recado-msg">{{ r.mensagem }}</p>
+                            <div
+                                style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px">
+                                <span class="lido-badge" [class.lido]="r.lido">{{ r.lido ? '✓ Lido' : '🔵 Novo'
+                                    }}</span>
+                                <button *ngIf="!r.lido" class="btn-ver" (click)="marcarRecadoLido(r.id)">
+                                    Marcar como lido
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+
             </ng-container>
 
             <!-- ══ ABA: MATERIAIS ══ -->
