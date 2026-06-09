@@ -54,6 +54,57 @@ export class Coordenador implements OnInit {
   filtroAtual: string = 'Todos';
   sidebarAberta = true;
 
+  // variáveis do modal
+  modalAberto = false;
+  alunoSelecionado: any = null;
+  boletimAluno: any[] = [];
+  carregandoBoletim = false;
+  bimestreSelecionado = 1;
+
+  get mediaGeral(): number {
+    const notas = this.boletimAluno.filter(i => i.nota !== null).map(i => parseFloat(i.nota));
+    if (notas.length === 0) return 0;
+    return notas.reduce((a, b) => a + b, 0) / notas.length;
+  }
+
+  abrirBoletim(aluno: any): void {
+    this.alunoSelecionado = aluno;
+    this.modalAberto = true;
+    this.bimestreSelecionado = 1;
+    this.carregarBoletimAluno();
+  }
+
+  fecharModal(): void {
+    this.modalAberto = false;
+    this.alunoSelecionado = null;
+    this.boletimAluno = [];
+  }
+
+  carregarBoletimAluno(): void {
+    this.carregandoBoletim = true;
+    fetch(`http://localhost:3000/boletim/${this.alunoSelecionado.id}?bimestre=${this.bimestreSelecionado}`)
+      .then(r => r.json())
+      .then(res => {
+        this.ngZone.run(() => {
+          this.boletimAluno = res.boletim || [];
+          this.carregandoBoletim = false;
+          this.cdr.detectChanges();
+        });
+      })
+      .catch(() => {
+        this.ngZone.run(() => {
+          this.boletimAluno = [];
+          this.carregandoBoletim = false;
+          this.cdr.detectChanges();
+        });
+      });
+  }
+
+  selecionarBimestre(b: number): void {
+    this.bimestreSelecionado = b;
+    this.carregarBoletimAluno();
+  }
+
   // ═══════════════════════════════════════
   // INIT
   // ═══════════════════════════════════════
@@ -240,5 +291,13 @@ export class Coordenador implements OnInit {
 
   navegarPara(rota: string): void {
     this.router.navigate([rota]);
+  }
+
+  getNoteClass(nota: any): string {
+    const n = parseFloat(nota);
+    if (isNaN(n)) return '';
+    if (n >= 7) return 'nota-boa';
+    if (n >= 5) return 'nota-media';
+    return 'nota-ruim';
   }
 }

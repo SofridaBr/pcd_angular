@@ -24,7 +24,7 @@
       <a class="nav-item" (click)="navegarPara('/coordenador/alunos')">
         <i class="ti ti-users"></i>
         <span *ngIf="sidebarAberta">Todos os alunos</span>
-       
+
       </a>
 
 
@@ -42,7 +42,7 @@
       <a class="nav-item" (click)="navegarPara('/coordenador/comunicacao')">
         <i class="ti ti-message-2"></i>
         <span *ngIf="sidebarAberta">Recados</span>
-        
+
       </a>
 
       <a class="nav-item" (click)="navegarPara('/coordenador/responsaveis')">
@@ -63,7 +63,7 @@
         <span *ngIf="sidebarAberta">Configurações</span>
       </a>
 
-      
+
     </nav>
 
     <!-- Sair -->
@@ -193,9 +193,7 @@
             <button class="filtro-btn" [class.ativo]="filtroAtual === 'Todos'" (click)="filtrarAlunos('Todos')">
               Todos ({{ alunos.length }})
             </button>
-            <button class="filtro-btn" [class.ativo]="filtroAtual === 'Ativos'" (click)="filtrarAlunos('Ativos')">
-              Ativos
-            </button>
+
 
           </div>
 
@@ -211,7 +209,8 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let aluno of alunosFiltrados">
+                <tr *ngFor="let aluno of alunosFiltrados" (click)="abrirBoletim(aluno)" style="cursor:pointer">
+
                   <td>
                     <div class="aluno-cell">
                       <div class="aluno-avatar">{{ getIniciais(aluno.nome) }}</div>
@@ -318,5 +317,62 @@
       </div>
 
     </main>
+  </div>
+
+  <!-- MODAL BOLETIM -->
+  <div class="modal-overlay" *ngIf="modalAberto" (click)="fecharModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="modal-aluno-info">
+          <div class="modal-avatar">{{ getIniciais(alunoSelecionado?.nome || '') }}</div>
+          <div>
+            <h2>{{ alunoSelecionado?.nome }}</h2>
+            <span>{{ alunoSelecionado?.serie || 'Sem série' }}</span>
+          </div>
+        </div>
+        <button class="modal-fechar" (click)="fecharModal()">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+
+      <!-- Bimestres -->
+      <div class="modal-bimestres">
+        <button *ngFor="let b of [1,2,3,4]" class="bimestre-btn" [class.ativo]="bimestreSelecionado === b"
+          (click)="selecionarBimestre(b)">
+          {{ b }}º Bimestre
+        </button>
+      </div>
+
+      <!-- Loading -->
+      <div class="modal-loading" *ngIf="carregandoBoletim">
+        <div class="spinner"></div> Carregando...
+      </div>
+
+      <!-- Notas -->
+      <div class="modal-notas" *ngIf="!carregandoBoletim">
+        <div class="nota-item" *ngFor="let item of boletimAluno">
+          <div class="nota-materia">
+            <span class="nota-emoji">📚</span>
+            <span>{{ item.materia }}</span>
+          </div>
+          <div class="nota-valor" [ngClass]="getNoteClass(item.nota)">
+            {{ item.nota !== null ? item.nota : '—' }}
+          </div>
+        </div>
+
+        <div class="empty-list" *ngIf="boletimAluno.length === 0">
+          <i class="ti ti-mood-empty"></i> Sem notas neste bimestre
+        </div>
+
+        <!-- Média -->
+        <div class="modal-media" *ngIf="boletimAluno.length > 0">
+          <span>Média Geral</span>
+          <strong [ngClass]="getNoteClass(mediaGeral)">{{ mediaGeral.toFixed(1) }}</strong>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
