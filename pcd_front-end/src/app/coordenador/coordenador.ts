@@ -131,6 +131,8 @@ export class Coordenador implements OnInit {
       year: 'numeric'
     });
 
+        
+
     this.carregarStats();
     this.carregarTurmas();
     this.carregarAlunos();
@@ -198,7 +200,7 @@ export class Coordenador implements OnInit {
 
   async carregarMensagens(): Promise<void> {
     try {
-      const res = await fetch(`http://localhost:3000/recados/professor/${this.usuario.id}`);
+      const res = await fetch(`http://localhost:3000/recados/coordenador/${this.usuario.id}`);
       const dados = await res.json();
       this.ngZone.run(() => {
         this.mensagens = (dados.recados || []).slice(0, 5);
@@ -291,6 +293,10 @@ export class Coordenador implements OnInit {
 
   navegarPara(rota: string): void {
     this.router.navigate([rota]);
+  }
+
+  irParaRecados(): void {
+    this.router.navigate(['/coordenador/comunicacao']);
   }
 
   getNoteClass(nota: any): string {

@@ -183,9 +183,7 @@
               <span class="card-dot blue-dot"></span>
               <h2 class="card-title">Alunos com PcD</h2>
             </div>
-            <button class="btn-novo">
-              <i class="ti ti-plus"></i> Novo
-            </button>
+           
           </div>
 
           <!-- Filtros -->
@@ -295,7 +293,8 @@
             </div>
 
             <div class="msgs-list" *ngIf="!carregandoMensagens">
-              <div class="msg-item" *ngFor="let msg of mensagens" [class.nao-lida]="!msg.lido">
+              <div class="msg-item" *ngFor="let msg of mensagens" [class.nao-lida]="!msg.lido" (click)="irParaRecados()"
+                style="cursor:pointer">
                 <div class="msg-avatar">{{ getIniciais(msg.aluno || 'U') }}</div>
                 <div class="msg-body">
                   <span class="msg-nome">{{ msg.aluno }}</span>

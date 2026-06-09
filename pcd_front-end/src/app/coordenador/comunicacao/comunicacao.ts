@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 })
 export class Comunicacao implements OnInit {
 
-  constructor(private router: Router, private cdr: ChangeDetectorRef) {}
+  constructor(private router: Router, private cdr: ChangeDetectorRef) { }
 
   usuario: any = null;
   carregando = true;
@@ -43,7 +43,7 @@ export class Comunicacao implements OnInit {
   async carregarRecados(): Promise<void> {
     this.carregando = true;
     try {
-      const res = await fetch(`http://localhost:3000/recados/professor/${this.usuario.id}`);
+      const res = await fetch(`http://localhost:3000/recados/coordenador/${this.usuario.id}`);
       const dados = await res.json();
       this.recadosEnviados = dados.recados || [];
     } catch {
@@ -101,17 +101,27 @@ export class Comunicacao implements OnInit {
     this.msgFeedback = '';
 
     try {
-      const body: any = {
-        professorId: this.usuario.id,
+      let url = '';
+      let body: any = {
         titulo: this.novoRecado.titulo,
         mensagem: this.novoRecado.mensagem
       };
 
-      if (this.novoRecado.destinatarioId) {
-        body.alunoId = this.novoRecado.destinatarioId;
+      if (this.filtroTipo === 'professor') {
+        // ✅ Rota específica do coordenador → professor
+        url = 'http://localhost:3000/recados/coordenador';
+        body.remetenteId = this.usuario.id;
+        body.professorId = this.novoRecado.destinatarioId; // null = todos (backend não suporta "todos" aqui ainda)
+      } else {
+        // ✅ Rota padrão → aluno ou responsável (via aluno_id)
+        url = 'http://localhost:3000/recados';
+        body.professorId = this.usuario.id; // coordenador age como remetente
+        if (this.novoRecado.destinatarioId) {
+          body.alunoId = this.novoRecado.destinatarioId;
+        }
       }
 
-      const res = await fetch('http://localhost:3000/recados', {
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)

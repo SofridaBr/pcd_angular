@@ -1069,6 +1069,27 @@ app.get("/recados/recebidos/professor/:professorId", (req, res) => {
     });
 });
 
+// Buscar TODOS os recados enviados pelo coordenador
+app.get("/recados/coordenador/:id", (req, res) => {
+    const { id } = req.params;
+
+    const sql = `
+        SELECT 
+            r.id, r.titulo, r.mensagem, r.lido, r.criado_em,
+            COALESCE(al.nome, pr.nome, '📢 Todos') AS aluno
+        FROM recados r
+        LEFT JOIN usuarios al ON r.aluno_id = al.id
+        LEFT JOIN usuarios pr ON r.destinatario_professor_id = pr.id
+        WHERE r.professor_id = ?
+        ORDER BY r.criado_em DESC
+    `;
+
+    conexao.query(sql, [id], (erro, resultado) => {
+        if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+        res.json({ recados: resultado });
+    });
+});
+
 
 // ════════════════════════════════════════════════
 // SERVIDOR

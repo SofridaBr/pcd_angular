@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './src/app/auth-guard';
 import { Login } from './login/login';
 import { Home } from './home/home';
 import { Informacoes } from './informacoes/informacoes';
@@ -20,55 +21,44 @@ import { TodosCuidadores } from './coordenador/todos-cuidadores/todos-cuidadores
 import { Comunicacao } from './coordenador/comunicacao/comunicacao';
 import { CoordenadorConfiguracoes } from './coordenador/coordenador-configuracoes/coordenador-configuracoes';
 
-
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: Login },
 
   // ── ALUNO ──────────────────────────────
-  { path: 'painel', component: Home },
-  { path: 'painel/informacoes', component: Informacoes },
-  { path: 'painel/tarefas', component: Tarefa },
-  { path: 'painel/boletim', component: Boletim },
-  { path: 'painel/recados', component: Recados },
-  { path: 'painel/tutoriais', component: Tutoriais },
-  { path: 'painel/configuracoes', component: Configuracoes },
-  { path: 'painel/materiais', component: Materiais },
+  { path: 'painel',                    component: Home,           canActivate: [authGuard] },
+  { path: 'painel/informacoes',        component: Informacoes,    canActivate: [authGuard] },
+  { path: 'painel/tarefas',            component: Tarefa,         canActivate: [authGuard] },
+  { path: 'painel/boletim',            component: Boletim,        canActivate: [authGuard] },
+  { path: 'painel/recados',            component: Recados,        canActivate: [authGuard] },
+  { path: 'painel/tutoriais',          component: Tutoriais,      canActivate: [authGuard] },
+  { path: 'painel/configuracoes',      component: Configuracoes,  canActivate: [authGuard] },
+  { path: 'painel/materiais',          component: Materiais,      canActivate: [authGuard] },
 
-  // ── PROFESSOR / APOIO ──────────────────
-  { path: 'professor', component: Professor },
-  { path: 'professor/configuracoes', component: ProfessorConfiguracoes },
+  // ── PROFESSOR ──────────────────────────
+  { path: 'professor',                 component: Professor,             canActivate: [authGuard] },
+  { path: 'professor/configuracoes',   component: ProfessorConfiguracoes, canActivate: [authGuard] },
 
   // ── COORDENADOR ────────────────────────
-  { path: 'coordenador', component: Coordenador },
-  { path: 'coordenador/alunos', component: TodosAlunos },
+  { path: 'coordenador',               component: Coordenador,              canActivate: [authGuard] },
+  { path: 'coordenador/alunos',        component: TodosAlunos,              canActivate: [authGuard] },
+  { path: 'coordenador/professores',   component: TodosProfessores,         canActivate: [authGuard] },
+  { path: 'coordenador/responsaveis',  component: TodosResponsaveis,        canActivate: [authGuard] },
+  { path: 'coordenador/cuidadores',    component: TodosCuidadores,          canActivate: [authGuard] },
+  { path: 'coordenador/comunicacao',   component: Comunicacao,              canActivate: [authGuard] },
+  { path: 'coordenador/configuracoes', component: CoordenadorConfiguracoes, canActivate: [authGuard] },
 
   // ── RESPONSÁVEL ────────────────────────
-  { path: 'responsavel', component: Familiar },  // ← NOVO
+  { path: 'responsavel',               component: Familiar, canActivate: [authGuard] },
+
+  // ── APOIO ──────────────────────────────
+  { path: 'apoio',                     component: Apoio,    canActivate: [authGuard] },
 
   // ── ALIASES ────────────────────────────
-  { path: 'home', redirectTo: 'painel', pathMatch: 'full' },
-  { path: 'info', redirectTo: 'painel/informacoes', pathMatch: 'full' },
-  { path: 'tarefa', redirectTo: 'painel/tarefas', pathMatch: 'full' },
+  { path: 'home',   redirectTo: 'painel',             pathMatch: 'full' },
+  { path: 'info',   redirectTo: 'painel/informacoes', pathMatch: 'full' },
+  { path: 'tarefa', redirectTo: 'painel/tarefas',     pathMatch: 'full' },
 
-  // - apoio
-
-  { path: 'apoio', component: Apoio },
-
-  // - coordenador
-  { path: 'coordenador/professores', component: TodosProfessores },
-
-  // - coordenador - responsáveis
-  { path: 'coordenador/responsaveis', component: TodosResponsaveis },
-
-
-  // - coordenador - cuidadores
-  { path: 'coordenador/cuidadores', component: TodosCuidadores },
-
-
-  // - coordenador - comunicação
-  { path: 'coordenador/comunicacao', component: Comunicacao },
-
-  // - coordenador - configurações
-  { path: 'coordenador/configuracoes', component: CoordenadorConfiguracoes },
+  // ── QUALQUER ROTA INVÁLIDA ─────────────
+  { path: '**', redirectTo: 'login' }
 ];
