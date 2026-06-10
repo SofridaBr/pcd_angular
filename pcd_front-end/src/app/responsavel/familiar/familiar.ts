@@ -195,24 +195,24 @@ export class Familiar implements OnInit {
   }
 
   async carregarBoletins(): Promise<void> {
-  const bimestre = Number(this.bimestreSelecionado);
-  this.boletins = {}; // ← limpa o cache antes de recarregar
-  for (const aluno of this.alunos) {
-    try {
-      const res = await fetch(
-        `${this.API}/boletim/${aluno.id}?bimestre=${bimestre}`
-      );
-      const dados = await res.json();
-      this.boletins = {
-        ...this.boletins,
-        [aluno.id]: res.ok ? dados.boletim : []
-      };
-      this.cdr.detectChanges(); // ← força atualização após cada aluno
-    } catch {
-      this.boletins[aluno.id] = [];
+    const bimestre = Number(this.bimestreSelecionado);
+    this.boletins = {}; // ← limpa o cache antes de recarregar
+    for (const aluno of this.alunos) {
+      try {
+        const res = await fetch(
+          `${this.API}/boletim/${aluno.id}?bimestre=${bimestre}`
+        );
+        const dados = await res.json();
+        this.boletins = {
+          ...this.boletins,
+          [aluno.id]: res.ok ? dados.boletim : []
+        };
+        this.cdr.detectChanges(); // ← força atualização após cada aluno
+      } catch {
+        this.boletins[aluno.id] = [];
+      }
     }
   }
-}
 
   // ═══════════════════════════════════════
   // RECADOS
@@ -230,7 +230,7 @@ export class Familiar implements OnInit {
 
       if (!ids) return;
 
-      const res = await fetch(`${this.API}/recados/responsavel?alunos=${ids}`);
+      const res = await fetch(`${this.API}/recados/responsavel?alunos=${ids}&usuarioId=${this.usuario.id}`);
       const dados = await res.json();
 
       if (res.ok) {
@@ -240,19 +240,23 @@ export class Familiar implements OnInit {
       console.error('Erro ao carregar recados');
     }
   }
-recadoSelecionado: any = null;
+  recadoSelecionado: any = null;
 
-lerRecado(recado: any): void {
-  this.recadoSelecionado = recado;
-  if (!recado.lido) {
-    fetch(`${this.API}/recados/${recado.id}/lido`, { method: 'PATCH' });
-    recado.lido = true;
+  lerRecado(recado: any): void {
+    this.recadoSelecionado = recado;
+    if (!recado.lido) {
+      fetch(`${this.API}/recados/${recado.id}/lido`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuarioId: this.usuario.id })
+      });
+      recado.lido = true;
+    }
   }
-}
 
-fecharRecado(): void {
-  this.recadoSelecionado = null;
-}
+  fecharRecado(): void {
+    this.recadoSelecionado = null;
+  }
 
   // ═══════════════════════════════════════
   // BADGE DE CONDIÇÃO
@@ -281,7 +285,7 @@ fecharRecado(): void {
     window.location.href = '/login';
   }
 
-    
+
 
   // ═══════════════════════════════════════
   // INIT
@@ -311,6 +315,6 @@ fecharRecado(): void {
     });
 
     this.carregarAlunos();
-    
+
   }
 }

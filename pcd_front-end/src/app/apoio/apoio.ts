@@ -14,7 +14,7 @@ export class Apoio implements OnInit {
 
   private readonly API = 'http://localhost:3000';
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(private cdr: ChangeDetectorRef) { }
 
   usuario: any = null;
   dataAtual: string = '';
@@ -155,9 +155,14 @@ export class Apoio implements OnInit {
   async carregarRecados(): Promise<void> {
     if (!this.aluno) return;
     try {
-      const res = await fetch(`${this.API}/recados/responsavel?alunos=${this.aluno.id}`);
+      const res = await fetch(
+        `${this.API}/recados/responsavel?alunos=${this.aluno.id}&usuarioId=${this.usuario.id}`
+      );
       const dados = await res.json();
-      if (res.ok) this.recados = dados;
+      if (res.ok) {
+        this.recados = dados;
+        this.cdr.markForCheck();
+      }
     } catch {
       console.error('Erro ao carregar recados');
     }
@@ -166,7 +171,11 @@ export class Apoio implements OnInit {
   async lerRecado(recado: any): Promise<void> {
     if (recado.lido) return;
     try {
-      await fetch(`${this.API}/recados/${recado.id}/lido`, { method: 'PATCH' });
+      await fetch(`${this.API}/recados/${recado.id}/lido`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuarioId: this.usuario.id })
+      });
       recado.lido = true;
     } catch {
       console.error('Erro ao marcar recado como lido');

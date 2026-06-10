@@ -7,6 +7,14 @@
       <span class="logo-text">Educa<span>Inclusiva</span></span>
     </div>
 
+    <div class="sidebar-profile">
+      <div class="sidebar-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
+      <div class="profile-info">
+        <span class="profile-name">{{ usuario?.nome }}</span>
+        <span class="profile-sub">Coordenador(a)</span>
+      </div>
+    </div>
+
     <nav class="sidebar-nav">
       <p class="nav-label">PRINCIPAL</p>
       <a class="nav-item" (click)="navegarPara('/coordenador')">
@@ -16,7 +24,6 @@
         <i class="ti ti-users"></i><span>Todos os alunos</span>
         <span class="nav-badge">{{ alunos.length }}</span>
       </a>
-
       <p class="nav-label">ESCOLAR</p>
       <a class="nav-item" (click)="navegarPara('/coordenador/professores')">
         <i class="ti ti-school"></i><span>Professores</span>
@@ -27,24 +34,20 @@
       <a class="nav-item" (click)="navegarPara('/coordenador/responsaveis')">
         <i class="ti ti-heart-handshake"></i><span>Responsáveis</span>
       </a>
-
       <a class="nav-item" (click)="navegarPara('/coordenador/cuidadores')">
-        <i class="ti ti-accessible"></i>
-        <span>Apoio & Cuidadores</span>
+        <i class="ti ti-accessible"></i><span>Apoio & Cuidadores</span>
       </a>
-
       <p class="nav-label">SISTEMA</p>
       <a class="nav-item" (click)="navegarPara('/coordenador/configuracoes')">
         <i class="ti ti-settings"></i><span>Configurações</span>
       </a>
-      
+      <!-- SAIR AQUI -->
+      <a class="nav-item sair" (click)="sair()">
+        <i class="ti ti-logout"></i><span>Sair</span>
+      </a>
     </nav>
 
-    <div class="sidebar-footer">
-      <button class="btn-sair" (click)="sair()">
-        <i class="ti ti-logout"></i><span>Sair</span>
-      </button>
-    </div>
+    
   </aside>
 
   <!-- ══════════ CONTEÚDO ══════════ -->

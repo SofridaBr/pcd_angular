@@ -5,6 +5,14 @@
       <div class="logo-icon">🌟</div>
       <span class="logo-text">Educa<span>Inclusiva</span></span>
     </div>
+
+    <div class="sidebar-profile">
+      <div class="sidebar-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
+      <div class="profile-info">
+        <span class="profile-name">{{ usuario?.nome }}</span>
+        <span class="profile-sub">Coordenador(a)</span>
+      </div>
+    </div>
     <nav class="sidebar-nav">
       <p class="nav-label">PRINCIPAL</p>
       <a class="nav-item" (click)="navegarPara('/coordenador')">
@@ -30,13 +38,11 @@
       <a class="nav-item" (click)="navegarPara('/coordenador/configuracoes')">
         <i class="ti ti-settings"></i><span>Configurações</span>
       </a>
-      
-    </nav>
-    <div class="sidebar-footer">
-      <button class="btn-sair" (click)="sair()">
+      <a class="nav-item sair" (click)="sair()">
         <i class="ti ti-logout"></i><span>Sair</span>
-      </button>
-    </div>
+      </a>
+    </nav>
+    
   </aside>
 
   <div class="content">
@@ -135,11 +141,9 @@
           <option *ngFor="let d of destinatarios" [ngValue]="d.id">{{ d.nome }}</option>
         </select>
 
-        <input type="text" class="modal-input" placeholder="Título do recado *"
-          [(ngModel)]="novoRecado.titulo" />
+        <input type="text" class="modal-input" placeholder="Título do recado *" [(ngModel)]="novoRecado.titulo" />
 
-        <textarea class="modal-textarea" placeholder="Mensagem *" rows="4"
-          [(ngModel)]="novoRecado.mensagem"></textarea>
+        <textarea class="modal-textarea" placeholder="Mensagem *" rows="4" [(ngModel)]="novoRecado.mensagem"></textarea>
 
         <p class="msg-feedback" *ngIf="msgFeedback" [class.erro]="erro">{{ msgFeedback }}</p>
 

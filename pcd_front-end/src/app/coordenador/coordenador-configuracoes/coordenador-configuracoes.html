@@ -7,57 +7,54 @@
       <span class="logo-text" *ngIf="sidebarAberta">Educa<span>Inclusiva</span></span>
     </div>
 
+    <div class="sidebar-profile" *ngIf="sidebarAberta">
+      <div class="sidebar-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
+      <div class="profile-info">
+        <span class="profile-name">{{ usuario?.nome }}</span>
+        <span class="profile-sub">Coordenador(a)</span>
+      </div>
+    </div>
+
     <nav class="sidebar-nav">
       <p class="nav-label" *ngIf="sidebarAberta">PRINCIPAL</p>
-
       <a class="nav-item" (click)="navegarPara('/coordenador')">
         <i class="ti ti-layout-dashboard"></i>
         <span *ngIf="sidebarAberta">Home</span>
       </a>
-
       <a class="nav-item" (click)="navegarPara('/coordenador/alunos')">
         <i class="ti ti-users"></i>
         <span *ngIf="sidebarAberta">Todos os alunos</span>
       </a>
-
       <p class="nav-label" *ngIf="sidebarAberta">ESCOLAR</p>
-
       <a class="nav-item" (click)="navegarPara('/coordenador/professores')">
         <i class="ti ti-school"></i>
         <span *ngIf="sidebarAberta">Professores</span>
       </a>
-
       <a class="nav-item" (click)="navegarPara('/coordenador/comunicacao')">
         <i class="ti ti-message-2"></i>
         <span *ngIf="sidebarAberta">Recados</span>
       </a>
-
       <a class="nav-item" (click)="navegarPara('/coordenador/responsaveis')">
         <i class="ti ti-heart-handshake"></i>
         <span *ngIf="sidebarAberta">Responsáveis</span>
       </a>
-
       <a class="nav-item" (click)="navegarPara('/coordenador/cuidadores')">
         <i class="ti ti-accessible"></i>
         <span *ngIf="sidebarAberta">Apoio & Cuidadores</span>
       </a>
-
       <p class="nav-label" *ngIf="sidebarAberta">SISTEMA</p>
-
       <a class="nav-item active" (click)="navegarPara('/coordenador/configuracoes')">
         <i class="ti ti-settings"></i>
         <span *ngIf="sidebarAberta">Configurações</span>
       </a>
-
-      
-    </nav>
-
-    <div class="sidebar-footer">
-      <button class="btn-sair" (click)="sair()">
+      <!-- SAIR AQUI -->
+      <a class="nav-item sair" (click)="sair()">
         <i class="ti ti-logout"></i>
         <span *ngIf="sidebarAberta">Sair</span>
-      </button>
-    </div>
+      </a>
+    </nav>
+
+    
   </aside>
 
   <!-- CONTEÚDO -->
@@ -99,7 +96,7 @@
           <button class="config-tab" [class.ativa]="abaAtiva === 'termos'" (click)="abaAtiva = 'termos'">
             <i class="ti ti-file-text"></i> Termos de Uso
           </button>
-         
+
         </nav>
 
         <!-- CONTEÚDO DA ABA -->
