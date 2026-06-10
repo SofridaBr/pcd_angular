@@ -1,7 +1,11 @@
 :host {
-    display: block;
+    display: flex;
+    flex-direction: column;
     width: 100%;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+    background: #1565C0;
+    font-family: 'Nunito', sans-serif;
 }
 
 * {
@@ -10,13 +14,11 @@
     padding: 0;
 }
 
-body,
-:host {
+body {
     font-family: 'Nunito', sans-serif;
     background: #1565C0;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    overflow: hidden;
 }
 
 // ─────────────────────────────────────────
@@ -24,87 +26,201 @@ body,
 // ─────────────────────────────────────────
 
 @keyframes fadeSlideDown {
-    from { opacity: 0; transform: translateY(-18px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes fadeSlideRight {
-    from { opacity: 0; transform: translateX(-28px); }
-    to   { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(-28px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.92); }
-    to   { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 @keyframes float {
-    0%, 100% { transform: translateY(0px) scale(1); }
-    50%       { transform: translateY(-22px) scale(1.04); }
+
+    0%,
+    100% {
+        transform: translateY(0px) scale(1);
+    }
+
+    50% {
+        transform: translateY(-22px) scale(1.04);
+    }
 }
 
 @keyframes orbDrift {
-    0%   { transform: translate(0, 0) scale(1); }
-    33%  { transform: translate(18px, -30px) scale(1.06); }
-    66%  { transform: translate(-12px, 14px) scale(0.96); }
-    100% { transform: translate(0, 0) scale(1); }
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(18px, -30px) scale(1.06);
+    }
+
+    66% {
+        transform: translate(-12px, 14px) scale(0.96);
+    }
+
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
 }
 
 @keyframes shimmer {
-    0%   { background-position: -200% center; }
-    100% { background-position: 200% center; }
+    0% {
+        background-position: -200% center;
+    }
+
+    100% {
+        background-position: 200% center;
+    }
 }
 
 @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 214, 0, 0.35); }
-    50%       { box-shadow: 0 0 0 10px rgba(255, 214, 0, 0); }
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 214, 0, 0.35);
+    }
+
+    50% {
+        box-shadow: 0 0 0 10px rgba(255, 214, 0, 0);
+    }
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes slideInModal {
-    from { opacity: 0; transform: scale(0.88) translateY(32px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
+    from {
+        opacity: 0;
+        transform: scale(0.88) translateY(32px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 @keyframes tabIndicator {
-    from { opacity: 0; transform: scaleX(0); }
-    to   { opacity: 1; transform: scaleX(1); }
+    from {
+        opacity: 0;
+        transform: scaleX(0);
+    }
+
+    to {
+        opacity: 1;
+        transform: scaleX(1);
+    }
 }
 
 @keyframes inputGlow {
-    from { box-shadow: 0 0 0 0 rgba(21, 101, 192, 0.3); }
-    to   { box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.12); }
+    from {
+        box-shadow: 0 0 0 0 rgba(21, 101, 192, 0.3);
+    }
+
+    to {
+        box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.12);
+    }
 }
 
 @keyframes featEntrance {
-    from { opacity: 0; transform: translateX(-20px); }
-    to   { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 @keyframes logoEntrance {
-    from { opacity: 0; transform: translateX(-20px) scale(0.85); }
-    to   { opacity: 1; transform: translateX(0) scale(1); }
+    from {
+        opacity: 0;
+        transform: translateX(-20px) scale(0.85);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
 }
 
 @keyframes bounceIn {
-    0%   { transform: scale(0.7); opacity: 0; }
-    60%  { transform: scale(1.08); opacity: 1; }
-    80%  { transform: scale(0.96); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(0.7);
+        opacity: 0;
+    }
+
+    60% {
+        transform: scale(1.08);
+        opacity: 1;
+    }
+
+    80% {
+        transform: scale(0.96);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 // ─────────────────────────────────────────
@@ -305,7 +421,8 @@ body,
 .main {
     display: flex;
     flex: 1;
-    min-height: calc(100vh - 75px);
+    height: calc(100vh - 75px);
+    overflow: hidden;
 }
 
 // ─────────────────────────────────────────
@@ -401,9 +518,17 @@ body,
     animation: featEntrance 0.55s ease both;
     transition: transform 0.25s ease;
 
-    &:nth-child(1) { animation-delay: 0.5s; }
-    &:nth-child(2) { animation-delay: 0.65s; }
-    &:nth-child(3) { animation-delay: 0.8s; }
+    &:nth-child(1) {
+        animation-delay: 0.5s;
+    }
+
+    &:nth-child(2) {
+        animation-delay: 0.65s;
+    }
+
+    &:nth-child(3) {
+        animation-delay: 0.8s;
+    }
 
     &:hover {
         transform: translateX(6px);
@@ -427,9 +552,17 @@ body,
     }
 }
 
-.ic-red   { background: #E53935; }
-.ic-green { background: #2E7D32; }
-.ic-purple{ background: #6A1B9A; }
+.ic-red {
+    background: #E53935;
+}
+
+.ic-green {
+    background: #2E7D32;
+}
+
+.ic-purple {
+    background: #6A1B9A;
+}
 
 .feat-text {
     display: flex;
@@ -463,6 +596,7 @@ body,
     overflow-y: auto;
     animation: fadeSlideUp 0.55s 0.1s ease both;
     box-shadow: -8px 0 40px rgba(0, 0, 0, 0.12);
+    height: 100%; // ← adiciona isso
 }
 
 // ─────────────────────────────────────────
@@ -527,7 +661,9 @@ body,
         background: rgba(21, 101, 192, 0.08);
     }
 
-    i { font-size: 18px; }
+    i {
+        font-size: 18px;
+    }
 }
 
 // ─────────────────────────────────────────
@@ -568,7 +704,9 @@ body,
     align-items: center;
     gap: 6px;
 
-    i { font-size: 30px; }
+    i {
+        font-size: 30px;
+    }
 }
 
 .input-wrap {
@@ -669,17 +807,69 @@ body,
     }
 }
 
-.chip-red    { background: #FFEBEE; color: #C62828; border-color: #EF9A9A; }
-.chip-green  { background: #E8F5E9; color: #1B5E20; border-color: #A5D6A7; }
-.chip-purple { background: #F3E5F5; color: #4A148C; border-color: #CE93D8; }
-.chip-brown  { background: #EFEBE9; color: #3E2723; border-color: #BCAAA4; }
-.chip-pink   { background: #EFEBE9; color: #e349c7; border-color: #de73bc; }
+.chip-red {
+    background: #FFEBEE;
+    color: #C62828;
+    border-color: #EF9A9A;
+}
 
-.chip-red.sel    { background: #E53935; color: #fff; border-color: #E53935; box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3); }
-.chip-green.sel  { background: #2E7D32; color: #fff; border-color: #2E7D32; box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3); }
-.chip-purple.sel { background: #6A1B9A; color: #fff; border-color: #6A1B9A; box-shadow: 0 4px 12px rgba(106, 27, 154, 0.3); }
-.chip-brown.sel  { background: #5D4037; color: #fff; border-color: #5D4037; }
-.chip-pink.sel   { background: #e349c7; color: #fff; border-color: #de73bc; box-shadow: 0 4px 12px rgba(227, 73, 199, 0.3); }
+.chip-green {
+    background: #E8F5E9;
+    color: #1B5E20;
+    border-color: #A5D6A7;
+}
+
+.chip-purple {
+    background: #F3E5F5;
+    color: #4A148C;
+    border-color: #CE93D8;
+}
+
+.chip-brown {
+    background: #EFEBE9;
+    color: #3E2723;
+    border-color: #BCAAA4;
+}
+
+.chip-pink {
+    background: #EFEBE9;
+    color: #e349c7;
+    border-color: #de73bc;
+}
+
+.chip-red.sel {
+    background: #E53935;
+    color: #fff;
+    border-color: #E53935;
+    box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
+}
+
+.chip-green.sel {
+    background: #2E7D32;
+    color: #fff;
+    border-color: #2E7D32;
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+}
+
+.chip-purple.sel {
+    background: #6A1B9A;
+    color: #fff;
+    border-color: #6A1B9A;
+    box-shadow: 0 4px 12px rgba(106, 27, 154, 0.3);
+}
+
+.chip-brown.sel {
+    background: #5D4037;
+    color: #fff;
+    border-color: #5D4037;
+}
+
+.chip-pink.sel {
+    background: #e349c7;
+    color: #fff;
+    border-color: #de73bc;
+    box-shadow: 0 4px 12px rgba(227, 73, 199, 0.3);
+}
 
 // ─────────────────────────────────────────
 // BOTÕES
@@ -710,7 +900,7 @@ body,
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
         opacity: 0;
         transition: opacity 0.3s;
     }
@@ -723,7 +913,7 @@ body,
         left: -100%;
         width: 60%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
         transition: left 0.4s ease;
     }
 
@@ -732,8 +922,13 @@ body,
         transform: translateY(-2px);
         box-shadow: 0 8px 24px rgba(21, 101, 192, 0.38);
 
-        &::before { opacity: 1; }
-        &::after  { left: 140%; }
+        &::before {
+            opacity: 1;
+        }
+
+        &::after {
+            left: 140%;
+        }
     }
 
     &:active {
@@ -741,7 +936,9 @@ body,
         box-shadow: none;
     }
 
-    i { font-size: 20px; }
+    i {
+        font-size: 20px;
+    }
 }
 
 .divider {
@@ -827,7 +1024,7 @@ body,
     padding: 32px;
     width: 100%;
     max-width: 500px;
-    box-shadow: 0 24px 60px rgba(13, 71, 161, 0.22), 0 4px 16px rgba(0,0,0,0.1);
+    box-shadow: 0 24px 60px rgba(13, 71, 161, 0.22), 0 4px 16px rgba(0, 0, 0, 0.1);
     max-height: 90vh;
     overflow-y: auto;
     animation: slideInModal 0.35s cubic-bezier(0.34, 1.38, 0.64, 1) both;
@@ -926,4 +1123,13 @@ body,
     .modal-box {
         max-width: 90%;
     }
+}
+
+.particles-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
 }

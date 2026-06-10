@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../service/api';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-login',
@@ -14,9 +15,63 @@ import { Api } from '../service/api';
   styleUrl: './login.scss'
 })
 
-export class Login {
+export class Login implements OnInit {
 
   constructor(private api: Api) { }
+
+ 
+
+  ngOnInit(): void {
+    this.initParticles();
+  }
+
+  initParticles(): void {
+    const canvas = document.querySelector('.particles-canvas') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d')!;
+    let W = canvas.offsetWidth;
+    let H = canvas.offsetHeight;
+    canvas.width = W;
+    canvas.height = H;
+
+    window.addEventListener('resize', () => {
+      W = canvas.offsetWidth;
+      H = canvas.offsetHeight;
+      canvas.width = W;
+      canvas.height = H;
+    });
+
+    const NUM = 55;
+    const particles = Array.from({ length: NUM }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 3 + 1,
+      dx: (Math.random() - 0.5) * 0.5,
+      dy: (Math.random() - 0.5) * 0.5,
+      alpha: Math.random() * 0.5 + 0.2,
+      color: Math.random() > 0.8 ? '#FFD600' : '#90CAF9'
+    }));
+
+    const draw = () => {
+      ctx.clearRect(0, 0, W, H);
+      for (const p of particles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha;
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < 0 || p.x > W) p.dx *= -1;
+        if (p.y < 0 || p.y > H) p.dy *= -1;
+      }
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(draw);
+    };
+
+    draw();
+  }
 
   // ═══════════════════════════════════════
   // TABS
@@ -212,17 +267,17 @@ export class Login {
 
       localStorage.setItem('usuario', JSON.stringify(usuario));
 
-      
-if (usuario.tipo === 'coordenador') {
-  window.location.href = '/coordenador';
-} else if (usuario.tipo === 'responsavel') {
-  window.location.href = '/responsavel';
-} else if (usuario.tipo === 'apoio') {
-  window.location.href = '/apoio';
-} else {
-  window.location.href = '/professor';
-}
-      
+
+      if (usuario.tipo === 'coordenador') {
+        window.location.href = '/coordenador';
+      } else if (usuario.tipo === 'responsavel') {
+        window.location.href = '/responsavel';
+      } else if (usuario.tipo === 'apoio') {
+        window.location.href = '/apoio';
+      } else {
+        window.location.href = '/professor';
+      }
+
     } catch (error) {
       alert('Erro ao conectar ao servidor.');
     }
