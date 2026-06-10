@@ -666,17 +666,22 @@ app.get("/recados/professor/:professorId", (req, res) => {
 });
 
 // Marcar recado como lido
-app.post("/recados/ler/:id", (req, res) => {
+// ════════════════════════════════════════════════
+// MARCAR RE CADO COMO LIDO (Corrigido para bater com o Angular)
+// ════════════════════════════════════════════════
+app.patch("/recados/:id/lido", (req, res) => {
+    const { id } = req.params;
+
     conexao.query(
         `UPDATE recados SET lido = 1 WHERE id = ?`,
-        [req.params.id],
-        (erro) => {
+        [id],
+        (erro, resultado) => {
             if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+            if (resultado.affectedRows === 0) return res.status(404).json({ mensagem: "Recado não encontrado." });
             res.json({ mensagem: "Recado marcado como lido." });
         }
     );
 });
-
 // ════════════════════════════════════════════════
 // MATERIAIS
 // ════════════════════════════════════════════════
@@ -720,7 +725,9 @@ app.get("/materiais/aluno/:alunoId", (req, res) => {
     });
 });
 
-// Buscar materiais do professor
+// ════════════════════════════════════════════════
+// BUSCAR MATERIAIS DO PROFESSOR (SQL Corrigido)
+// ════════════════════════════════════════════════
 app.get("/materiais/professor/:professorId", (req, res) => {
     const { professorId } = req.params;
     const sql = `
@@ -729,7 +736,7 @@ app.get("/materiais/professor/:professorId", (req, res) => {
         FROM materiais m
         LEFT JOIN material_aluno ma ON m.id = ma.material_id
         WHERE m.professor_id = ?
-        GROUP BY m.id
+        GROUP BY m.id, m.titulo, m.descricao, m.tipo, m.url, m.banner, m.materia, m.data_criacao
         ORDER BY m.data_criacao DESC
     `;
     conexao.query(sql, [professorId], (erro, resultado) => {
