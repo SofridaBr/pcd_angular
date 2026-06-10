@@ -835,15 +835,16 @@ app.get("/recados/responsavel", (req, res) => {
 });
 
 // Marcar recado como lido (PATCH)
+// Marcar recado como lido (PATCH)
 app.patch("/recados/:id/lido", (req, res) => {
-    const { usuarioId } = req.body; // ← receber quem está lendo
+    const { usuarioId } = req.body;
 
     if (!usuarioId) return res.status(400).json({ mensagem: "usuarioId é obrigatório." });
 
     const sql = `
-    INSERT IGNORE INTO recado_leituras (recado_id, usuario_id)
-    VALUES (?, ?)
-  `;
+        INSERT IGNORE INTO recado_leituras (recado_id, usuario_id)
+        VALUES (?, ?)
+    `;
 
     conexao.query(sql, [req.params.id, usuarioId], (erro) => {
         if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });

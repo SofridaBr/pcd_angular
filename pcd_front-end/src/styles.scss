@@ -1,6 +1,19 @@
-html, body {
+html,
+body {
   height: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
   margin: 0;
   padding: 0;
+}
+
+body {
+  overflow-y: auto;
+}
+
+i.ti {
+  color: inherit;
+}
+
+.sc-icon i.ti {
+  color: #fff !important;
 }

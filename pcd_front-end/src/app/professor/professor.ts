@@ -5,6 +5,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 
+
 const API = 'http://localhost:3000';
 
 const MATERIAS = [
@@ -364,10 +365,12 @@ export class Professor implements OnInit {
   }
 
   marcarRecadoLido(id: number): void {
-    this.http.patch<any>(`${API}/recados/${id}/lido`, {}).subscribe({
+    this.http.patch<any>(`${API}/recados/${id}/lido`, { usuarioId: this.professorId }).subscribe({
       next: () => {
-        const r = this.recadosRecebidos.find(x => x.id === id);
-        if (r) { r.lido = 1; this.cdr.detectChanges(); }
+        this.recadosRecebidos = this.recadosRecebidos.map(r =>
+          r.id === id ? { ...r, lido: true } : r
+        );
+        this.cdr.detectChanges();
       },
       error: () => { }
     });
@@ -512,7 +515,7 @@ export class Professor implements OnInit {
 
   get isRecadosAtivo(): boolean {
     return this.abaAtiva === 'recados';
-    
+
   }
 }
 
