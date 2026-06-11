@@ -18,30 +18,29 @@
 
         <nav class="sidebar-nav">
             <p class="nav-label">PRINCIPAL</p>
-            <a class="nav-item" [class.active]="abaAtiva === 'alunos'" (click)="abaAtiva = 'alunos'">
+            <a class="nav-item" [class.active]="abaAtiva === 'alunos'" (click)="trocarAba('alunos')">
                 <i class="ti ti-home"></i> <span>Home</span>
             </a>
-            <a class="nav-item" [class.active]="abaAtiva === 'alunos'" (click)="abaAtiva = 'alunos'">
+            <a class="nav-item" [class.active]="abaAtiva === 'alunos'" (click)="trocarAba('alunos')">
                 <i class="ti ti-users"></i> <span>Meus Alunos</span>
             </a>
-            <a class="nav-item" [class.active]="abaAtiva === 'boletim'" (click)="abaAtiva = 'boletim'">
+            <a class="nav-item" [class.active]="abaAtiva === 'boletim'" (click)="trocarAba('boletim')">
                 <i class="ti ti-clipboard-list"></i> <span>Boletim</span>
             </a>
 
             <p class="nav-label">ATIVIDADES</p>
-            <a class="nav-item" [class.active]="abaAtiva === 'tarefas'" (click)="abaAtiva = 'tarefas'">
+            <a class="nav-item" [class.active]="abaAtiva === 'tarefas'" (click)="trocarAba('tarefas')">
                 <i class="ti ti-circle-plus"></i> <span>Nova Atividade</span>
                 <span class="nav-badge" *ngIf="tarefasEnviadas.length > 0">{{ tarefasEnviadas.length }}</span>
             </a>
 
             <p class="nav-label">APRENDIZADO</p>
-            <a class="nav-item" [class.active]="abaAtiva === 'materiais'" (click)="abaAtiva = 'materiais'">
+            <a class="nav-item" [class.active]="abaAtiva === 'materiais'" (click)="trocarAba('materiais')">
                 <i class="ti ti-books"></i> <span>Materiais</span>
             </a>
 
-
             <p class="nav-label">COMUNICAÇÃO</p>
-            <a class="nav-item" [class.active]="abaAtiva === 'recados'" (click)="abaAtiva = 'recados'">
+            <a class="nav-item" [class.active]="abaAtiva === 'recados'" (click)="trocarAba('recados')">
                 <i class="ti ti-mail"></i> <span>Recados</span>
                 <span class="nav-badge" *ngIf="totalNaoLidos > 0">{{ totalNaoLidos }}</span>
             </a>
@@ -79,7 +78,7 @@
         </header>
 
         <!-- MAIN -->
-        <main class="main-content">
+        <main class="main-content" [class.animating]="animating">
 
             <!-- ══ ABA: HOME / ALUNOS ══ -->
             <ng-container *ngIf="abaAtiva === 'alunos'">
@@ -165,7 +164,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr *ngFor="let a of alunosFiltradosVisao">
+                                <tr *ngFor="let a of alunosFiltradosVisao; let i = index"
+                                    [style.animation-delay]="getCardDelay(i)"
+                                    style="animation: cardEntrance 0.4s ease both;">
                                     <td class="td-aluno">
                                         <div class="avatar-xs">{{ a.nome[0] }}</div>
                                         <div>
@@ -200,8 +201,8 @@
                                 {{ carregandoAdd ? 'Adicionando...' : '+ Adicionar' }}
                             </button>
                         </div>
-                        <p class="msg-feedback" *ngIf="msgFeedbackAluno" [class.erro]="erroAluno">{{ msgFeedbackAluno }}
-                        </p>
+                        <p class="msg-feedback" *ngIf="msgFeedbackAluno" [class.erro]="erroAluno">{{
+                            msgFeedbackAluno }}</p>
                     </div>
 
                     <div class="filtro-serie-bar">
@@ -211,11 +212,13 @@
                             (click)="serieFiltro = s">{{ s }}</button>
                     </div>
 
-                    <h3 class="section-title">{{ serieFiltro || 'Todos os alunos' }} ({{ alunosFiltrados.length }})</h3>
+                    <h3 class="section-title">{{ serieFiltro || 'Todos os alunos' }} ({{
+                        alunosFiltrados.length }})</h3>
                     <p class="vazio" *ngIf="alunosFiltrados.length === 0">Nenhum aluno encontrado.</p>
 
                     <div class="alunos-grid">
-                        <div class="aluno-card" *ngFor="let aluno of alunosFiltrados">
+                        <div class="aluno-card" *ngFor="let aluno of alunosFiltrados; let i = index"
+                            [style.animation-delay]="getCardDelay(i)">
                             <div class="aluno-avatar">{{ aluno.nome[0] }}</div>
                             <div class="aluno-info">
                                 <strong>{{ aluno.nome }}</strong>
@@ -227,9 +230,6 @@
                                     {{ aluno.condicao }}</span>
                             </div>
                             <div class="aluno-progresso">
-
-
-
                                 <button class="btn-mini" (click)="abrirBoletimAluno(aluno)">📊</button>
                             </div>
                         </div>
@@ -246,7 +246,8 @@
                 </div>
                 <p class="vazio" *ngIf="tarefasEnviadas.length === 0">Nenhuma tarefa enviada ainda. 📝</p>
                 <div class="tarefas-grid">
-                    <div class="tarefa-card" *ngFor="let tarefa of tarefasEnviadas">
+                    <div class="tarefa-card" *ngFor="let tarefa of tarefasEnviadas; let i = index"
+                        [style.animation-delay]="getCardDelay(i)">
                         <img *ngIf="tarefa.banner" class="tarefa-banner" [src]="tarefa.banner" alt="Banner" />
                         <div class="tarefa-body">
                             <span class="tarefa-materia">{{ tarefa.materia }}</span>
@@ -280,8 +281,8 @@
                 <div class="aluno-select-box" *ngIf="!alunoBoletimSelecionado">
                     <p class="select-hint">Selecione um aluno para lançar as notas:</p>
                     <div class="alunos-grid">
-                        <div class="aluno-card selectable" *ngFor="let aluno of alunos"
-                            (click)="abrirBoletimAluno(aluno)">
+                        <div class="aluno-card selectable" *ngFor="let aluno of alunos; let i = index"
+                            [style.animation-delay]="getCardDelay(i)" (click)="abrirBoletimAluno(aluno)">
                             <div class="aluno-avatar">{{ aluno.nome[0] }}</div>
                             <div class="aluno-info">
                                 <strong>{{ aluno.nome }}</strong>
@@ -301,9 +302,10 @@
                         <button class="btn-secondary-sm" (click)="alunoBoletimSelecionado = null">← Voltar</button>
                     </div>
                     <div class="materias-grid">
-                        <div class="materia-row" *ngFor="let item of notasBoletim">
-                            <div class="materia-nome"><span class="materia-emoji">{{ getMateriaEmoji(item.materia)
-                                    }}</span>{{ item.materia }}</div>
+                        <div class="materia-row" *ngFor="let item of notasBoletim; let i = index"
+                            [style.animation-delay]="getCardDelay(i)">
+                            <div class="materia-nome"><span class="materia-emoji">{{
+                                    getMateriaEmoji(item.materia) }}</span>{{ item.materia }}</div>
                             <div class="nota-input-wrap">
                                 <input type="number" class="nota-input"
                                     [class.nota-boa]="item.nota != null && item.nota >= 7"
@@ -311,12 +313,14 @@
                                     [class.nota-ruim]="item.nota !== null && item.nota < 5" placeholder="—"
                                     [(ngModel)]="item.nota" (blur)="salvarNota(item)" />
                             </div>
-                            <div class="nota-status" *ngIf="item.salvo"><span class="salvo-ok">✓ Salvo</span></div>
+                            <div class="nota-status" *ngIf="item.salvo"><span class="salvo-ok">✓ Salvo</span>
+                            </div>
                         </div>
                     </div>
-                    <p class="boletim-hint">💡 Notas salvas automaticamente ao sair do campo. Intervalo: 0 a 10.</p>
-                    <p class="msg-feedback" *ngIf="msgFeedbackBoletim" [class.erro]="erroBoletim">{{ msgFeedbackBoletim
-                        }}</p>
+                    <p class="boletim-hint">💡 Notas salvas automaticamente ao sair do campo. Intervalo: 0 a
+                        10.</p>
+                    <p class="msg-feedback" *ngIf="msgFeedbackBoletim" [class.erro]="erroBoletim">{{
+                        msgFeedbackBoletim }}</p>
                 </div>
             </ng-container>
 
@@ -348,23 +352,27 @@
                 <ng-container *ngIf="abaRecados === 'enviados'">
                     <p class="vazio" *ngIf="recadosEnviados.length === 0">Nenhum recado enviado ainda. 📬</p>
                     <div class="recados-lista">
-                        <div class="recado-card" *ngFor="let r of recadosEnviados">
+                        <div class="recado-card" *ngFor="let r of recadosEnviados; let i = index"
+                            [style.animation-delay]="getCardDelay(i)">
                             <div class="recado-header">
                                 <span class="recado-titulo">{{ r.titulo }}</span>
                                 <span class="recado-destinatario">Para: <strong>{{ r.aluno }}</strong></span>
                                 <span class="recado-data">{{ formatarData(r.criado_em) }}</span>
                             </div>
                             <p class="recado-msg">{{ r.mensagem }}</p>
-                            <span class="lido-badge" [class.lido]="r.lido">{{ r.lido ? '✓ Lido' : '⏳ Não lido' }}</span>
+                            <span class="lido-badge" [class.lido]="r.lido">{{ r.lido ? '✓ Lido' : '⏳ Não
+                                lido' }}</span>
                         </div>
                     </div>
                 </ng-container>
 
                 <!-- RECEBIDOS -->
                 <ng-container *ngIf="abaRecados === 'recebidos'">
-                    <p class="vazio" *ngIf="recadosRecebidos.length === 0">Nenhum recado recebido ainda. 📭</p>
+                    <p class="vazio" *ngIf="recadosRecebidos.length === 0">Nenhum recado recebido ainda.
+                        📭</p>
                     <div class="recados-lista">
-                        <div class="recado-card" *ngFor="let r of recadosRecebidos"
+                        <div class="recado-card" *ngFor="let r of recadosRecebidos; let i = index"
+                            [style.animation-delay]="getCardDelay(i)"
                             [style.border-color]="!r.lido ? '#1565C0' : '#E3F2FD'">
                             <div class="recado-header">
                                 <span class="recado-titulo">{{ r.titulo }}</span>
@@ -374,8 +382,8 @@
                             <p class="recado-msg">{{ r.mensagem }}</p>
                             <div
                                 style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px">
-                                <span class="lido-badge" [class.lido]="r.lido">{{ r.lido ? '✓ Lido' : '🔵 Novo'
-                                    }}</span>
+                                <span class="lido-badge" [class.lido]="r.lido">{{ r.lido ? '✓ Lido' : '🔵
+                                    Novo' }}</span>
                                 <button *ngIf="!r.lido" class="btn-ver" (click)="marcarRecadoLido(r.id)">
                                     Marcar como lido
                                 </button>
@@ -392,13 +400,16 @@
                     <h2 class="section-title">Materiais publicados ({{ materiaisEnviados.length }})</h2>
                     <button class="btn-nova-tarefa" (click)="abrirModalMaterial()">📚 Novo Material</button>
                 </div>
-                <p class="vazio" *ngIf="materiaisEnviados.length === 0">Nenhum material publicado ainda. 📚</p>
+                <p class="vazio" *ngIf="materiaisEnviados.length === 0">Nenhum material publicado ainda.
+                    📚</p>
                 <div class="tarefas-grid">
-                    <div class="tarefa-card" *ngFor="let m of materiaisEnviados">
+                    <div class="tarefa-card" *ngFor="let m of materiaisEnviados; let i = index"
+                        [style.animation-delay]="getCardDelay(i)">
                         <img *ngIf="m.banner && isValidUrl(m.banner)" class="tarefa-banner" [src]="m.banner"
                             alt="Banner" />
                         <div class="tarefa-body">
-                            <span class="tarefa-materia">{{ m.materia || 'Geral' }} • {{ getTipoLabel(m.tipo) }}</span>
+                            <span class="tarefa-materia">{{ m.materia || 'Geral' }} • {{ getTipoLabel(m.tipo)
+                                }}</span>
                             <h3>{{ m.titulo }}</h3>
                             <p>{{ m.descricao }}</p>
                             <div class="tarefa-stats"><span>👥 {{ m.totalAlunos }} alunos</span></div>
@@ -412,7 +423,7 @@
     </div>
 </div>
 
-<!-- MODAIS (mantidos sem alteração) -->
+<!-- MODAIS -->
 <div class="modal-overlay" *ngIf="modalTarefaAberto">
     <div class="modal-box">
         <div class="modal-header">
@@ -451,7 +462,8 @@
                             [checked]="alunosSelecionados.includes(aluno.id)" />
                         <span class="aluno-avatar-sm">{{ aluno.nome[0] }}</span>
                         <span>{{ aluno.nome }}</span>
-                        <span class="chip-serie-xs" *ngIf="aluno.serie">{{ abreviarSerie(aluno.serie) }}</span>
+                        <span class="chip-serie-xs" *ngIf="aluno.serie">{{ abreviarSerie(aluno.serie)
+                            }}</span>
                     </label>
                 </div>
                 <p class="vazio" *ngIf="alunos.length === 0">Você não tem alunos cadastrados ainda.</p>
@@ -459,7 +471,8 @@
                     {{ todosSelecionados ? 'Desmarcar todos' : 'Selecionar todos' }}
                 </button>
             </div>
-            <p class="msg-feedback" *ngIf="msgFeedbackTarefa" [class.erro]="erroTarefa">{{ msgFeedbackTarefa }}</p>
+            <p class="msg-feedback" *ngIf="msgFeedbackTarefa" [class.erro]="erroTarefa">{{
+                msgFeedbackTarefa }}</p>
             <button class="btn-publicar" (click)="criarTarefa()" [disabled]="carregandoTarefa">
                 {{ carregandoTarefa ? 'Enviando...' : '🚀 Publicar tarefa' }}
             </button>
@@ -482,7 +495,8 @@
             </div>
             <input type="text" placeholder="Título do recado *" [(ngModel)]="novoRecado.titulo" />
             <textarea rows="5" placeholder="Mensagem *" [(ngModel)]="novoRecado.mensagem"></textarea>
-            <p class="msg-feedback" *ngIf="msgFeedbackRecado" [class.erro]="erroRecado">{{ msgFeedbackRecado }}</p>
+            <p class="msg-feedback" *ngIf="msgFeedbackRecado" [class.erro]="erroRecado">{{
+                msgFeedbackRecado }}</p>
             <button class="btn-publicar" (click)="enviarRecado()" [disabled]="carregandoRecado">
                 {{ carregandoRecado ? 'Enviando...' : '📤 Enviar recado' }}
             </button>
@@ -538,7 +552,8 @@
                             [checked]="alunosMaterialSelecionados.includes(aluno.id)" />
                         <span class="aluno-avatar-sm">{{ aluno.nome[0] }}</span>
                         <span>{{ aluno.nome }}</span>
-                        <span class="chip-serie-xs" *ngIf="aluno.serie">{{ abreviarSerie(aluno.serie) }}</span>
+                        <span class="chip-serie-xs" *ngIf="aluno.serie">{{ abreviarSerie(aluno.serie)
+                            }}</span>
                     </label>
                 </div>
                 <p class="vazio" *ngIf="alunos.length === 0">Você não tem alunos cadastrados ainda.</p>
@@ -546,8 +561,8 @@
                     {{ todosMaterialSelecionados ? 'Desmarcar todos' : 'Selecionar todos' }}
                 </button>
             </div>
-            <p class="msg-feedback" *ngIf="msgFeedbackMaterial" [class.erro]="erroMaterial">{{ msgFeedbackMaterial }}
-            </p>
+            <p class="msg-feedback" *ngIf="msgFeedbackMaterial" [class.erro]="erroMaterial">{{
+                msgFeedbackMaterial }}</p>
             <button class="btn-publicar" (click)="publicarMaterial()" [disabled]="carregandoMaterial">
                 {{ carregandoMaterial ? 'Publicando...' : '📤 Publicar material' }}
             </button>

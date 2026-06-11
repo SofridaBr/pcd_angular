@@ -2,9 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-
 
 const API = 'http://localhost:3000';
 
@@ -37,6 +35,7 @@ export class Professor implements OnInit {
   nomeProfessor: string = '';
   dataHoje: string = '';
   iniciais: string = '';
+  animating: boolean = true;
 
   abaAtiva: 'alunos' | 'tarefas' | 'boletim' | 'recados' | 'materiais' = 'alunos';
   innerTab: 'visao' | 'alunos' = 'visao';
@@ -169,7 +168,6 @@ export class Professor implements OnInit {
     this.carregarRecadosEnviados();
     this.carregarMateriaisEnviados();
     this.carregarRecadosRecebidos();
-
   }
 
   sair(): void {
@@ -280,7 +278,7 @@ export class Professor implements OnInit {
         this.erroTarefa = false;
         this.carregarTarefasEnviadas();
         this.cdr.detectChanges();
-        setTimeout(() => { this.fecharModalTarefa(); this.abaAtiva = 'tarefas'; }, 1500);
+        setTimeout(() => { this.fecharModalTarefa(); this.trocarAba('tarefas'); }, 1500);
       },
       error: (err) => {
         this.msgFeedbackTarefa = '❌ ' + (err.error?.mensagem || 'Erro ao criar tarefa.');
@@ -293,7 +291,7 @@ export class Professor implements OnInit {
 
   abrirBoletimAluno(aluno: any): void {
     this.alunoBoletimSelecionado = aluno;
-    this.abaAtiva = 'boletim';
+    this.trocarAba('boletim');
     this.cdr.detectChanges();
     this.carregarNotasAluno();
   }
@@ -355,7 +353,6 @@ export class Professor implements OnInit {
       error: () => console.error('Erro ao carregar recados')
     });
   }
-
 
   carregarRecadosRecebidos(): void {
     this.http.get<any>(`${API}/recados/recebidos/professor/${this.professorId}`).subscribe({
@@ -476,7 +473,7 @@ export class Professor implements OnInit {
         this.erroMaterial = false;
         this.carregarMateriaisEnviados();
         this.cdr.detectChanges();
-        setTimeout(() => { this.fecharModalMaterial(); this.abaAtiva = 'materiais'; }, 1500);
+        setTimeout(() => { this.fecharModalMaterial(); this.trocarAba('materiais'); }, 1500);
       },
       error: (err) => {
         this.msgFeedbackMaterial = '❌ ' + (err.error?.mensagem || 'Erro ao publicar.');
@@ -507,15 +504,26 @@ export class Professor implements OnInit {
     });
   }
 
-  irParaRecados(): void {
-    this.abaAtiva = 'recados';
-    this.abaRecados = 'enviados';
+  getCardDelay(index: number): string {
+    return `${index * 0.07}s`;
+  }
 
+  irParaRecados(): void {
+    this.trocarAba('recados');
+    this.abaRecados = 'enviados';
   }
 
   get isRecadosAtivo(): boolean {
     return this.abaAtiva === 'recados';
-
   }
-}
 
+  trocarAba(aba: typeof this.abaAtiva): void {
+    this.animating = false;
+    setTimeout(() => {
+      this.abaAtiva = aba;
+      this.animating = true;
+      this.cdr.detectChanges();
+    }, 10);
+  }
+
+}

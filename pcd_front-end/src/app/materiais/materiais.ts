@@ -14,6 +14,8 @@ const API = 'http://localhost:3000';
   styleUrl: './materiais.scss'
 })
 export class Materiais implements OnInit {
+  totalTarefas = 0;
+  totalRecados = 0;
 
   usuario: any = null;
   iniciais = '';
@@ -27,13 +29,13 @@ export class Materiais implements OnInit {
 
   get materiaisFiltrados(): any[] {
     return this.materiais.filter(m => {
-      const okTipo    = !this.filtroTipo    || m.tipo === this.filtroTipo;
+      const okTipo = !this.filtroTipo || m.tipo === this.filtroTipo;
       const okMateria = !this.filtroMateria || m.materia === this.filtroMateria;
       return okTipo && okMateria;
     });
   }
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
@@ -45,14 +47,37 @@ export class Materiais implements OnInit {
       : partes[0]?.[0] || '?').toUpperCase();
 
     const agora = new Date();
-    const dias  = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
-    const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const dias = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     this.dataAtual = `${dias[agora.getDay()]}, ${agora.getDate()} de ${meses[agora.getMonth()]} de ${agora.getFullYear()}`;
 
     this.carregarMateriais();
   }
 
+  carregarTotalTarefas(): void {
+    this.http.get<any>(`${API}/tarefas/aluno/${this.usuario.id}`).subscribe({
+      next: (res) => {
+        this.totalTarefas = (res.tarefas || []).filter((t: any) => t.concluida === 0 || t.concluida === false).length;
+        this.cdr.detectChanges();
+      },
+      error: () => { }
+    });
+  }
+
+  carregarTotalRecados(): void {
+    this.http.get<any>(`${API}/recados/aluno/${this.usuario.id}`).subscribe({
+      next: (res) => {
+        this.totalRecados = (res.recados || []).filter((r: any) => r.lido === 0 || r.lido === false).length;
+        this.cdr.detectChanges();
+      },
+      error: () => { }
+    });
+  }
+
+
   carregarMateriais(): void {
+    this.carregarTotalTarefas();
+    this.carregarTotalRecados();
     this.carregando = true;
     this.cdr.detectChanges();
     this.http.get<any>(`${API}/materiais/aluno/${this.usuario.id}`).subscribe({

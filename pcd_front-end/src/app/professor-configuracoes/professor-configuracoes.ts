@@ -17,11 +17,12 @@ export class ProfessorConfiguracoes implements OnInit {
   sidebarCollapsed = false;
   dataHoje: string = '';
   totalNaoLidos = 0;
+  animating: boolean = true;
 
   // 2. Injetado o cd no construtor
   constructor(
     private router: Router,
-    private cd: ChangeDetectorRef 
+    private cd: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -38,22 +39,22 @@ export class ProfessorConfiguracoes implements OnInit {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
 
-    this.carregarNaoLidos(); 
+    this.carregarNaoLidos();
   }
 
   carregarNaoLidos(): void {
     const professorId = this.usuario?.id;
     if (!professorId) return;
-  
+
     setTimeout(() => {
       fetch(`http://localhost:3000/recados/recebidos/professor/${professorId}`)
         .then(r => r.json())
         .then(data => {
           const recados = data.recados ?? [];
           this.totalNaoLidos = recados.filter((r: any) => r.lido === 0).length;
-          
+
           // 3. ADICIONADO AQUI: Avisa o Angular para atualizar o HTML na mesma hora!
-          this.cd.detectChanges(); 
+          this.cd.detectChanges();
         })
         .catch(() => {
           this.totalNaoLidos = 0;
@@ -70,5 +71,15 @@ export class ProfessorConfiguracoes implements OnInit {
     localStorage.removeItem('usuario');
     sessionStorage.removeItem('usuario');
     this.router.navigate(['/login']);
+  }
+
+
+  trocarAba(aba: typeof this.abaAtiva): void {
+    this.animating = false;
+    setTimeout(() => {
+      this.abaAtiva = aba;
+      this.animating = true;
+      this.cd.detectChanges();
+    }, 10);
   }
 }

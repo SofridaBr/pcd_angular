@@ -50,6 +50,7 @@
     <a class="nav-item" routerLink="/painel/recados" routerLinkActive="active">
       <i class="ti ti-mail"></i>
       <span *ngIf="!sidebarCollapsed">Recados</span>
+      <span class="badge" *ngIf="totalRecadosNaoLidos > 0 && !sidebarCollapsed">{{ totalRecadosNaoLidos }}</span>
     </a>
 
     <p class="nav-label" *ngIf="!sidebarCollapsed">APRENDIZADO</p>

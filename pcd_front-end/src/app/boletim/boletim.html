@@ -29,7 +29,9 @@
             <i class="ti ti-user-circle"></i><span *ngIf="!sidebarCollapsed">Informações</span>
         </a>
         <a class="nav-item" routerLink="/painel/tarefas" routerLinkActive="active">
-            <i class="ti ti-clipboard-list"></i><span *ngIf="!sidebarCollapsed">Tarefas</span>
+            <i class="ti ti-clipboard-list"></i>
+            <span *ngIf="!sidebarCollapsed">Tarefas</span>
+            <span class="badge" *ngIf="totalTarefas > 0 && !sidebarCollapsed">{{ totalTarefas }}</span>
         </a>
         <a class="nav-item" routerLink="/painel/boletim" routerLinkActive="active">
             <i class="ti ti-chart-bar"></i><span *ngIf="!sidebarCollapsed">Boletim</span>
@@ -47,7 +49,7 @@
         <a class="nav-item" routerLink="/painel/tutoriais" routerLinkActive="active">
             <i class="ti ti-video"></i><span *ngIf="!sidebarCollapsed">Tutoriais</span>
         </a>
-        
+
         <p class="nav-label" *ngIf="!sidebarCollapsed">CONTA</p>
 
         <a class="nav-item" routerLink="/painel/configuracoes" routerLinkActive="active">

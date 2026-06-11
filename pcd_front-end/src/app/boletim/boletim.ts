@@ -6,14 +6,14 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 const API = 'http://localhost:3000';
 
 const MATERIA_EMOJIS: Record<string, string> = {
-  'Português':       '📖',
-  'Matemática':      '🔢',
-  'História':        '🏛️',
-  'Geografia':       '🌍',
-  'Ciências':        '🔬',
-  'Inglês':          '🌐',
+  'Português': '📖',
+  'Matemática': '🔢',
+  'História': '🏛️',
+  'Geografia': '🌍',
+  'Ciências': '🔬',
+  'Inglês': '🌐',
   'Educação Física': '⚽',
-  'Artes':           '🎨',
+  'Artes': '🎨',
 };
 
 @Component({
@@ -29,7 +29,7 @@ export class Boletim implements OnInit {
   iniciais: string = '';
   sidebarCollapsed: boolean = false;
   totalNaoLidos: number = 0;
-
+  totalTarefas: number = 0;
   bimestreSelecionado: number = 1;
   boletim: any[] = [];
   carregando: boolean = true;
@@ -40,7 +40,7 @@ export class Boletim implements OnInit {
     return notas.reduce((a, b) => a + b, 0) / notas.length;
   }
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
@@ -55,6 +55,7 @@ export class Boletim implements OnInit {
 
     this.carregarBoletim();
     this.carregarTotalRecadosNaoLidos();
+    this.carregarTotalTarefas();
   }
 
   carregarBoletim(): void {
@@ -80,7 +81,18 @@ export class Boletim implements OnInit {
         this.totalNaoLidos = (res.recados || []).filter((r: any) => r.lido === 0 || r.lido === false).length;
         this.cdr.detectChanges();
       },
-      error: () => {}
+      error: () => { }
+    });
+  }
+
+  carregarTotalTarefas(): void {
+    this.http.get<any>(`${API}/tarefas/aluno/${this.usuario.id}`).subscribe({
+      next: (res) => {
+        const pendentes = (res.tarefas || []).filter((t: any) => t.concluida === 0 || t.concluida === false);
+        this.totalTarefas = pendentes.length;
+        this.cdr.detectChanges();
+      },
+      error: () => { }
     });
   }
 

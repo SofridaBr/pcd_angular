@@ -19,12 +19,13 @@ export class Recados implements OnInit {
   sidebarCollapsed: boolean = false;
   recados: any[] = [];
   carregando: boolean = true;
+  totalTarefas: number = 0;
 
   get totalNaoLidos(): number {
     return this.recados.filter(r => r.lido === 0 || r.lido === false).length;
   }
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
@@ -37,7 +38,19 @@ export class Recados implements OnInit {
     this.carregarRecados();
   }
 
+  carregarTotalTarefas(): void {
+    this.http.get<any>(`${API}/tarefas/aluno/${this.usuario.id}`).subscribe({
+      next: (res) => {
+        const pendentes = (res.tarefas || []).filter((t: any) => t.concluida === 0 || t.concluida === false);
+        this.totalTarefas = pendentes.length;
+        this.cdr.detectChanges();
+      },
+      error: () => { }
+    });
+  }
+
   carregarRecados(): void {
+    this.carregarTotalTarefas();
     this.carregando = true;
     this.cdr.detectChanges();
     this.http.get<any>(`${API}/recados/aluno/${this.usuario.id}`).subscribe({
@@ -50,6 +63,7 @@ export class Recados implements OnInit {
         this.recados = [];
         this.carregando = false;
         this.cdr.detectChanges();
+
       }
     });
   }
@@ -59,7 +73,7 @@ export class Recados implements OnInit {
     if (!recado.lido) {
       recado.lido = 1;
       this.cdr.detectChanges();
-      this.http.post<any>(`${API}/recados/ler/${recado.id}`, {}).subscribe({
+      this.http.patch<any>(`${API}/recados/${recado.id}/lido`, { usuarioId: this.usuario.id }).subscribe({
         error: () => { recado.lido = 0; this.cdr.detectChanges(); }
       });
     }
@@ -71,10 +85,10 @@ export class Recados implements OnInit {
     const hoje = new Date();
     const diffH = Math.floor((hoje.getTime() - d.getTime()) / (1000 * 60 * 60));
     const diffD = Math.floor(diffH / 24);
-    if (diffH < 1)   return 'Agora mesmo';
-    if (diffH < 24)  return `${diffH}h atrás`;
+    if (diffH < 1) return 'Agora mesmo';
+    if (diffH < 24) return `${diffH}h atrás`;
     if (diffD === 1) return 'Ontem';
-    if (diffD < 7)   return `${diffD} dias atrás`;
+    if (diffD < 7) return `${diffD} dias atrás`;
     return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 

@@ -44,12 +44,20 @@
                     *ngIf="!sidebarCollapsed">Home</span></a>
             <a class="nav-item" routerLink="/painel/informacoes" routerLinkActive="active"><i
                     class="ti ti-user-circle"></i><span *ngIf="!sidebarCollapsed">Informações</span></a>
-            <a class="nav-item" routerLink="/painel/tarefas" routerLinkActive="active"><i
-                    class="ti ti-clipboard-list"></i><span *ngIf="!sidebarCollapsed">Tarefas</span></a>
-            <a class="nav-item" routerLink="/painel/boletim" routerLinkActive="active"><i
-                    class="ti ti-chart-bar"></i><span *ngIf="!sidebarCollapsed">Boletim</span></a>
-            <a class="nav-item" routerLink="/painel/recados" routerLinkActive="active"><i class="ti ti-mail"></i><span
-                    *ngIf="!sidebarCollapsed">Recados</span></a>
+            <a class="nav-item" routerLink="/painel/tarefas" routerLinkActive="active">
+                <i class="ti ti-clipboard-list"></i>
+                <span *ngIf="!sidebarCollapsed">Tarefas</span>
+                <span class="badge" *ngIf="totalTarefas > 0 && !sidebarCollapsed">{{ totalTarefas }}</span>
+            </a>
+            <a class="nav-item" routerLink="/painel/boletim" routerLinkActive="active">
+                <i class="ti ti-chart-bar"></i>
+                <span *ngIf="!sidebarCollapsed">Boletim</span>
+            </a>
+            <a class="nav-item" routerLink="/painel/recados" routerLinkActive="active">
+                <i class="ti ti-mail"></i>
+                <span *ngIf="!sidebarCollapsed">Recados</span>
+                <span class="badge" *ngIf="totalRecados > 0 && !sidebarCollapsed">{{ totalRecados }}</span>
+            </a>
             <p class="nav-label" *ngIf="!sidebarCollapsed">APRENDIZADO</p>
             <a class="nav-item" routerLink="/painel/materiais" routerLinkActive="active"><i
                     class="ti ti-books"></i><span *ngIf="!sidebarCollapsed">Materiais Digitais</span></a>

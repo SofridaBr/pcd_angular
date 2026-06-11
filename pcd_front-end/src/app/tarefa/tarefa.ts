@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 
+
 const API = 'http://localhost:3000';
 
 @Component({
@@ -20,6 +21,7 @@ export class Tarefa implements OnInit {
   usuarioId: number = 0;
   modalAberto = false;
   tarefas: any[] = [];
+  totalRecadosNaoLidos = 0;
 
   novaTarefa = {
     titulo: '', materia: '', descricao: '',
@@ -33,7 +35,7 @@ export class Tarefa implements OnInit {
   sidebarCollapsed = false;
   filtroMateria = '';
   filtroStatus = '';
-  materias = ['Português','Matemática','História','Geografia','Ciências','Inglês','Educação Física','Artes'];
+  materias = ['Português', 'Matemática', 'História', 'Geografia', 'Ciências', 'Inglês', 'Educação Física', 'Artes'];
 
   get totalPendentes(): number {
     return this.tarefas.filter(t => !t.concluida).length;
@@ -42,14 +44,14 @@ export class Tarefa implements OnInit {
   get tarefasFiltradas(): any[] {
     return this.tarefas.filter(t => {
       const okMateria = !this.filtroMateria || t.materia === this.filtroMateria;
-      const okStatus  = !this.filtroStatus  ||
-        (this.filtroStatus === 'pendente'  && !t.concluida) ||
-        (this.filtroStatus === 'concluida' &&  t.concluida);
+      const okStatus = !this.filtroStatus ||
+        (this.filtroStatus === 'pendente' && !t.concluida) ||
+        (this.filtroStatus === 'concluida' && t.concluida);
       return okMateria && okStatus;
     });
   }
 
-  constructor(private http: HttpClient, private router: Router, private cdr: ChangeDetectorRef) {}
+  constructor(private http: HttpClient, private router: Router, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     const usuarioStr = sessionStorage.getItem('usuario') || localStorage.getItem('usuario');
@@ -67,12 +69,16 @@ export class Tarefa implements OnInit {
       : partes[0]?.[0] || '?').toUpperCase();
 
     const agora = new Date();
-    const dias  = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
-    const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const dias = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     this.dataAtual = `${dias[agora.getDay()]}, ${agora.getDate()} de ${meses[agora.getMonth()]} de ${agora.getFullYear()}`;
 
     this.carregarTarefas();
+    this.carregarRecados();
+
   }
+
+
 
   carregarTarefas(): void {
     if (this.tipoUsuario === 'aluno') {
@@ -92,6 +98,19 @@ export class Tarefa implements OnInit {
         error: () => console.error('Erro ao carregar tarefas do professor')
       });
     }
+  }
+
+  async carregarRecados(): Promise<void> {
+    if (!this.usuarioId) return;
+    try {
+      const res = await fetch(`${API}/recados/aluno/${this.usuarioId}`);
+      if (res.ok) {
+        const dados = await res.json();
+        const naoLidos = (dados.recados || []).filter((r: any) => r.lido === 0 || r.lido === false);
+        this.totalRecadosNaoLidos = naoLidos.length;
+        this.cdr.detectChanges();
+      }
+    } catch { }
   }
 
   abrirModal() { this.modalAberto = true; }
@@ -117,11 +136,11 @@ export class Tarefa implements OnInit {
     if (!url) return false;
     return url.startsWith('http') && !url.includes('forms.gle') &&
       (url.includes('.jpg') || url.includes('.png') ||
-       url.includes('.jpeg') || url.includes('.webp') || url.includes('.gif'));
+        url.includes('.jpeg') || url.includes('.webp') || url.includes('.gif'));
   }
 
   // ── Métodos novos ────────────────────────────
-  aplicarFiltros() {}
+  aplicarFiltros() { }
 
   toggleSidebar() { this.sidebarCollapsed = !this.sidebarCollapsed; }
 

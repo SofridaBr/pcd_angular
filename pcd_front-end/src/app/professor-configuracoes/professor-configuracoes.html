@@ -83,21 +83,21 @@
             </div>
         </header>
 
-        <main class="main-content">
+        <main class="main-content" [class.animating]="animating">
             <div class="config-layout">
 
                 <nav class="config-nav">
-                    <button class="config-tab" [class.ativa]="abaAtiva === 'sobre'" (click)="abaAtiva = 'sobre'">
+                    <button class="config-tab" [class.ativa]="abaAtiva === 'sobre'" (click)="trocarAba('sobre')">
                         <i class="ti ti-info-circle"></i><span>Sobre</span>
                     </button>
                     <button class="config-tab" [class.ativa]="abaAtiva === 'privacidade'"
-                        (click)="abaAtiva = 'privacidade'">
+                        (click)="trocarAba('privacidade')">
                         <i class="ti ti-shield"></i><span>Política de Privacidade</span>
                     </button>
-                    <button class="config-tab" [class.ativa]="abaAtiva === 'termos'" (click)="abaAtiva = 'termos'">
+                    <button class="config-tab" [class.ativa]="abaAtiva === 'termos'" (click)="trocarAba('termos')">
                         <i class="ti ti-file-text"></i><span>Termos de Uso</span>
                     </button>
-                    <button class="config-tab" [class.ativa]="abaAtiva === 'suporte'" (click)="abaAtiva = 'suporte'">
+                    <button class="config-tab" [class.ativa]="abaAtiva === 'suporte'" (click)="trocarAba('suporte')">
                         <i class="ti ti-help-circle"></i><span>Suporte</span>
                     </button>
                 </nav>

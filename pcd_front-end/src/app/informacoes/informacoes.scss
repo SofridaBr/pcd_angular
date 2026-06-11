@@ -29,7 +29,7 @@
   top: 0;
   height: 100vh;
   overflow-y: auto;
- 
+
   &.collapsed {
     width: 72px;
   }
@@ -216,7 +216,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  
+
 }
 
 .topbar-left {
@@ -505,6 +505,16 @@
   i {
     font-size: 18px;
   }
+}
+
+.badge {
+  background: #FFD600;
+  color: #0D47A1;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 1px 8px;
+  margin-left: auto;
 }
 
 // RESPONSIVE

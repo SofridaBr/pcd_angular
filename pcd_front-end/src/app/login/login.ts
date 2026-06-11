@@ -213,7 +213,7 @@ export class Login implements OnInit {
 
       localStorage.setItem('usuario', JSON.stringify(usuario));
 
-      window.location.href = '/painel/tarefas';
+      window.location.href = '/painel/';
 
     } catch (error) {
       alert('Erro ao conectar ao servidor.');

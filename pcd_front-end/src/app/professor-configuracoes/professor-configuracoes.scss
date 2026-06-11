@@ -339,6 +339,10 @@
 // ── MAIN ──
 .main-content {
   padding: 24px 28px;
+
+  &.animating {
+    animation: fadeSlideUp 0.35s ease both;
+  }
 }
 
 // ── CONFIG LAYOUT ──
@@ -469,6 +473,18 @@
   span {
     color: #607D8B;
     font-size: 14px;
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
