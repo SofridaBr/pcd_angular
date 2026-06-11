@@ -211,7 +211,7 @@ export class Login implements OnInit {
         return;
       }
 
-      localStorage.setItem('usuario', JSON.stringify(usuario));
+      
 
       window.location.href = '/painel/';
 
@@ -265,7 +265,6 @@ export class Login implements OnInit {
         return;
       }
 
-      localStorage.setItem('usuario', JSON.stringify(usuario));
 
 
       if (usuario.tipo === 'coordenador') {

@@ -1,8 +1,13 @@
 const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 const app = express();
+
+const SECRET = 'educa_inclusiva_secret_2026';
+
 
 app.use(cors());
 app.use(express.json());
@@ -19,38 +24,55 @@ const conexao = mysql.createPool({
     connectionLimit: 10
 });
 
+function autenticar(req, res, next) {
+    const auth = req.headers.authorization;
+    if (!auth) return res.status(401).json({ mensagem: "Token não enviado." });
+
+    const token = auth.split(' ')[1];
+    try {
+        req.usuario = jwt.verify(token, SECRET);
+        next();
+    } catch {
+        return res.status(401).json({ mensagem: "Token inválido ou expirado." });
+    }
+}
+
 // ════════════════════════════════════════════════
 // LOGIN (todos os tipos)
 // ════════════════════════════════════════════════
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
     const { email, senha } = req.body;
 
-    if (!email || !senha) {
+    if (!email || !senha)
         return res.status(400).json({ mensagem: "Preencha email e senha." });
-    }
 
-    const sql = `
-        SELECT id, nome, email, tipo, nivel, pontos, progresso, condicao, 
-               cpf, rg, telefone, serie, tipoEscola, disciplina, nivelAutismo
-        FROM usuarios
-        WHERE email = ? AND senha = ?
-    `;
+    const sql = `SELECT * FROM usuarios WHERE email = ?`;
 
-    conexao.query(sql, [email, senha], (erro, resultado) => {
+    conexao.query(sql, [email], async (erro, resultado) => {
         if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+        if (resultado.length === 0)
+            return res.status(401).json({ mensagem: "Email ou senha incorretos." });
 
-        if (resultado.length > 0) {
-            res.json({ mensagem: "Login correto", usuario: resultado[0] });
-        } else {
-            res.status(401).json({ mensagem: "Email ou senha incorretos." });
-        }
+        const usuario = resultado[0];
+        const senhaOk = await bcrypt.compare(senha, usuario.senha);
+        if (!senhaOk)
+            return res.status(401).json({ mensagem: "Email ou senha incorretos." });
+
+        const token = jwt.sign(
+            { id: usuario.id, tipo: usuario.tipo },
+            SECRET,
+            { expiresIn: '8h' }
+        );
+
+        delete usuario.senha;
+        res.json({ token, usuario });
     });
 });
 
 // ════════════════════════════════════════════════
 // CADASTRO DE ALUNO (auto-registro)
 // ════════════════════════════════════════════════
-app.post("/cadastro/aluno", (req, res) => {
+app.post("/cadastro/aluno", async (req, res) => {
     const { nome, email, cpf, rg, telefone, serie, tipoEscola, nivelAutismo, condicao, senha } = req.body;
 
     if (!nome || !email || !cpf || !rg || !telefone || !senha) {
@@ -68,9 +90,13 @@ app.post("/cadastro/aluno", (req, res) => {
             if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
             if (resultado.length > 0) return res.status(400).json({ mensagem: "Este CPF já está cadastrado." });
 
-            conexao.query(`SELECT id FROM usuarios WHERE rg = ?`, [rg], (erro, resultado) => {
+        
+
+            conexao.query(`SELECT id FROM usuarios WHERE rg = ?`, [rg], async(erro, resultado) => {
                 if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
                 if (resultado.length > 0) return res.status(400).json({ mensagem: "Este RG já está cadastrado." });
+
+                const senhaHash = await bcrypt.hash(senha, 10);
 
                 const sqlInsere = `
                     INSERT INTO usuarios 
@@ -86,7 +112,7 @@ app.post("/cadastro/aluno", (req, res) => {
                         serie || 'Sem informação',
                         tipoEscola || 'Não informado',
                         nivelAutismo || 0,
-                        senha,
+                        senhaHash,
                         condicao || 'Nenhuma'
                     ],
                     (erro, resultado) => {
@@ -137,9 +163,11 @@ app.post("/cadastro/institucional", (req, res) => {
             if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
             if (resultado.length > 0) return res.status(400).json({ mensagem: "Este CPF já está cadastrado." });
 
-            conexao.query(`SELECT id FROM usuarios WHERE rg = ?`, [rg], (erro, resultado) => {
+            conexao.query(`SELECT id FROM usuarios WHERE rg = ?`, [rg], async (erro, resultado) => {
                 if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
                 if (resultado.length > 0) return res.status(400).json({ mensagem: "Este RG já está cadastrado." });
+
+                const senhaHash = await bcrypt.hash(senha, 10);
 
                 const sqlInsere = `
                     INSERT INTO usuarios 
@@ -149,7 +177,7 @@ app.post("/cadastro/institucional", (req, res) => {
 
                 conexao.query(
                     sqlInsere,
-                    [nome, email, cpf, rg, telefone, disciplina || null, tipoEscola || 'Não informado', tipo, senha],
+                    [nome, email, cpf, rg, telefone, disciplina || null, tipoEscola || 'Não informado', tipo, senhaHash],
                     (erro, resultado) => {
                         if (erro) return res.status(500).json({ mensagem: "Erro ao criar conta." });
                         res.json({
@@ -168,7 +196,7 @@ app.post("/cadastro/institucional", (req, res) => {
 // ════════════════════════════════════════════════
 // ATUALIZAR CONDIÇÃO DO ALUNO
 // ════════════════════════════════════════════════
-app.post("/atualizar-condicao", (req, res) => {
+app.post("/atualizar-condicao", autenticar, (req, res) => {
     const { id, condicao } = req.body;
 
     if (!id || !condicao) {
@@ -187,7 +215,7 @@ app.post("/atualizar-condicao", (req, res) => {
 // ════════════════════════════════════════════════
 // BUSCAR DADOS DE UM ALUNO ESPECÍFICO
 // ════════════════════════════════════════════════
-app.get("/aluno/:id", (req, res) => {
+app.get("/aluno/:id", autenticar, (req, res) => {
     const { id } = req.params;
 
     const sql = `
@@ -207,7 +235,7 @@ app.get("/aluno/:id", (req, res) => {
 // ════════════════════════════════════════════════
 // APAGAR ALUNO (coordenador) — cascata em todas as tabelas
 // ════════════════════════════════════════════════
-app.delete("/alunos/:id", (req, res) => {
+app.delete("/alunos/:id", autenticar, (req, res) => {
     const { id } = req.params;
 
     // Deleta em cascata nas tabelas relacionadas, depois o usuário
@@ -239,7 +267,7 @@ app.delete("/alunos/:id", (req, res) => {
 // ════════════════════════════════════════════════
 // BUSCAR TODOS OS ALUNOS (coordenador)
 // ════════════════════════════════════════════════
-app.get("/alunos/todos", (req, res) => {
+app.get("/alunos/todos", autenticar, (req, res) => {
     const sql = `
         SELECT id, nome, email, cpf, rg, telefone, serie, tipo, nivel, pontos,
                progresso, condicao, tipoEscola, nivelAutismo
@@ -256,7 +284,7 @@ app.get("/alunos/todos", (req, res) => {
 // ════════════════════════════════════════════════
 // BUSCAR ALUNOS DO PROFESSOR / RESPONSÁVEL
 // ════════════════════════════════════════════════
-app.get("/alunos/:professorId", (req, res) => {
+app.get("/alunos/:professorId", autenticar, (req, res) => {
     const { professorId } = req.params;
 
     const sql = `
@@ -277,7 +305,7 @@ app.get("/alunos/:professorId", (req, res) => {
 // ════════════════════════════════════════════════
 // ADICIONAR ALUNO AO PROFESSOR / RESPONSÁVEL
 // ════════════════════════════════════════════════
-app.post("/adicionar-aluno", (req, res) => {
+app.post("/adicionar-aluno", autenticar, (req, res) => {
     const { professorId, emailAluno } = req.body;
 
     if (!professorId || !emailAluno) {
@@ -319,7 +347,7 @@ app.post("/adicionar-aluno", (req, res) => {
 // ════════════════════════════════════════════════
 // CRIAR TAREFA
 // ════════════════════════════════════════════════
-app.post("/tarefas", (req, res) => {
+app.post("/tarefas", autenticar, (req, res) => {
     const { professorId, titulo, materia, descricao, link, banner, alunosIds } = req.body;
 
     if (!professorId || !titulo || !materia || !link) {
@@ -356,7 +384,7 @@ app.post("/tarefas", (req, res) => {
 // ════════════════════════════════════════════════
 // BUSCAR TAREFAS DO ALUNO
 // ════════════════════════════════════════════════
-app.get("/tarefas/aluno/:alunoId", (req, res) => {
+app.get("/tarefas/aluno/:alunoId", autenticar, (req, res) => {
     const { alunoId } = req.params;
 
     const sql = `
@@ -378,7 +406,7 @@ app.get("/tarefas/aluno/:alunoId", (req, res) => {
 // ════════════════════════════════════════════════
 // BUSCAR TAREFAS DO PROFESSOR
 // ════════════════════════════════════════════════
-app.get("/tarefas/professor/:professorId", (req, res) => {
+app.get("/tarefas/professor/:professorId", autenticar, (req, res) => {
     const { professorId } = req.params;
 
     const sql = `
@@ -402,7 +430,7 @@ app.get("/tarefas/professor/:professorId", (req, res) => {
 // ════════════════════════════════════════════════
 // MARCAR TAREFA COMO CONCLUÍDA
 // ════════════════════════════════════════════════
-app.post("/tarefas/concluir", (req, res) => {
+app.post("/tarefas/concluir", autenticar, (req, res) => {
     const { tarefaId, alunoId } = req.body;
 
     if (!tarefaId || !alunoId) {
@@ -426,7 +454,7 @@ app.post("/tarefas/concluir", (req, res) => {
 // ════════════════════════════════════════════════
 // ESTATÍSTICAS GERAIS
 // ════════════════════════════════════════════════
-app.get("/escola/stats", (req, res) => {
+app.get("/escola/stats", autenticar, (req, res) => {
     const sqlAlunos = `
         SELECT
             COUNT(*) AS totalAlunos,
@@ -478,7 +506,7 @@ app.get("/escola/stats", (req, res) => {
 // ════════════════════════════════════════════════
 // TURMAS POR EDUCADOR
 // ════════════════════════════════════════════════
-app.get("/escola/turmas", (req, res) => {
+app.get("/escola/turmas", autenticar, (req, res) => {
     const sql = `
         SELECT
             u.nome AS professor, u.disciplina,
@@ -503,7 +531,7 @@ app.get("/escola/turmas", (req, res) => {
 // ════════════════════════════════════════════════
 
 // Salvar / atualizar nota (professor)
-app.post("/boletim", (req, res) => {
+app.post("/boletim", autenticar, (req, res) => {
     const { professorId, alunoId, materia, nota, bimestre } = req.body;
 
     if (!professorId || !alunoId || !materia || nota === undefined || nota === null) {
@@ -527,7 +555,7 @@ app.post("/boletim", (req, res) => {
 });
 
 // Buscar boletim completo de um aluno (por bimestre)
-app.get("/boletim/:alunoId", (req, res) => {
+app.get("/boletim/:alunoId", autenticar, (req, res) => {
     const { alunoId } = req.params;
     const bimestre = req.query.bimestre || 1;
 
@@ -547,7 +575,7 @@ app.get("/boletim/:alunoId", (req, res) => {
 });
 
 // Buscar boletim de todos os alunos de um professor (para edição)
-app.get("/boletim/professor/:professorId/aluno/:alunoId", (req, res) => {
+app.get("/boletim/professor/:professorId/aluno/:alunoId", autenticar, (req, res) => {
     const { professorId, alunoId } = req.params;
     const bimestre = req.query.bimestre || 1;
 
@@ -624,7 +652,7 @@ app.post("/recados", (req, res) => {
 });
 
 // Buscar recados do aluno
-app.get("/recados/aluno/:alunoId", (req, res) => {
+app.get("/recados/aluno/:alunoId", autenticar, (req, res) => {
     const { alunoId } = req.params;
 
     const sql = `
@@ -647,7 +675,7 @@ app.get("/recados/aluno/:alunoId", (req, res) => {
 
 
 // Buscar recados enviados pelo professor
-app.get("/recados/professor/:professorId", (req, res) => {
+app.get("/recados/professor/:professorId", autenticar, (req, res) => {
     const { professorId } = req.params;
 
     const sql = `
@@ -669,7 +697,7 @@ app.get("/recados/professor/:professorId", (req, res) => {
 // ════════════════════════════════════════════════
 // MARCAR RE CADO COMO LIDO (Corrigido para bater com o Angular)
 // ════════════════════════════════════════════════
-app.patch("/recados/:id/lido", (req, res) => {
+app.patch("/recados/:id/lido", autenticar, (req, res) => {
     const { id } = req.params;
 
     conexao.query(
@@ -687,7 +715,7 @@ app.patch("/recados/:id/lido", (req, res) => {
 // ════════════════════════════════════════════════
 
 // Criar material
-app.post("/materiais", (req, res) => {
+app.post("/materiais", autenticar, (req, res) => {
     const { professorId, titulo, descricao, tipo, url, banner, materia, alunosIds } = req.body;
     if (!professorId || !titulo || !url || !tipo) {
         return res.status(400).json({ mensagem: "Campos obrigatórios: professorId, titulo, url, tipo." });
@@ -708,7 +736,7 @@ app.post("/materiais", (req, res) => {
 });
 
 // Buscar materiais do aluno
-app.get("/materiais/aluno/:alunoId", (req, res) => {
+app.get("/materiais/aluno/:alunoId", autenticar, (req, res) => {
     const { alunoId } = req.params;
     const sql = `
         SELECT m.id, m.titulo, m.descricao, m.tipo, m.url, m.banner, m.materia, m.data_criacao,
@@ -728,7 +756,7 @@ app.get("/materiais/aluno/:alunoId", (req, res) => {
 // ════════════════════════════════════════════════
 // BUSCAR MATERIAIS DO PROFESSOR (SQL Corrigido)
 // ════════════════════════════════════════════════
-app.get("/materiais/professor/:professorId", (req, res) => {
+app.get("/materiais/professor/:professorId", autenticar, (req, res) => {
     const { professorId } = req.params;
     const sql = `
         SELECT m.id, m.titulo, m.descricao, m.tipo, m.url, m.banner, m.materia, m.data_criacao,
@@ -750,7 +778,7 @@ app.get("/materiais/professor/:professorId", (req, res) => {
 // ════════════════════════════════════════════════
 
 // Buscar alunos vinculados ao responsável
-app.get("/responsavel/alunos/:id", (req, res) => {
+app.get("/responsavel/alunos/:id", autenticar, (req, res) => {
     const { id } = req.params;
 
     const sql = `
@@ -770,7 +798,7 @@ app.get("/responsavel/alunos/:id", (req, res) => {
 });
 
 // Vincular aluno pelo e-mail
-app.post("/responsavel/vincular", (req, res) => {
+app.post("/responsavel/vincular", autenticar, (req, res) => {
     const { responsavel_id, email_aluno } = req.body;
 
     if (!responsavel_id || !email_aluno) {
@@ -810,7 +838,7 @@ app.post("/responsavel/vincular", (req, res) => {
 });
 
 // Recados dos alunos vinculados ao responsável
-app.get("/recados/responsavel", (req, res) => {
+app.get("/recados/responsavel", autenticar, (req, res) => {
     const ids = req.query.alunos;
     const usuarioId = req.query.usuarioId;
 
@@ -860,7 +888,7 @@ app.patch("/recados/:id/lido", (req, res) => {
 });
 
 // Tarefas pendentes do aluno
-app.get("/tarefas/pendentes/:alunoId", (req, res) => {
+app.get("/tarefas/pendentes/:alunoId", autenticar, (req, res) => {
     const { alunoId } = req.params;
 
     const sql = `
@@ -876,7 +904,7 @@ app.get("/tarefas/pendentes/:alunoId", (req, res) => {
 });
 
 // Tarefas concluídas do aluno
-app.get("/tarefas/concluidas/:alunoId", (req, res) => {
+app.get("/tarefas/concluidas/:alunoId", autenticar, (req, res) => {
     const { alunoId } = req.params;
 
     const sql = `
@@ -897,7 +925,7 @@ app.get("/tarefas/concluidas/:alunoId", (req, res) => {
 // ════════════════════════════════════════════════
 
 // Buscar aluno vinculado ao apoio
-app.get("/apoio/aluno/:id", (req, res) => {
+app.get("/apoio/aluno/:id", autenticar, (req, res) => {
     const { id } = req.params;
 
     const sql = `
@@ -916,7 +944,7 @@ app.get("/apoio/aluno/:id", (req, res) => {
 });
 
 // Vincular aluno ao apoio pelo e-mail
-app.post("/apoio/vincular", (req, res) => {
+app.post("/apoio/vincular", autenticar, (req, res) => {
     console.log('Body recebido:', req.body);
     const { apoioId, emailAluno } = req.body;
 
@@ -959,7 +987,7 @@ app.post("/apoio/vincular", (req, res) => {
 // ════════════════════════════════════════════════
 // BUSCAR TODOS OS EDUCADORES (coordenador)
 // ════════════════════════════════════════════════
-app.get("/usuarios/educadores", (req, res) => {
+app.get("/usuarios/educadores", autenticar, (req, res) => {
     const sql = `
         SELECT id, nome, email, cpf, rg, telefone, disciplina, tipoEscola, tipo
         FROM usuarios
@@ -977,7 +1005,7 @@ app.get("/usuarios/educadores", (req, res) => {
 // ════════════════════════════════════════════════
 // BUSCAR SÓ PROFESSORES (coordenador)         ← ADICIONA AQUI
 // ════════════════════════════════════════════════
-app.get("/usuarios/professores", (req, res) => {
+app.get("/usuarios/professores", autenticar, (req, res) => {
     const sql = `
         SELECT id, nome, email, cpf, rg, telefone, disciplina, tipoEscola, tipo
         FROM usuarios
@@ -993,7 +1021,7 @@ app.get("/usuarios/professores", (req, res) => {
 // ════════════════════════════════════════════════
 // APAGAR EDUCADOR (coordenador)
 // ════════════════════════════════════════════════
-app.delete("/usuarios/:id", (req, res) => {
+app.delete("/usuarios/:id", autenticar, (req, res) => {
     const { id } = req.params;
 
     const tabelas = [
@@ -1022,7 +1050,7 @@ app.delete("/usuarios/:id", (req, res) => {
 // ════════════════════════════════════════════════
 // BUSCAR TODOS OS RESPONSÁVEIS (coordenador)
 // ════════════════════════════════════════════════
-app.get("/usuarios/responsaveis", (req, res) => {
+app.get("/usuarios/responsaveis", autenticar, (req, res) => {
     const sql = `
         SELECT id, nome, email, cpf, rg, telefone, tipoEscola, tipo
         FROM usuarios
@@ -1038,7 +1066,7 @@ app.get("/usuarios/responsaveis", (req, res) => {
 // ════════════════════════════════════════════════
 // BUSCAR TODOS OS CUIDADORES/APOIO (coordenador)
 // ════════════════════════════════════════════════
-app.get("/usuarios/cuidadores", (req, res) => {
+app.get("/usuarios/cuidadores", autenticar, (req, res) => {
     const sql = `
         SELECT id, nome, email, cpf, rg, telefone, disciplina, tipoEscola, tipo
         FROM usuarios
@@ -1052,7 +1080,7 @@ app.get("/usuarios/cuidadores", (req, res) => {
 });
 
 // Coordenador envia recado para professor
-app.post("/recados/coordenador", (req, res) => {
+app.post("/recados/coordenador", autenticar, (req, res) => {
     const { remetenteId, professorId, titulo, mensagem } = req.body;
 
     if (!remetenteId || !professorId || !titulo || !mensagem) {
@@ -1071,7 +1099,7 @@ app.post("/recados/coordenador", (req, res) => {
 });
 
 // Professor busca recados recebidos (do coordenador)
-app.get("/recados/recebidos/professor/:professorId", (req, res) => {
+app.get("/recados/recebidos/professor/:professorId", autenticar, (req, res) => {
     const { professorId } = req.params;
 
     const sql = `
@@ -1090,7 +1118,7 @@ app.get("/recados/recebidos/professor/:professorId", (req, res) => {
 });
 
 // Buscar TODOS os recados enviados pelo coordenador
-app.get("/recados/coordenador/:id", (req, res) => {
+app.get("/recados/coordenador/:id", autenticar, (req, res) => {
     const { id } = req.params;
 
     const sql = `

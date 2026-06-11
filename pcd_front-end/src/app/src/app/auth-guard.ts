@@ -1,23 +1,17 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { Api } from '../../service/api';
 
 export const authGuard: CanActivateFn = (route) => {
   const router = inject(Router);
-  const raw = localStorage.getItem('usuario');
+  const api = inject(Api);
 
-  if (!raw) {
+  const tipo = api.getTipoUsuario();
+
+  if (!tipo) {
     router.navigate(['/login']);
     return false;
   }
-
-  const usuario = JSON.parse(raw);
-  const tipo: string = usuario.tipo;
-
-  // Pega o prefixo da URL atual
-  const urlCompleta = route.pathFromRoot
-    .map(r => r.routeConfig?.path || '')
-    .filter(p => p)
-    .join('/');
 
   const prefixosPermitidos: Record<string, string> = {
     aluno:       'painel',
@@ -29,7 +23,11 @@ export const authGuard: CanActivateFn = (route) => {
 
   const prefixoPermitido = prefixosPermitidos[tipo];
 
-  // Se a rota não começa com o prefixo do tipo dele, redireciona
+  const urlCompleta = route.pathFromRoot
+    .map(r => r.routeConfig?.path || '')
+    .filter(p => p)
+    .join('/');
+
   if (!urlCompleta.startsWith(prefixoPermitido)) {
     router.navigate([`/${prefixoPermitido}`]);
     return false;
