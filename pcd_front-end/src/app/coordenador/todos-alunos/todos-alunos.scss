@@ -19,6 +19,8 @@
     transform: translateY(14px);
   }
 
+
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -28,6 +30,42 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -46,7 +84,7 @@
 // ────────────────────────────────────────
 
 .sidebar {
-  width: 240px;
+  width: 260px;
   background: #0D47A1;
   display: flex;
   flex-direction: column;
@@ -213,7 +251,7 @@
 // ────────────────────────────────────────
 
 .content {
-  margin-left: 240px;
+  margin-left: 260px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -235,7 +273,7 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  animation: fadeUp 0.4s ease both;
+  animation: fadeSlideDown 0.4s ease both;
 }
 
 .topbar-left {
@@ -327,7 +365,7 @@
 .main-content {
   padding: 28px 32px;
   flex: 1;
-  animation: fadeUp 0.45s 0.05s ease both;
+  animation: fadeSlideUp 0.35s ease both;
 }
 
 .page-header {
@@ -355,6 +393,7 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 24px;
+  animation: fadeSlideUp 0.4s 0.1s ease both;
 }
 
 .serie-chip {
@@ -369,10 +408,12 @@
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  
 
   &:hover {
     border-color: #90CAF9;
     color: #1565C0;
+    transform: translateY(-1px);
   }
 
   &.ativo {
@@ -423,12 +464,39 @@
   padding: 20px;
   box-shadow: 0 2px 12px rgba(21, 101, 192, 0.07);
   transition: transform 0.2s, box-shadow 0.2s;
-  animation: fadeUp 0.4s ease both;
+  animation: cardEntrance 0.4s ease both;
   cursor: pointer;
 
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 28px rgba(21, 101, 192, 0.13);
+
+
+  }
+
+
+  &:nth-child(1) {
+    animation-delay: 0.05s;
+  }
+
+  &:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 0.15s;
+  }
+
+  &:nth-child(4) {
+    animation-delay: 0.2s;
+  }
+
+  &:nth-child(5) {
+    animation-delay: 0.25s;
+  }
+
+  &:nth-child(6) {
+    animation-delay: 0.3s;
   }
 }
 

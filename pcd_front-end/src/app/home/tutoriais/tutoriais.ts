@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { SafeUrlPipe } from '../pipes/safe-url-pipe';
+import { SafeUrlPipe } from '../../pipes/safe-url-pipe';
 
 const API = 'http://localhost:3000';
 

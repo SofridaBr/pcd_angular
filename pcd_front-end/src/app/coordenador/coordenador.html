@@ -7,9 +7,9 @@
       <span class="logo-text" *ngIf="sidebarAberta">Educa<span>Inclusiva</span></span>
     </div>
 
-    <div class="sidebar-profile" *ngIf="sidebarAberta">
+    <div class="sidebar-profile">
       <div class="sidebar-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
-      <div class="profile-info">
+      <div class="profile-info" *ngIf="sidebarAberta">
         <span class="profile-name">{{ usuario?.nome }}</span>
         <span class="profile-sub">Coordenador(a)</span>
       </div>
