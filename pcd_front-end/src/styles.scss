@@ -44,31 +44,8 @@ i.ti {
 }
 
 
-app-coordenador aside.sidebar,
-app-comunicacao aside.sidebar {
-  padding-top: 0 !important;
-}
-
-app-coordenador .sidebar-logo,
-app-comunicacao .sidebar-logo {
-  padding-bottom: 10px !important;
-  margin-bottom: 0 !important;
-
-
-}
-
-
-
-// Fix do bloco branco na home do coordenador
 app-coordenador {
-  display: flex;
+  display: block;
   width: 100%;
   min-height: 100vh;
-  overflow-x: hidden;
-}
-
-app-coordenador .app-wrapper {
-  width: 100%;
-  min-height: 100vh;
-  overflow-x: hidden;
 }

@@ -131,7 +131,7 @@ export class Coordenador implements OnInit {
       year: 'numeric'
     });
 
-        
+
 
     this.carregarStats();
     this.carregarTurmas();
@@ -142,46 +142,12 @@ export class Coordenador implements OnInit {
   // ═══════════════════════════════════════
   // CARREGAR DADOS
   // ═══════════════════════════════════════
-
-  async carregarStats(): Promise<void> {
-    try {
-      const res = await fetch('http://localhost:3000/escola/stats');
-      const dados = await res.json();
-      this.ngZone.run(() => {
-        this.stats = dados;
-        this.carregandoStats = false;
-        this.cdr.detectChanges();
-      });
-    } catch {
-      this.ngZone.run(() => {
-        this.carregandoStats = false;
-        this.cdr.detectChanges();
-      });
-      console.error('Erro ao carregar stats');
-    }
-  }
-
-  async carregarTurmas(): Promise<void> {
-    try {
-      const res = await fetch('http://localhost:3000/escola/turmas');
-      const dados = await res.json();
-      this.ngZone.run(() => {
-        this.turmas = dados.turmas || [];
-        this.carregandoTurmas = false;
-        this.cdr.detectChanges();
-      });
-    } catch {
-      this.ngZone.run(() => {
-        this.carregandoTurmas = false;
-        this.cdr.detectChanges();
-      });
-      console.error('Erro ao carregar turmas');
-    }
-  }
-
   async carregarAlunos(): Promise<void> {
     try {
-      const res = await fetch('http://localhost:3000/alunos/todos');
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:3000/alunos/todos', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const dados = await res.json();
       this.ngZone.run(() => {
         this.alunos = dados.alunos || [];
@@ -198,9 +164,57 @@ export class Coordenador implements OnInit {
     }
   }
 
+
+
+
+  async carregarTurmas(): Promise<void> {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:3000/escola/turmas', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const dados = await res.json();
+      this.ngZone.run(() => {
+        this.turmas = dados.turmas || [];
+        this.carregandoTurmas = false;
+        this.cdr.detectChanges();
+      });
+    } catch {
+      this.ngZone.run(() => {
+        this.carregandoTurmas = false;
+        this.cdr.detectChanges();
+      });
+      console.error('Erro ao carregar turmas');
+    }
+  }
+
+  async carregarStats(): Promise<void> {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:3000/escola/stats', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const dados = await res.json();
+      this.ngZone.run(() => {
+        this.stats = dados;
+        this.carregandoStats = false;
+        this.cdr.detectChanges();
+      });
+    } catch {
+      this.ngZone.run(() => {
+        this.carregandoStats = false;
+        this.cdr.detectChanges();
+      });
+      console.error('Erro ao carregar stats');
+    }
+  }
+
   async carregarMensagens(): Promise<void> {
     try {
-      const res = await fetch(`http://localhost:3000/recados/coordenador/${this.usuario.id}`);
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:3000/recados/coordenador/${this.usuario.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const dados = await res.json();
       this.ngZone.run(() => {
         this.mensagens = (dados.recados || []).slice(0, 5);
@@ -215,7 +229,6 @@ export class Coordenador implements OnInit {
       console.error('Erro ao carregar mensagens');
     }
   }
-
   // ═══════════════════════════════════════
   // FILTROS DE ALUNOS
   // ═══════════════════════════════════════
