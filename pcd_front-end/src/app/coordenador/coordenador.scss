@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════════
-// COORDENADOR DASHBOARD – SCSS (alinhado ao apoio)
+// COORDENADOR DASHBOARD – SCSS (alinhado ao todos-alunos)
 // ════════════════════════════════════════════════════
 
 @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
@@ -24,42 +24,93 @@
 // ────────────────────────────────────────
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeSlideDown {
-  from { opacity: 0; transform: translateY(-14px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeSlideRight {
-  from { opacity: 0; transform: translateX(-20px); }
-  to   { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes cardEntrance {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideInModal {
-  from { opacity: 0; transform: scale(0.88) translateY(28px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(28px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 // ────────────────────────────────────────
@@ -70,6 +121,7 @@
   display: flex;
   min-height: 100vh;
   background: #F0F4FF;
+  width: 100%; // ← FIX: estava faltando
 
   &.sidebar-fechada {
     .sidebar {
@@ -86,10 +138,17 @@
         display: none;
       }
 
-      .nav-badge { display: none; }
+      .nav-badge {
+        display: none;
+      }
 
-      .logo-icon  { margin: 0 auto; }
-      .sidebar-avatar { margin: 0 auto; }
+      .logo-icon {
+        margin: 0 auto;
+      }
+
+      .sidebar-avatar {
+        margin: 0 auto;
+      }
 
       .nav-item {
         justify-content: center;
@@ -108,7 +167,7 @@
 // ────────────────────────────────────────
 
 .sidebar {
-  width: 240px;
+  width: 260px; // ← FIX: era 240px, agora igual ao todos-alunos
   background: #0D47A1;
   display: flex;
   flex-direction: column;
@@ -128,9 +187,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 24px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  margin-bottom: 20px;
+  padding: 0 26px 27px;
+  
 }
 
 .logo-icon {
@@ -151,7 +209,9 @@
   font-size: 20px;
   white-space: nowrap;
 
-  span { color: #FFD600; }
+  span {
+    color: #FFD600;
+  }
 }
 
 .sidebar-profile {
@@ -163,7 +223,7 @@
   background: rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .sidebar-avatar {
@@ -233,9 +293,13 @@
   text-decoration: none;
   transition: background 0.2s, color 0.2s, transform 0.15s;
 
-  span { flex: 1; }
+  span {
+    flex: 1;
+  }
 
-  i { font-size: 18px; }
+  i {
+    font-size: 18px;
+  }
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);
@@ -248,7 +312,9 @@
     color: #FFD600;
     font-weight: 700;
 
-    i { color: #FFD600; }
+    i {
+      color: #FFD600;
+    }
   }
 
   &.sair {
@@ -281,7 +347,7 @@
 // ────────────────────────────────────────
 
 .content {
-  margin-left: 240px;
+  margin-left: 260px; // ← FIX: era 240px, agora igual ao todos-alunos
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -325,7 +391,9 @@
   border-radius: 8px;
   transition: background 0.2s;
 
-  &:hover { background: #E3F2FD; }
+  &:hover {
+    background: #E3F2FD;
+  }
 }
 
 .search-wrap {
@@ -339,7 +407,9 @@
   width: 240px;
   transition: border-color 0.2s;
 
-  &:focus-within { border-color: #90CAF9; }
+  &:focus-within {
+    border-color: #90CAF9;
+  }
 
   i {
     color: #90A4AE;
@@ -356,7 +426,9 @@
   color: #1565C0;
   width: 100%;
 
-  &::placeholder { color: #90A4AE; }
+  &::placeholder {
+    color: #90A4AE;
+  }
 }
 
 .topbar-right {
@@ -432,7 +504,9 @@
   cursor: pointer;
   transition: transform 0.2s;
 
-  &:hover { transform: scale(1.08); }
+  &:hover {
+    transform: scale(1.08);
+  }
 }
 
 // ────────────────────────────────────────
@@ -486,7 +560,9 @@
   align-items: center;
   gap: 6px;
 
-  i { font-size: 16px; }
+  i {
+    font-size: 16px;
+  }
 }
 
 // ────────────────────────────────────────
@@ -502,7 +578,7 @@
 .stat-card {
   background: #fff;
   border-radius: 16px;
-  padding: 20px 20px;
+  padding: 20px;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -510,9 +586,17 @@
   transition: transform 0.2s, box-shadow 0.2s;
   animation: cardEntrance 0.4s ease both;
 
-  &:nth-child(1) { animation-delay: 0.1s; }
-  &:nth-child(2) { animation-delay: 0.18s; }
-  &:nth-child(3) { animation-delay: 0.26s; }
+  &:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+
+  &:nth-child(2) {
+    animation-delay: 0.18s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 0.26s;
+  }
 
   &:hover {
     transform: translateY(-3px);
@@ -529,11 +613,22 @@
   justify-content: center;
   flex-shrink: 0;
 
-  i { font-size: 26px; color: #fff; }
+  i {
+    font-size: 26px;
+    color: #fff;
+  }
 
-  .stat-blue & { background: #1565C0; }
-  .stat-green & { background: #2E7D32; }
-  .stat-purple & { background: #6A1B9A; }
+  .stat-blue & {
+    background: #1565C0;
+  }
+
+  .stat-green & {
+    background: #2E7D32;
+  }
+
+  .stat-purple & {
+    background: #6A1B9A;
+  }
 }
 
 .stat-info {
@@ -552,13 +647,17 @@
   border-radius: 20px;
   align-self: flex-start;
   margin-bottom: 4px;
-
-  .stat-green & { color: #2E7D32; background: #E8F5E9; }
-  .stat-purple & { color: #6A1B9A; background: #F3E5F5; }
 }
 
-.green-badge  { color: #2E7D32 !important; background: #E8F5E9 !important; }
-.purple-badge { color: #6A1B9A !important; background: #F3E5F5 !important; }
+.green-badge {
+  color: #2E7D32 !important;
+  background: #E8F5E9 !important;
+}
+
+.purple-badge {
+  color: #6A1B9A !important;
+  background: #F3E5F5 !important;
+}
 
 .stat-value {
   font-family: 'Fredoka One', cursive;
@@ -588,9 +687,17 @@
   transition: width 0.8s ease;
 }
 
-.blue-fill   { background: #1565C0; }
-.green-fill  { background: #2E7D32; }
-.purple-fill { background: #6A1B9A; }
+.blue-fill {
+  background: #1565C0;
+}
+
+.green-fill {
+  background: #2E7D32;
+}
+
+.purple-fill {
+  background: #6A1B9A;
+}
 
 // ────────────────────────────────────────
 // BOTTOM GRID
@@ -634,9 +741,17 @@
   flex-shrink: 0;
 }
 
-.blue-dot   { background: #1565C0; }
-.green-dot  { background: #2E7D32; }
-.orange-dot { background: #E65100; }
+.blue-dot {
+  background: #1565C0;
+}
+
+.green-dot {
+  background: #2E7D32;
+}
+
+.orange-dot {
+  background: #E65100;
+}
 
 .card-title {
   font-family: 'Fredoka One', cursive;
@@ -733,8 +848,13 @@
     color: #37474F;
   }
 
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #F8FBFF; }
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: #F8FBFF;
+  }
 }
 
 .aluno-cell {
@@ -762,8 +882,16 @@
   flex-direction: column;
 }
 
-.aluno-nome  { font-weight: 700; color: #1565C0; font-size: 13px; }
-.aluno-email { font-size: 11px; color: #90A4AE; }
+.aluno-nome {
+  font-weight: 700;
+  color: #1565C0;
+  font-size: 13px;
+}
+
+.aluno-email {
+  font-size: 11px;
+  color: #90A4AE;
+}
 
 .badge {
   font-size: 11px;
@@ -773,19 +901,65 @@
   white-space: nowrap;
 }
 
-.badge-tea      { background: #E3F2FD; color: #1565C0; }
-.badge-visual   { background: #F3E5F5; color: #6A1B9A; }
-.badge-auditiva { background: #FFF3E0; color: #E65100; }
-.badge-fisica   { background: #E8F5E9; color: #1B5E20; }
-.badge-cognitiva{ background: #FCE4EC; color: #880E4F; }
-.badge-tdah     { background: #FFFDE7; color: #F57F17; }
-.badge-dislexia { background: #E0F2F1; color: #004D40; }
-.badge-down     { background: #FFF8E1; color: #FF6F00; }
-.badge-pc       { background: #EFEBE9; color: #3E2723; }
-.badge-nenhuma  { background: #ECEFF1; color: #546E7A; }
-.badge-outra    { background: #F5F5F5; color: #616161; }
+.badge-tea {
+  background: #E3F2FD;
+  color: #1565C0;
+}
 
-.serie-text { font-size: 12px; color: #546E7A; }
+.badge-visual {
+  background: #F3E5F5;
+  color: #6A1B9A;
+}
+
+.badge-auditiva {
+  background: #FFF3E0;
+  color: #E65100;
+}
+
+.badge-fisica {
+  background: #E8F5E9;
+  color: #1B5E20;
+}
+
+.badge-cognitiva {
+  background: #FCE4EC;
+  color: #880E4F;
+}
+
+.badge-tdah {
+  background: #FFFDE7;
+  color: #F57F17;
+}
+
+.badge-dislexia {
+  background: #E0F2F1;
+  color: #004D40;
+}
+
+.badge-down {
+  background: #FFF8E1;
+  color: #FF6F00;
+}
+
+.badge-pc {
+  background: #EFEBE9;
+  color: #3E2723;
+}
+
+.badge-nenhuma {
+  background: #ECEFF1;
+  color: #546E7A;
+}
+
+.badge-outra {
+  background: #F5F5F5;
+  color: #616161;
+}
+
+.serie-text {
+  font-size: 12px;
+  color: #546E7A;
+}
 
 .empty-row,
 .loading-row {
@@ -862,8 +1036,14 @@
   text-overflow: ellipsis;
 }
 
-.turma-disc { font-size: 11px; color: #90A4AE; }
-.turma-meta { flex-shrink: 0; }
+.turma-disc {
+  font-size: 11px;
+  color: #90A4AE;
+}
+
+.turma-meta {
+  flex-shrink: 0;
+}
 
 .turma-alunos {
   font-size: 11px;
@@ -909,7 +1089,10 @@
 
   &.nao-lida {
     background: #FFF8E1;
-    &:hover { background: #FFF3CD; }
+
+    &:hover {
+      background: #FFF3CD;
+    }
   }
 }
 
@@ -934,7 +1117,12 @@
   min-width: 0;
 }
 
-.msg-nome  { font-size: 13px; font-weight: 700; color: #1565C0; }
+.msg-nome {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1565C0;
+}
+
 .msg-texto {
   font-size: 12px;
   color: #78909C;
@@ -943,7 +1131,11 @@
   text-overflow: ellipsis;
 }
 
-.msg-hora { font-size: 11px; color: #90A4AE; flex-shrink: 0; }
+.msg-hora {
+  font-size: 11px;
+  color: #90A4AE;
+  flex-shrink: 0;
+}
 
 // ────────────────────────────────────────
 // UTILITÁRIOS
@@ -984,11 +1176,35 @@
 // SCROLLBAR
 // ────────────────────────────────────────
 
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F0F4FF;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #90CAF9;
+  border-radius: 10px;
+}
+
 .tabela-wrap,
 .msgs-list {
-  &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-track { background: #F0F4FF; border-radius: 10px; }
-  &::-webkit-scrollbar-thumb { background: #90CAF9; border-radius: 10px; }
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #F0F4FF;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #90CAF9;
+    border-radius: 10px;
+  }
 }
 
 // ────────────────────────────────────────
@@ -996,8 +1212,14 @@
 // ────────────────────────────────────────
 
 @media (max-width: 1100px) {
-  .bottom-grid { grid-template-columns: 1fr; }
-  .right-col { display: grid; grid-template-columns: 1fr 1fr; }
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .right-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 900px) {
@@ -1007,9 +1229,13 @@
 
     .logo-text,
     .sidebar-profile,
-    .nav-label { display: none; }
+    .nav-label {
+      display: none;
+    }
 
-    .logo-icon { margin: 0 auto; }
+    .logo-icon {
+      margin: 0 auto;
+    }
 
     .nav-item {
       justify-content: center;
@@ -1017,15 +1243,31 @@
     }
   }
 
-  .content { margin-left: 70px; }
+  .content {
+    margin-left: 70px;
+  }
 }
 
 @media (max-width: 768px) {
-  .sidebar { display: none; }
-  .content { margin-left: 0; }
-  .stats-grid { grid-template-columns: 1fr; }
-  .main-content { padding: 20px 16px; }
-  .right-col { grid-template-columns: 1fr; }
+  .sidebar {
+    display: none;
+  }
+
+  .content {
+    margin-left: 0;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .main-content {
+    padding: 20px 16px;
+  }
+
+  .right-col {
+    grid-template-columns: 1fr;
+  }
 }
 
 // ────────────────────────────────────────
@@ -1075,7 +1317,10 @@
     font-size: 20px;
   }
 
-  span { font-size: 13px; color: #90A4AE; }
+  span {
+    font-size: 13px;
+    color: #90A4AE;
+  }
 }
 
 .modal-avatar {
@@ -1131,8 +1376,16 @@
   font-family: 'Nunito', sans-serif;
   transition: all 0.2s;
 
-  &:hover { border-color: #1565C0; color: #1565C0; }
-  &.ativo { background: #1565C0; color: #fff; border-color: #1565C0; }
+  &:hover {
+    border-color: #1565C0;
+    color: #1565C0;
+  }
+
+  &.ativo {
+    background: #1565C0;
+    color: #fff;
+    border-color: #1565C0;
+  }
 }
 
 .modal-loading {
@@ -1171,7 +1424,9 @@
   color: #37474F;
 }
 
-.nota-emoji { font-size: 18px; }
+.nota-emoji {
+  font-size: 18px;
+}
 
 .nota-valor {
   font-size: 16px;
@@ -1179,9 +1434,20 @@
   padding: 4px 12px;
   border-radius: 20px;
 
-  &.nota-boa   { background: #E8F5E9; color: #2E7D32; }
-  &.nota-media { background: #FFFDE7; color: #F57F17; }
-  &.nota-ruim  { background: #FFEBEE; color: #C62828; }
+  &.nota-boa {
+    background: #E8F5E9;
+    color: #2E7D32;
+  }
+
+  &.nota-media {
+    background: #FFFDE7;
+    color: #F57F17;
+  }
+
+  &.nota-ruim {
+    background: #FFEBEE;
+    color: #C62828;
+  }
 }
 
 .modal-media {
@@ -1193,16 +1459,30 @@
   border-radius: 12px;
   margin-top: 4px;
 
-  span { font-size: 14px; font-weight: 700; color: #1565C0; }
+  span {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1565C0;
+  }
 
   strong {
     font-size: 20px;
     font-family: 'Fredoka One', cursive;
 
-    &.nota-boa   { color: #2E7D32; }
-    &.nota-media { color: #F57F17; }
-    &.nota-ruim  { color: #C62828; }
+    &.nota-boa {
+      color: #2E7D32;
+    }
+
+    &.nota-media {
+      color: #F57F17;
+    }
+
+    &.nota-ruim {
+      color: #C62828;
+    }
   }
 }
 
-.card-alunos { align-self: flex-start; }
+.card-alunos {
+  align-self: flex-start;
+}

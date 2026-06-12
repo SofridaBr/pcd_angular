@@ -1,3 +1,7 @@
+// ════════════════════════════════════════════════════
+// TODOS OS ALUNOS – SCSS (idêntico ao home do coordenador)
+// ════════════════════════════════════════════════════
+
 @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
 @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
 
@@ -20,12 +24,8 @@
 // ────────────────────────────────────────
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 @keyframes fadeSlideDown {
@@ -48,14 +48,49 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes slideInModal {
+  from { opacity: 0; transform: scale(0.88) translateY(28px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 // ────────────────────────────────────────
-// LAYOUT
+// LAYOUT RAIZ
 // ────────────────────────────────────────
 
 .app-wrapper {
   display: flex;
   min-height: 100vh;
   background: #F0F4FF;
+  width: 100%;  
+
+  &.sidebar-fechada {
+    .sidebar {
+      width: 70px;
+
+      .nav-label,
+      .logo-text,
+      .profile-info { display: none; }
+
+      .nav-item span,
+      .btn-sair span { display: none; }
+
+      .nav-badge { display: none; }
+
+      .logo-icon      { margin: 0 auto; }
+      .sidebar-avatar { margin: 0 auto; }
+
+      .nav-item {
+        justify-content: center;
+        padding: 12px;
+      }
+    }
+
+    .content { margin-left: 70px; }
+  }
 }
 
 // ────────────────────────────────────────
@@ -63,7 +98,7 @@
 // ────────────────────────────────────────
 
 .sidebar {
-  width: 240px;
+  width: 260px;
   background: #0D47A1;
   display: flex;
   flex-direction: column;
@@ -73,6 +108,7 @@
   height: 100vh;
   z-index: 100;
   padding: 28px 0;
+  transition: width 0.25s ease;
   overflow-y: auto;
   overflow-x: hidden;
   animation: fadeSlideRight 0.45s ease both;
@@ -117,7 +153,8 @@
   background: rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  overflow: hidden;
+  overflow: visible;
+  
 }
 
 .sidebar-avatar {
@@ -182,13 +219,13 @@
   font-size: 14px;
   font-weight: 600;
   border-radius: 12px;
+  position: relative;
   white-space: nowrap;
   text-decoration: none;
   transition: background 0.2s, color 0.2s, transform 0.15s;
-  position: relative;
 
-  i { font-size: 18px; }
   span { flex: 1; }
+  i    { font-size: 18px; }
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);
@@ -225,20 +262,23 @@
   flex-shrink: 0;
 }
 
+.nav-badge-alert { background: #E53935; }
+
 // ────────────────────────────────────────
-// CONTENT
+// CONTENT AREA
 // ────────────────────────────────────────
 
 .content {
-  margin-left: 240px;
+  margin-left: 260px;
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  transition: margin-left 0.25s ease;
 }
 
 // ────────────────────────────────────────
-// TOPBAR
+// TOPBAR — igual ao home
 // ────────────────────────────────────────
 
 .topbar {
@@ -261,6 +301,22 @@
   gap: 16px;
 }
 
+.btn-toggle-sidebar {
+  background: none;
+  border: none;
+  color: #1565C0;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.2s;
+
+  &:hover { background: #E3F2FD; }
+}
+
+// mantido pra compatibilidade com o html que usa btn-voltar
 .btn-voltar {
   background: none;
   border: none;
@@ -284,7 +340,7 @@
   border: 2px solid #E3F2FD;
   border-radius: 12px;
   padding: 6px 14px;
-  width: 280px;
+  width: 240px;
   transition: border-color 0.2s;
 
   &:focus-within { border-color: #90CAF9; }
@@ -307,6 +363,60 @@
 .topbar-right {
   display: flex;
   align-items: center;
+  gap: 16px;
+}
+
+.topbar-icon-btn {
+  background: none;
+  border: none;
+  color: #546E7A;
+  font-size: 20px;
+  cursor: pointer;
+  position: relative;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover {
+    background: #E3F2FD;
+    color: #1565C0;
+  }
+}
+
+.notif-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background: #E53935;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.user-role {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1565C0;
+}
+
+.user-escola {
+  font-size: 11px;
+  color: #90A4AE;
 }
 
 .user-avatar {
@@ -327,7 +437,7 @@
 }
 
 // ────────────────────────────────────────
-// MAIN
+// MAIN CONTENT
 // ────────────────────────────────────────
 
 .main-content {
@@ -339,9 +449,7 @@
   animation: fadeSlideUp 0.35s ease both;
 }
 
-.page-header {
-  margin-bottom: 4px;
-}
+.page-header { margin-bottom: 4px; }
 
 .page-title {
   font-family: 'Fredoka One', cursive;
@@ -637,7 +745,7 @@
 }
 
 // ────────────────────────────────────────
-// MODAL CONFIRMAÇÃO
+// MODAL
 // ────────────────────────────────────────
 
 .modal-overlay {
@@ -649,6 +757,7 @@
   align-items: center;
   justify-content: center;
   z-index: 999;
+  padding: 20px;
   animation: fadeSlideDown 0.25s ease both;
 }
 
@@ -661,7 +770,7 @@
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(13, 71, 161, 0.2);
-  animation: fadeUp 0.3s ease both;
+  animation: slideInModal 0.35s cubic-bezier(0.34, 1.38, 0.64, 1) both;
   text-align: center;
 }
 
@@ -719,10 +828,7 @@
 
   &:hover { background: #C62828; }
 
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 
 // ────────────────────────────────────────
@@ -795,8 +901,20 @@
 }
 
 // ────────────────────────────────────────
+// SCROLLBAR
+// ────────────────────────────────────────
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #F0F4FF; border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: #90CAF9; border-radius: 10px; }
+
+// ────────────────────────────────────────
 // RESPONSIVE
 // ────────────────────────────────────────
+
+@media (max-width: 1100px) {
+  .alunos-grid { grid-template-columns: repeat(2, 1fr); }
+}
 
 @media (max-width: 900px) {
   .sidebar {
@@ -821,10 +939,8 @@
 @media (max-width: 768px) {
   .sidebar { display: none; }
   .content { margin-left: 0; }
-
   .main-content { padding: 20px 16px; }
-
   .search-wrap { width: 200px; }
-
+  .alunos-grid { grid-template-columns: 1fr; }
   .detalhe-grid { grid-template-columns: 1fr; }
 }

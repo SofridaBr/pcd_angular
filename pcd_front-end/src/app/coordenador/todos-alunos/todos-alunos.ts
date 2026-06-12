@@ -21,6 +21,7 @@ export class TodosAlunos implements OnInit {
   // ESTADO
   // ═══════════════════════════════════════
 
+  sidebarAberta = true;
   usuario: any = null;
   alunos: any[] = [];
   alunosFiltrados: any[] = [];
@@ -105,6 +106,10 @@ export class TodosAlunos implements OnInit {
   // ═══════════════════════════════════════
   // UTILITÁRIOS
   // ═══════════════════════════════════════
+
+  toggleSidebar(): void {
+    this.sidebarAberta = !this.sidebarAberta;
+  }
 
   getIniciais(nome: string): string {
     return nome?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || '??';

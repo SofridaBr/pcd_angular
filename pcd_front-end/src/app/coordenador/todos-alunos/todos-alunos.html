@@ -1,79 +1,97 @@
-<div class="app-wrapper">
+<div class="app-wrapper" [class.sidebar-fechada]="!sidebarAberta">
 
   <!-- ══════════ SIDEBAR ══════════ -->
   <aside class="sidebar">
+
     <div class="sidebar-logo">
       <div class="logo-icon">🌟</div>
-      <span class="logo-text">Educa<span>Inclusiva</span></span>
+      <span class="logo-text" *ngIf="sidebarAberta">Educa<span>Inclusiva</span></span>
     </div>
 
     <div class="sidebar-profile">
       <div class="sidebar-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
-      <div class="profile-info">
+      <div class="profile-info" *ngIf="sidebarAberta">
         <span class="profile-name">{{ usuario?.nome }}</span>
         <span class="profile-sub">Coordenador(a)</span>
       </div>
     </div>
 
     <nav class="sidebar-nav">
-      <p class="nav-label">PRINCIPAL</p>
+      <p class="nav-label" *ngIf="sidebarAberta">PRINCIPAL</p>
       <a class="nav-item" (click)="navegarPara('/coordenador')">
-        <i class="ti ti-layout-dashboard"></i><span>Home</span>
+        <i class="ti ti-layout-dashboard"></i>
+        <span *ngIf="sidebarAberta">Home</span>
       </a>
       <a class="nav-item active" (click)="navegarPara('/coordenador/alunos')">
-        <i class="ti ti-users"></i><span>Todos os alunos</span>
-        <span class="nav-badge">{{ alunos.length }}</span>
+        <i class="ti ti-users"></i>
+        <span *ngIf="sidebarAberta">Todos os alunos</span>
+        <span class="nav-badge" *ngIf="sidebarAberta">{{ alunos.length }}</span>
       </a>
-      <p class="nav-label">ESCOLAR</p>
+
+      <p class="nav-label" *ngIf="sidebarAberta">ESCOLAR</p>
       <a class="nav-item" (click)="navegarPara('/coordenador/professores')">
-        <i class="ti ti-school"></i><span>Professores</span>
+        <i class="ti ti-school"></i>
+        <span *ngIf="sidebarAberta">Professores</span>
       </a>
       <a class="nav-item" (click)="navegarPara('/coordenador/comunicacao')">
-        <i class="ti ti-message-2"></i><span>Recados</span>
+        <i class="ti ti-message-2"></i>
+        <span *ngIf="sidebarAberta">Recados</span>
       </a>
       <a class="nav-item" (click)="navegarPara('/coordenador/responsaveis')">
-        <i class="ti ti-heart-handshake"></i><span>Responsáveis</span>
+        <i class="ti ti-heart-handshake"></i>
+        <span *ngIf="sidebarAberta">Responsáveis</span>
       </a>
       <a class="nav-item" (click)="navegarPara('/coordenador/cuidadores')">
-        <i class="ti ti-accessible"></i><span>Apoio & Cuidadores</span>
+        <i class="ti ti-accessible"></i>
+        <span *ngIf="sidebarAberta">Apoio & Cuidadores</span>
       </a>
-      <p class="nav-label">SISTEMA</p>
+
+      <p class="nav-label" *ngIf="sidebarAberta">SISTEMA</p>
       <a class="nav-item" (click)="navegarPara('/coordenador/configuracoes')">
-        <i class="ti ti-settings"></i><span>Configurações</span>
+        <i class="ti ti-settings"></i>
+        <span *ngIf="sidebarAberta">Configurações</span>
       </a>
-      <!-- SAIR AQUI -->
       <a class="nav-item sair" (click)="sair()">
-        <i class="ti ti-logout"></i><span>Sair</span>
+        <i class="ti ti-logout"></i>
+        <span *ngIf="sidebarAberta">Sair</span>
       </a>
     </nav>
 
-    
   </aside>
 
   <!-- ══════════ CONTEÚDO ══════════ -->
   <div class="content">
 
-    <!-- TOPBAR -->
+    <!-- TOPBAR — igual ao home -->
     <header class="topbar">
       <div class="topbar-left">
-        <button class="btn-voltar" (click)="voltarDashboard()">
-          <i class="ti ti-arrow-left"></i>
+        <button class="btn-toggle-sidebar" (click)="toggleSidebar()">
+          <i class="ti ti-menu-2"></i>
         </button>
         <div class="search-wrap">
           <i class="ti ti-search"></i>
-          <input type="text" placeholder="Buscar por nome ou e-mail..." class="search-input" [(ngModel)]="busca"
-            (input)="onBusca()" />
+          <input type="text" placeholder="Buscar por nome ou e-mail..." class="search-input"
+            [(ngModel)]="busca" (input)="onBusca()" />
         </div>
       </div>
       <div class="topbar-right">
-        <div class="user-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
+        <button class="topbar-icon-btn">
+          <i class="ti ti-bell"></i>
+          <span class="notif-dot"></span>
+        </button>
+        <div class="topbar-user">
+          <div class="user-info">
+            <span class="user-role">Coordenação</span>
+            <span class="user-escola">Escola</span>
+          </div>
+          <div class="user-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
+        </div>
       </div>
     </header>
 
     <!-- MAIN -->
     <main class="main-content">
 
-      <!-- TÍTULO -->
       <div class="page-header">
         <div>
           <h1 class="page-title">Todos os Alunos</h1>
@@ -83,7 +101,6 @@
         </div>
       </div>
 
-      <!-- FILTROS POR SÉRIE -->
       <div class="series-row" *ngIf="!carregando">
         <button class="serie-chip" [class.ativo]="filtroSerie === 'Todas'" (click)="selecionarSerie('Todas')">
           Todas as séries
@@ -94,32 +111,25 @@
         </button>
       </div>
 
-      <!-- LOADING -->
       <div class="loading-wrap" *ngIf="carregando">
         <div class="spinner"></div>
         <p>Carregando alunos...</p>
       </div>
 
-      <!-- GRID DE CARDS -->
       <div class="alunos-grid" *ngIf="!carregando">
 
         <div class="aluno-card" *ngFor="let aluno of alunosFiltrados" (click)="verAluno(aluno)">
-
-
           <div class="card-top">
             <div class="card-avatar">{{ getIniciais(aluno.nome) }}</div>
             <div class="card-info">
               <span class="card-nome">{{ aluno.nome }}</span>
               <span class="card-email">{{ aluno.email }}</span>
             </div>
-
           </div>
-
           <div class="prog-bar-wrap">
-            <div class="prog-bar" [ngClass]="getProgressoClass(aluno.progresso)" [style.width.%]="aluno.progresso">
-            </div>
+            <div class="prog-bar" [ngClass]="getProgressoClass(aluno.progresso)"
+              [style.width.%]="aluno.progresso"></div>
           </div>
-
           <div class="card-tags">
             <span class="tag tag-serie" *ngIf="aluno.serie">
               <i class="ti ti-school"></i> {{ aluno.serie }}
@@ -132,16 +142,13 @@
               {{ aluno.condicao }}
             </span>
           </div>
-
           <div class="card-actions">
             <button class="btn-apagar" (click)="$event.stopPropagation(); confirmarApagar(aluno)">
               <i class="ti ti-trash"></i> Apagar aluno
             </button>
           </div>
-
         </div>
 
-        <!-- Estado vazio -->
         <div class="empty-state" *ngIf="alunosFiltrados.length === 0">
           <span class="empty-icon">🔍</span>
           <p>Nenhum aluno encontrado</p>
@@ -160,7 +167,6 @@
         <span class="modal-title">👤 {{ alunoSelecionado?.nome }}</span>
         <button class="modal-close" (click)="alunoSelecionado = null">✕</button>
       </div>
-
       <div class="detalhe-grid">
         <div class="detalhe-item">
           <span class="detalhe-label">Série</span>
