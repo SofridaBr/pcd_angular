@@ -54,16 +54,13 @@
     <div class="content">
 
         <!-- TOPBAR -->
+        
         <header class="topbar">
             <div class="topbar-left">
                 <button class="btn-voltar" (click)="voltarDashboard()">
                     <i class="ti ti-arrow-left"></i>
                 </button>
-                <div class="search-wrap">
-                    <i class="ti ti-search"></i>
-                    <input type="text" placeholder="Buscar por nome ou e-mail..." class="search-input"
-                        [(ngModel)]="busca" (input)="onBusca()" />
-                </div>
+                <h1 class="topbar-title">Professores do sistema</h1>
             </div>
             <div class="topbar-right">
                 <div class="user-avatar">{{ getIniciais(usuario?.nome || '') }}</div>

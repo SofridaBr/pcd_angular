@@ -60,6 +60,7 @@ export class Tarefa implements OnInit {
     this.tipoUsuario = usuario.tipo;
     this.usuarioId = usuario.id;
 
+
     // Dados pra sidebar
     this.usuario = usuario;
     const partes = (usuario.nome || '').split(' ');
@@ -74,6 +75,7 @@ export class Tarefa implements OnInit {
 
     this.carregarTarefas();
     this.carregarRecados();
+    this.initGuiaLeitura();
   }
   async carregarTarefas(): Promise<void> {
     if (this.tipoUsuario === 'aluno') {
@@ -149,4 +151,35 @@ export class Tarefa implements OnInit {
     sessionStorage.removeItem('usuario');
     this.router.navigate(['/login']);
   }
+
+  // propriedades
+  menuAcessibilidade = false;
+  guiaLeitura = false;
+  fontSize = 16;
+  zoom = 1;
+  altoContraste = false;
+  dislexia = false;
+  tdah = false;
+
+  // métodos
+  toggleMenu(): void { this.menuAcessibilidade = !this.menuAcessibilidade; }
+  toggleGuide(): void { this.guiaLeitura = !this.guiaLeitura; }
+  increaseFont(): void { this.fontSize += 2; document.body.style.fontSize = this.fontSize + 'px'; }
+  decreaseFont(): void { this.fontSize -= 2; document.body.style.fontSize = this.fontSize + 'px'; }
+  toggleContrast(): void { this.altoContraste = !this.altoContraste; document.body.classList.toggle('high-contrast'); }
+  toggleDyslexia(): void { this.dislexia = !this.dislexia; document.body.classList.toggle('dyslexia'); }
+  toggleTDAH(): void { this.tdah = !this.tdah; document.body.classList.toggle('tdah-mode'); }
+  zoomPage(): void { this.zoom += 0.1; document.body.style.zoom = this.zoom.toString(); }
+  speakText(): void { const s = new SpeechSynthesisUtterance(document.body.innerText); s.lang = 'pt-BR'; window.speechSynthesis.speak(s); }
+  
+  initGuiaLeitura(): void {
+  document.addEventListener('mousemove', (e) => {
+    const guia = document.getElementById('reading-guide');
+    if (guia && this.guiaLeitura) {
+      guia.style.display = 'block';
+      guia.style.top = (e.clientY - 20) + 'px';
+    }
+  });
 }
+}
+

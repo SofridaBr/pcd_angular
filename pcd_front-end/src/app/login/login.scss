@@ -367,37 +367,6 @@ body {
 }
 
 // ─────────────────────────────────────────
-// ESTADOS GLOBAIS
-// ─────────────────────────────────────────
-
-.high-contrast {
-    background: black !important;
-    color: yellow !important;
-}
-
-.dyslexia {
-    font-family: Arial, sans-serif;
-    letter-spacing: 2px;
-    line-height: 2;
-}
-
-.tdah-mode * {
-    animation: none !important;
-    transition: none !important;
-}
-
-#reading-guide {
-    position: fixed;
-    width: 100%;
-    height: 4px;
-    background: red;
-    top: 0;
-    left: 0;
-    z-index: 9998;
-    display: none;
-}
-
-// ─────────────────────────────────────────
 // ALERTA ACESSO NEGADO
 // ─────────────────────────────────────────
 

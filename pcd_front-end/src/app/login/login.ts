@@ -23,6 +23,7 @@ export class Login implements OnInit {
 
   ngOnInit(): void {
     this.initParticles();
+    this.initGuiaLeitura();
   }
 
   initParticles(): void {
@@ -72,6 +73,17 @@ export class Login implements OnInit {
 
     draw();
   }
+
+  initGuiaLeitura(): void {
+    document.addEventListener('mousemove', (e) => {
+      const guia = document.getElementById('reading-guide');
+      if (guia && this.guiaLeitura) {
+        guia.style.display = 'block';
+        guia.style.top = (e.clientY - 20) + 'px';
+      }
+    });
+  }
+
 
   // ═══════════════════════════════════════
   // TABS

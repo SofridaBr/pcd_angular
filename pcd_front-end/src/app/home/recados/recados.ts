@@ -37,6 +37,17 @@ export class Recados implements OnInit {
       ? partes[0][0] + partes[partes.length - 1][0]
       : partes[0]?.[0] || '?').toUpperCase();
     this.carregarRecados();
+    this.initGuiaLeitura();
+  }
+
+  initGuiaLeitura(): void {
+    document.addEventListener('mousemove', (e) => {
+      const guia = document.getElementById('reading-guide');
+      if (guia && this.guiaLeitura) {
+        guia.style.display = 'block';
+        guia.style.top = (e.clientY - 20) + 'px';
+      }
+    });
   }
 
   async carregarTotalTarefas(): Promise<void> {
@@ -61,6 +72,8 @@ export class Recados implements OnInit {
     this.carregando = false;
     this.cdr.detectChanges();
   }
+
+
 
   async marcarLido(recado: any): Promise<void> {
     recado.aberto = !recado.aberto;
@@ -98,4 +111,24 @@ export class Recados implements OnInit {
     sessionStorage.removeItem('usuario');
     window.location.href = '/login';
   }
+
+  // propriedades
+  menuAcessibilidade = false;
+  guiaLeitura = false;
+  fontSize = 16;
+  zoom = 1;
+  altoContraste = false;
+  dislexia = false;
+  tdah = false;
+
+  // métodos
+  toggleMenu(): void { this.menuAcessibilidade = !this.menuAcessibilidade; }
+  toggleGuide(): void { this.guiaLeitura = !this.guiaLeitura; }
+  increaseFont(): void { this.fontSize += 2; document.body.style.fontSize = this.fontSize + 'px'; }
+  decreaseFont(): void { this.fontSize -= 2; document.body.style.fontSize = this.fontSize + 'px'; }
+  toggleContrast(): void { this.altoContraste = !this.altoContraste; document.body.classList.toggle('high-contrast'); }
+  toggleDyslexia(): void { this.dislexia = !this.dislexia; document.body.classList.toggle('dyslexia'); }
+  toggleTDAH(): void { this.tdah = !this.tdah; document.body.classList.toggle('tdah-mode'); }
+  zoomPage(): void { this.zoom += 0.1; document.body.style.zoom = this.zoom.toString(); }
+  speakText(): void { const s = new SpeechSynthesisUtterance(document.body.innerText); s.lang = 'pt-BR'; window.speechSynthesis.speak(s); }
 }

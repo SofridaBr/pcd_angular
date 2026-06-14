@@ -67,6 +67,19 @@ export class Familiar implements OnInit {
     return this.alunos.filter(a => a.condicao && a.condicao !== 'Nenhuma').length;
   }
 
+  get tituloPagina(): string {
+    const titulos: Record<string, string> = {
+      home: 'Home',
+      alunos: 'Meus Alunos',
+      progresso: 'Progresso',
+      boletim: 'Boletim',
+      recados: 'Recados',
+      configuracoes: 'Configurações'
+    };
+    return titulos[this.abaAtual] || 'Home';
+  }
+
+
   async carregarAlunos(): Promise<void> {
     try {
       const res = await fetch(`${this.API}/responsavel/alunos/${this.usuario.id}`, {
@@ -100,6 +113,7 @@ export class Familiar implements OnInit {
       console.error('Erro ao carregar alunos');
     }
   }
+
 
   alunoSelecionado: any = null;
 

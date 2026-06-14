@@ -68,11 +68,8 @@
         <button class="btn-toggle-sidebar" (click)="toggleSidebar()">
           <i class="ti ti-menu-2"></i>
         </button>
-        <div class="search-wrap">
-          <i class="ti ti-search"></i>
-          <input type="text" placeholder="Buscar por nome ou e-mail..." class="search-input"
-            [(ngModel)]="busca" (input)="onBusca()" />
-        </div>
+        <h1 class="page-title">Alunos do sistema</h1>
+       
       </div>
       <div class="topbar-right">
         <button class="topbar-icon-btn">
@@ -127,8 +124,8 @@
             </div>
           </div>
           <div class="prog-bar-wrap">
-            <div class="prog-bar" [ngClass]="getProgressoClass(aluno.progresso)"
-              [style.width.%]="aluno.progresso"></div>
+            <div class="prog-bar" [ngClass]="getProgressoClass(aluno.progresso)" [style.width.%]="aluno.progresso">
+            </div>
           </div>
           <div class="card-tags">
             <span class="tag tag-serie" *ngIf="aluno.serie">

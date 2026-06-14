@@ -110,6 +110,7 @@
   overflow-x: hidden;
 }
 
+
 .sidebar-logo {
   display: flex;
   align-items: center;
@@ -324,6 +325,14 @@
   transition: background 0.2s;
 
   &:hover { background: #E3F2FD; }
+}
+
+.topbar-title {
+  font-family: 'Fredoka One', cursive;
+  color: #1565C0;
+  font-size: 27px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .search-wrap {

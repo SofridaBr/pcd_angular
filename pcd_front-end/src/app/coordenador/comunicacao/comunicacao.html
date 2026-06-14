@@ -42,7 +42,7 @@
         <i class="ti ti-logout"></i><span>Sair</span>
       </a>
     </nav>
-    
+
   </aside>
 
   <div class="content">
@@ -51,10 +51,10 @@
         <button class="btn-voltar" (click)="voltarDashboard()">
           <i class="ti ti-arrow-left"></i>
         </button>
-        <div class="search-wrap">
-          <i class="ti ti-search"></i>
-          <input type="text" placeholder="Buscar recados..." class="search-input" />
-        </div>
+        <h1 class="page-title">
+          <i class="ti ti-message-2"></i> Recados
+        </h1>
+       
       </div>
       <div class="topbar-right">
         <div class="user-avatar">{{ getIniciais(usuario?.nome || '') }}</div>

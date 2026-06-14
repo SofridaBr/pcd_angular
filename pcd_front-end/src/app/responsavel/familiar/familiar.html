@@ -38,15 +38,15 @@
                 <i class="ti ti-message"></i> Recados
                 <span class="nav-badge badge-red" *ngIf="recadosNaoLidos > 0">{{ recadosNaoLidos }}</span>
             </a>
-<span class="nav-group-label">CONTA</span>
-<a class="nav-item" [class.active]="abaAtual === 'configuracoes'" (click)="setAba('configuracoes')">
-    <i class="ti ti-settings"></i> Configurações
-</a>
-<a class="nav-item nav-logout" (click)="logout()">
-    <i class="ti ti-logout"></i> Sair
-</a>
+            <span class="nav-group-label">CONTA</span>
+            <a class="nav-item" [class.active]="abaAtual === 'configuracoes'" (click)="setAba('configuracoes')">
+                <i class="ti ti-settings"></i> Configurações
+            </a>
+            <a class="nav-item nav-logout" (click)="logout()">
+                <i class="ti ti-logout"></i> Sair
+            </a>
 
-            
+
         </nav>
     </aside>
 
@@ -57,17 +57,17 @@
 
         <!-- TOPBAR -->
         <header class="topbar">
-            <div class="topbar-search">
-                <i class="ti ti-search"></i>
-                <input type="text" placeholder="Buscar aluno..." [(ngModel)]="buscaAluno" name="busca">
-            </div>
-            <div class="topbar-right">
-                <div class="topbar-date">
-                    <i class="ti ti-calendar"></i>
-                    {{ dataAtual }}
+            <header class="topbar">
+                <h1 class="topbar-title">{{ tituloPagina }}</h1>
+                
+                <div class="topbar-right">
+                    <div class="topbar-date">
+                        <i class="ti ti-calendar"></i>
+                        {{ dataAtual }}
+                    </div>
+                    <div class="topbar-avatar">{{ inicialNome }}</div>
                 </div>
-                <div class="topbar-avatar">{{ inicialNome }}</div>
-            </div>
+            </header>
         </header>
 
         <!-- ── ABA: HOME ────────────────────────── -->
@@ -186,15 +186,15 @@
                         </div>
                     </div>
                     <div class="aluno-card-stats">
-    <div class="aluno-stat">
-        <span class="aluno-stat-val">{{ a.tarefasConcluidas ?? 0 }}</span>
-        <span class="aluno-stat-label">Concluídas</span>
-    </div>
-    <div class="aluno-stat">
-        <span class="aluno-stat-val">{{ a.tarefasPendentes ?? 0 }}</span>
-        <span class="aluno-stat-label">Pendentes</span>
-    </div>
-</div>
+                        <div class="aluno-stat">
+                            <span class="aluno-stat-val">{{ a.tarefasConcluidas ?? 0 }}</span>
+                            <span class="aluno-stat-label">Concluídas</span>
+                        </div>
+                        <div class="aluno-stat">
+                            <span class="aluno-stat-val">{{ a.tarefasPendentes ?? 0 }}</span>
+                            <span class="aluno-stat-label">Pendentes</span>
+                        </div>
+                    </div>
                     <span class="badge-condicao" [class]="badgeCondicao(a.condicao)">
                         {{ a.condicao || 'Nenhuma' }}
                     </span>
@@ -226,23 +226,23 @@
                         <div class="prog-avatar">{{ a.nome[0] }}</div>
                         <div>
                             <p class="prog-nome">{{ a.nome }}</p>
-                           <p class="prog-desc">
-    {{ a.tarefasConcluidas ?? 0 }} concluídas · {{ a.tarefasPendentes ?? 0 }} pendentes
-</p>
+                            <p class="prog-desc">
+                                {{ a.tarefasConcluidas ?? 0 }} concluídas · {{ a.tarefasPendentes ?? 0 }} pendentes
+                            </p>
                         </div>
                     </div>
                 </div>
 
                 <div class="progresso-stats">
-    <div class="prog-stat-card">
-        <span class="prog-stat-val">{{ a.tarefasConcluidas ?? 0 }}</span>
-        <span class="prog-stat-label">Concluídas</span>
-    </div>
-    <div class="prog-stat-card">
-        <span class="prog-stat-val">{{ a.tarefasPendentes ?? 0 }}</span>
-        <span class="prog-stat-label">Pendentes</span>
-    </div>
-</div>
+                    <div class="prog-stat-card">
+                        <span class="prog-stat-val">{{ a.tarefasConcluidas ?? 0 }}</span>
+                        <span class="prog-stat-label">Concluídas</span>
+                    </div>
+                    <div class="prog-stat-card">
+                        <span class="prog-stat-val">{{ a.tarefasPendentes ?? 0 }}</span>
+                        <span class="prog-stat-label">Pendentes</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -253,13 +253,12 @@
                 <div class="bimestre-select">
                     <label>Bimestre:</label>
                     <select [(ngModel)]="bimestreSelecionado"
-        (change)="bimestreSelecionado = +$any($event.target).value; carregarBoletins()"
-        name="bimestre">
-    <option [value]="1">1º Bimestre</option>
-    <option [value]="2">2º Bimestre</option>
-    <option [value]="3">3º Bimestre</option>
-    <option [value]="4">4º Bimestre</option>
-</select>
+                        (change)="bimestreSelecionado = +$any($event.target).value; carregarBoletins()" name="bimestre">
+                        <option [value]="1">1º Bimestre</option>
+                        <option [value]="2">2º Bimestre</option>
+                        <option [value]="3">3º Bimestre</option>
+                        <option [value]="4">4º Bimestre</option>
+                    </select>
                 </div>
             </div>
 
@@ -331,86 +330,90 @@
         </div>
 
         <!-- ── ABA: CONFIGURAÇÕES ─────────────── -->
-<div *ngIf="abaAtual === 'configuracoes'" class="aba-content">
-    <div class="config-layout">
-        <nav class="config-nav">
-            <button class="config-tab" [class.ativa]="abaConfig === 'sobre'" (click)="abaConfig = 'sobre'">
-                <i class="ti ti-info-circle"></i> Sobre
-            </button>
-            <button class="config-tab" [class.ativa]="abaConfig === 'privacidade'" (click)="abaConfig = 'privacidade'">
-                <i class="ti ti-shield"></i> Política de Privacidade
-            </button>
-            <button class="config-tab" [class.ativa]="abaConfig === 'termos'" (click)="abaConfig = 'termos'">
-                <i class="ti ti-file-text"></i> Termos de Uso
-            </button>
-            <button class="config-tab" [class.ativa]="abaConfig === 'suporte'" (click)="abaConfig = 'suporte'">
-                <i class="ti ti-help-circle"></i> Suporte
-            </button>
-        </nav>
+        <div *ngIf="abaAtual === 'configuracoes'" class="aba-content">
+            <div class="config-layout">
+                <nav class="config-nav">
+                    <button class="config-tab" [class.ativa]="abaConfig === 'sobre'" (click)="abaConfig = 'sobre'">
+                        <i class="ti ti-info-circle"></i> Sobre
+                    </button>
+                    <button class="config-tab" [class.ativa]="abaConfig === 'privacidade'"
+                        (click)="abaConfig = 'privacidade'">
+                        <i class="ti ti-shield"></i> Política de Privacidade
+                    </button>
+                    <button class="config-tab" [class.ativa]="abaConfig === 'termos'" (click)="abaConfig = 'termos'">
+                        <i class="ti ti-file-text"></i> Termos de Uso
+                    </button>
+                    <button class="config-tab" [class.ativa]="abaConfig === 'suporte'" (click)="abaConfig = 'suporte'">
+                        <i class="ti ti-help-circle"></i> Suporte
+                    </button>
+                </nav>
 
-        <div class="config-body">
-            <div *ngIf="abaConfig === 'sobre'">
-                <h2>Sobre o EducaInclusiva</h2>
-                <p>O <strong>EducaInclusiva</strong> nasceu para transformar a experiência educacional, conectando alunos, professores e responsáveis em uma plataforma acessível e inclusiva.</p>
-                <h3>Benefícios para estudantes</h3>
-                <ul>
-                    <li><strong>Acesso centralizado:</strong> tarefas, boletim, recados e materiais em um só lugar.</li>
-                    <li><strong>Recursos educativos:</strong> materiais digitais e tutoriais em vídeo.</li>
-                    <li><strong>Praticidade:</strong> acompanhe seu progresso e desempenho facilmente.</li>
-                </ul>
-                <h3>Benefícios para professores</h3>
-                <ul>
-                    <li><strong>Gestão de alunos:</strong> adicione e acompanhe seus alunos.</li>
-                    <li><strong>Envio de tarefas:</strong> envie atividades diretamente para os alunos.</li>
-                    <li><strong>Comunicação:</strong> envie recados e acompanhe a leitura.</li>
-                </ul>
-            </div>
-
-            <div *ngIf="abaConfig === 'privacidade'">
-                <h2>Política de Privacidade</h2>
-                <p>Seus dados são tratados com total segurança e confidencialidade. Não compartilhamos informações pessoais com terceiros.</p>
-                <h3>Dados coletados</h3>
-                <ul>
-                    <li>Nome, e-mail e informações escolares para personalizar a experiência.</li>
-                    <li>Progresso e desempenho para gerar relatórios educacionais.</li>
-                </ul>
-                <h3>Uso dos dados</h3>
-                <ul>
-                    <li>Exclusivamente para fins educacionais dentro da plataforma.</li>
-                    <li>Nunca vendidos ou compartilhados com anunciantes.</li>
-                </ul>
-            </div>
-
-            <div *ngIf="abaConfig === 'termos'">
-                <h2>Termos de Uso</h2>
-                <p>Ao usar o EducaInclusiva, você concorda com os seguintes termos:</p>
-                <ul>
-                    <li>Usar a plataforma apenas para fins educacionais.</li>
-                    <li>Não compartilhar suas credenciais de acesso.</li>
-                    <li>Respeitar os outros usuários da plataforma.</li>
-                    <li>Não publicar conteúdo inadequado ou ofensivo.</li>
-                </ul>
-            </div>
-
-            <div *ngIf="abaConfig === 'suporte'">
-                <h2>Suporte</h2>
-                <p>Encontrou algum problema ou tem alguma dúvida? Entre em contato:</p>
-                <div class="suporte-cards">
-                    <div class="suporte-card">
-                        <i class="ti ti-mail"></i>
-                        <strong>E-mail</strong>
-                        <span>suporte&#64;educainclusiva.com</span>
+                <div class="config-body">
+                    <div *ngIf="abaConfig === 'sobre'">
+                        <h2>Sobre o EducaInclusiva</h2>
+                        <p>O <strong>EducaInclusiva</strong> nasceu para transformar a experiência educacional,
+                            conectando alunos, professores e responsáveis em uma plataforma acessível e inclusiva.</p>
+                        <h3>Benefícios para estudantes</h3>
+                        <ul>
+                            <li><strong>Acesso centralizado:</strong> tarefas, boletim, recados e materiais em um só
+                                lugar.</li>
+                            <li><strong>Recursos educativos:</strong> materiais digitais e tutoriais em vídeo.</li>
+                            <li><strong>Praticidade:</strong> acompanhe seu progresso e desempenho facilmente.</li>
+                        </ul>
+                        <h3>Benefícios para professores</h3>
+                        <ul>
+                            <li><strong>Gestão de alunos:</strong> adicione e acompanhe seus alunos.</li>
+                            <li><strong>Envio de tarefas:</strong> envie atividades diretamente para os alunos.</li>
+                            <li><strong>Comunicação:</strong> envie recados e acompanhe a leitura.</li>
+                        </ul>
                     </div>
-                    <div class="suporte-card">
-                        <i class="ti ti-help-circle"></i>
-                        <strong>FAQ</strong>
-                        <span>Acesse as perguntas frequentes</span>
+
+                    <div *ngIf="abaConfig === 'privacidade'">
+                        <h2>Política de Privacidade</h2>
+                        <p>Seus dados são tratados com total segurança e confidencialidade. Não compartilhamos
+                            informações pessoais com terceiros.</p>
+                        <h3>Dados coletados</h3>
+                        <ul>
+                            <li>Nome, e-mail e informações escolares para personalizar a experiência.</li>
+                            <li>Progresso e desempenho para gerar relatórios educacionais.</li>
+                        </ul>
+                        <h3>Uso dos dados</h3>
+                        <ul>
+                            <li>Exclusivamente para fins educacionais dentro da plataforma.</li>
+                            <li>Nunca vendidos ou compartilhados com anunciantes.</li>
+                        </ul>
+                    </div>
+
+                    <div *ngIf="abaConfig === 'termos'">
+                        <h2>Termos de Uso</h2>
+                        <p>Ao usar o EducaInclusiva, você concorda com os seguintes termos:</p>
+                        <ul>
+                            <li>Usar a plataforma apenas para fins educacionais.</li>
+                            <li>Não compartilhar suas credenciais de acesso.</li>
+                            <li>Respeitar os outros usuários da plataforma.</li>
+                            <li>Não publicar conteúdo inadequado ou ofensivo.</li>
+                        </ul>
+                    </div>
+
+                    <div *ngIf="abaConfig === 'suporte'">
+                        <h2>Suporte</h2>
+                        <p>Encontrou algum problema ou tem alguma dúvida? Entre em contato:</p>
+                        <div class="suporte-cards">
+                            <div class="suporte-card">
+                                <i class="ti ti-mail"></i>
+                                <strong>E-mail</strong>
+                                <span>suporte&#64;educainclusiva.com</span>
+                            </div>
+                            <div class="suporte-card">
+                                <i class="ti ti-help-circle"></i>
+                                <strong>FAQ</strong>
+                                <span>Acesse as perguntas frequentes</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
     </main>
 </div>

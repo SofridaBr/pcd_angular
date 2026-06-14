@@ -455,6 +455,14 @@
   }
 }
 
+.page-title {
+  font-family: 'Fredoka One', cursive;
+  color: #1565C0;
+  font-size: 26px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .notif-dot {
   position: absolute;
   top: 6px;

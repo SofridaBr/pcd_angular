@@ -41,6 +41,17 @@ export class Professor implements OnInit {
   filtroVisao: 'todos' | 'pcd' = 'todos';
   buscaAluno: string = '';
 
+  get tituloPagina(): string {
+    const titulos: Record<string, string> = {
+      alunos: this.innerTab === 'alunos' ? 'Meus Alunos' : 'Home',
+      tarefas: 'Nova Atividade',
+      boletim: 'Boletim',
+      recados: 'Recados',
+      materiais: 'Materiais'
+    };
+    return titulos[this.abaAtiva] || 'Home';
+  }
+
   alunos: any[] = [];
   emailNovoAluno: string = '';
   carregandoAdd: boolean = false;

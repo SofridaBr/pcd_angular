@@ -53,6 +53,17 @@ export class Materiais implements OnInit {
     this.dataAtual = `${dias[agora.getDay()]}, ${agora.getDate()} de ${meses[agora.getMonth()]} de ${agora.getFullYear()}`;
 
     this.carregarMateriais();
+    this.initGuiaLeitura();
+  }
+
+  initGuiaLeitura(): void {
+    document.addEventListener('mousemove', (e) => {
+      const guia = document.getElementById('reading-guide');
+      if (guia && this.guiaLeitura) {
+        guia.style.display = 'block';
+        guia.style.top = (e.clientY - 20) + 'px';
+      }
+    });
   }
 
   async carregarTotalTarefas(): Promise<void> {
@@ -126,4 +137,27 @@ export class Materiais implements OnInit {
     sessionStorage.removeItem('usuario');
     window.location.href = '/login';
   }
-}
+  // ═══════════════════════════════════════
+  // ACESSIBILIDADE
+  // ═══════════════════════════════════════
+
+  menuAcessibilidade = false;
+  guiaLeitura = false;
+  fontSize = 16;
+  zoom = 1;
+  altoContraste = false;
+  dislexia = false;
+  tdah = false;
+
+  toggleMenu(): void { this.menuAcessibilidade = !this.menuAcessibilidade; }
+  toggleGuide(): void { this.guiaLeitura = !this.guiaLeitura; }
+  increaseFont(): void { this.fontSize += 2; document.body.style.fontSize = this.fontSize + 'px'; }
+  decreaseFont(): void { this.fontSize -= 2; document.body.style.fontSize = this.fontSize + 'px'; }
+  toggleContrast(): void { this.altoContraste = !this.altoContraste; document.body.classList.toggle('high-contrast'); }
+  toggleDyslexia(): void { this.dislexia = !this.dislexia; document.body.classList.toggle('dyslexia'); }
+  toggleTDAH(): void { this.tdah = !this.tdah; document.body.classList.toggle('tdah-mode'); }
+  zoomPage(): void { this.zoom += 0.1; document.body.style.zoom = this.zoom.toString(); }
+  speakText(): void { const s = new SpeechSynthesisUtterance(document.body.innerText); s.lang = 'pt-BR'; window.speechSynthesis.speak(s); }
+
+} // ← fecha a classe
+
