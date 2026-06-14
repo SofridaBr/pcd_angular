@@ -11,7 +11,7 @@
         <div class="sidebar-profile">
             <div class="avatar">{{ iniciais }}</div>
             <div class="profile-info">
-                <span class="profile-name">{{ nomeProfessor }}</span>
+                <span class="profile-name">{{ usuario?.nome?.split(' ')[0] }}</span>
                 <span class="profile-sub">Professor(a)</span>
             </div>
         </div>
@@ -72,7 +72,7 @@
                 <div class="date-chip"><i class="ti ti-calendar"></i> {{ dataHoje }}</div>
                 <div class="professor-chip">
                     <div class="avatar-sm">{{ iniciais }}</div>
-                    <span>{{ nomeProfessor }}</span>
+                    <span>{{ usuario?.nome?.split(' ')[0] }}</span>
                 </div>
             </div>
         </header>
@@ -88,7 +88,7 @@
                     <div class="welcome-left">
                         <div class="avatar-big">{{ iniciais }}</div>
                         <div>
-                            <h2 class="welcome-title">Bom dia, {{ nomeProfessor }}! 👋</h2>
+                            <h2 class="welcome-title">Bom dia, {{ usuario?.nome?.split(' ')[0] }}! 👋</h2>
                             <p class="welcome-sub">{{ dataHoje }}</p>
                         </div>
                     </div>

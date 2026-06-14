@@ -1,7 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; // 1. Importado o ChangeDetectorRef
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-
+import { Api } from '../../service/api';
 @Component({
   selector: 'app-professor-configuracoes',
   standalone: true,
@@ -19,16 +19,18 @@ export class ProfessorConfiguracoes implements OnInit {
   totalNaoLidos = 0;
   animating: boolean = true;
 
-  // 2. Injetado o cd no construtor
   constructor(
     private router: Router,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private api: Api
   ) { }
 
   ngOnInit(): void {
+    const usuario = this.api.getUsuario();
+    if (!usuario) { this.router.navigate(['/login']); return; }
+
     const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
-    if (!raw) { this.router.navigate(['/login']); return; }
-    this.usuario = JSON.parse(raw);
+    this.usuario = raw ? JSON.parse(raw) : usuario;
 
     const partes = (this.usuario.nome || '').split(' ');
     this.iniciais = (partes.length >= 2
@@ -42,25 +44,16 @@ export class ProfessorConfiguracoes implements OnInit {
     this.carregarNaoLidos();
   }
 
-  carregarNaoLidos(): void {
+  async carregarNaoLidos(): Promise<void> {
     const professorId = this.usuario?.id;
     if (!professorId) return;
 
-    setTimeout(() => {
-      fetch(`http://localhost:3000/recados/recebidos/professor/${professorId}`)
-        .then(r => r.json())
-        .then(data => {
-          const recados = data.recados ?? [];
-          this.totalNaoLidos = recados.filter((r: any) => r.lido === 0).length;
-
-          // 3. ADICIONADO AQUI: Avisa o Angular para atualizar o HTML na mesma hora!
-          this.cd.detectChanges();
-        })
-        .catch(() => {
-          this.totalNaoLidos = 0;
-          this.cd.detectChanges(); // Garante a atualização mesmo se der erro
-        });
-    }, 300);
+    const res = await this.api.get(`/recados/recebidos/professor/${professorId}`);
+    if (res.status) {
+      const recados = res.dados.recados ?? [];
+      this.totalNaoLidos = recados.filter((r: any) => r.lido === 0).length;
+      this.cd.detectChanges();
+    }
   }
 
   toggleSidebar(): void {
@@ -69,10 +62,10 @@ export class ProfessorConfiguracoes implements OnInit {
 
   sair(): void {
     localStorage.removeItem('usuario');
+    localStorage.removeItem('token');
     sessionStorage.removeItem('usuario');
     this.router.navigate(['/login']);
   }
-
 
   trocarAba(aba: typeof this.abaAtiva): void {
     this.animating = false;

@@ -115,7 +115,8 @@
                 </div>
 
                 <!-- Mensagem expandida ao clicar -->
-                <div class="recado-body" [class.aberto]="r.aberto">
+                <!-- Mensagem expandida ao clicar -->
+                <div class="recado-body" [class.aberto]="r.aberto" (click)="$event.stopPropagation()">
                     <p>{{ r.mensagem }}</p>
                 </div>
 

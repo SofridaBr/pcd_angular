@@ -19,6 +19,15 @@ export class Apoio implements OnInit {
   usuario: any = null;
   dataAtual: string = '';
 
+  // ── HEADERS COM TOKEN ───────────────────────────
+  private getHeaders(): HeadersInit {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+  }
+
   get iniciais(): string {
     const partes = (this.usuario?.nome || '').split(' ');
     return (partes.length >= 2
@@ -57,7 +66,9 @@ export class Apoio implements OnInit {
 
   async carregarAluno(): Promise<void> {
     try {
-      const res = await fetch(`${this.API}/apoio/aluno/${this.usuario.id}`);
+      const res = await fetch(`${this.API}/apoio/aluno/${this.usuario.id}`, {
+        headers: this.getHeaders()
+      });
       const dados = await res.json();
 
       if (res.ok && dados.alunos && dados.alunos.length > 0) {
@@ -68,12 +79,16 @@ export class Apoio implements OnInit {
         let totalConcluidas = 0;
 
         for (const a of dados.alunos) {
-          const rP = await fetch(`${this.API}/tarefas/pendentes/${a.id}`);
+          const rP = await fetch(`${this.API}/tarefas/pendentes/${a.id}`, {
+            headers: this.getHeaders()
+          });
           const dP = await rP.json();
           a.tarefasPendentes = dP.pendentes ?? 0;
           totalPendentes += a.tarefasPendentes;
 
-          const rC = await fetch(`${this.API}/tarefas/concluidas/${a.id}`);
+          const rC = await fetch(`${this.API}/tarefas/concluidas/${a.id}`, {
+            headers: this.getHeaders()
+          });
           const dC = await rC.json();
           a.tarefasConcluidas = dC.concluidas ?? 0;
           totalConcluidas += a.tarefasConcluidas;
@@ -101,7 +116,7 @@ export class Apoio implements OnInit {
     try {
       const res = await fetch(`${this.API}/apoio/vincular`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getHeaders(),
         body: JSON.stringify({
           apoioId: this.usuario.id,
           emailAluno: email
@@ -112,21 +127,21 @@ export class Apoio implements OnInit {
 
       if (!res.ok) {
         this.alertaAdicionar = dados.mensagem || `Erro ${res.status}`;
+        this.cdr.markForCheck();
         return;
       }
 
       this.alertaAdicionar = 'Aluno vinculado com sucesso!';
-      this.aluno = null;
-      this.alunos = [];
-      this.totalTarefas = 0;
-      this.recados = [];
+      this.cdr.markForCheck();
 
       await this.carregarAluno();
       setTimeout(() => this.fecharModalAdicionar(), 1500);
     } catch {
       this.alertaAdicionar = 'Erro ao conectar ao servidor.';
+      this.cdr.markForCheck();
     } finally {
       this.adicionandoAluno = false;
+      this.cdr.markForCheck();
     }
   }
 
@@ -153,10 +168,12 @@ export class Apoio implements OnInit {
   }
 
   async carregarRecados(): Promise<void> {
-    if (!this.aluno) return;
+    if (this.alunos.length === 0) return;
     try {
+      const ids = this.alunos.map(a => a.id).join(',');
       const res = await fetch(
-        `${this.API}/recados/responsavel?alunos=${this.aluno.id}&usuarioId=${this.usuario.id}`
+        `${this.API}/recados/responsavel?alunos=${ids}&usuarioId=${this.usuario.id}`,
+        { headers: this.getHeaders() }
       );
       const dados = await res.json();
       if (res.ok) {
@@ -171,12 +188,15 @@ export class Apoio implements OnInit {
   async lerRecado(recado: any): Promise<void> {
     if (recado.lido) return;
     try {
-      await fetch(`${this.API}/recados/${recado.id}/lido`, {
+      const res = await fetch(`${this.API}/recados/${recado.id}/lido`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getHeaders(),
         body: JSON.stringify({ usuarioId: this.usuario.id })
       });
-      recado.lido = true;
+      if (res.ok) {
+        recado.lido = true;
+        this.cdr.markForCheck();
+      }
     } catch {
       console.error('Erro ao marcar recado como lido');
     }
@@ -202,13 +222,14 @@ export class Apoio implements OnInit {
   async enviarRecado(): Promise<void> {
     if (!this.novoRecado.titulo || !this.novoRecado.mensagem) {
       this.alertaRecado = 'Preencha o título e a mensagem.';
+      this.cdr.markForCheck();
       return;
     }
 
     try {
       const res = await fetch(`${this.API}/recados`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getHeaders(),
         body: JSON.stringify({
           professorId: this.usuario.id,
           alunoId: this.recadoAlunoId || null,
@@ -221,23 +242,30 @@ export class Apoio implements OnInit {
 
       if (!res.ok) {
         this.alertaRecado = dados.mensagem || `Erro ${res.status}`;
+        this.cdr.markForCheck();
         return;
       }
 
       this.alertaRecado = 'Recado enviado com sucesso!';
+      this.cdr.markForCheck();
+      await this.carregarRecados();
       setTimeout(() => this.fecharModalRecado(), 1500);
     } catch {
       this.alertaRecado = 'Erro ao conectar ao servidor.';
+      this.cdr.markForCheck();
     }
   }
 
   sair(): void {
     localStorage.removeItem('usuario');
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('usuario');
+    sessionStorage.removeItem('token');
     window.location.href = '/login';
   }
 
   ngOnInit(): void {
-    const raw = localStorage.getItem('usuario');
+    const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
     if (!raw) { window.location.href = '/login'; return; }
 
     this.usuario = JSON.parse(raw);

@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Api } from '../../service/api';
 
 @Component({
   selector: 'app-todos-alunos',
@@ -14,12 +15,9 @@ export class TodosAlunos implements OnInit {
 
   constructor(
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private api: Api
   ) { }
-
-  // ═══════════════════════════════════════
-  // ESTADO
-  // ═══════════════════════════════════════
 
   sidebarAberta = true;
   usuario: any = null;
@@ -31,51 +29,42 @@ export class TodosAlunos implements OnInit {
   filtroSerie = 'Todas';
   series: string[] = [];
 
-  // ═══════════════════════════════════════
-  // INIT
-  // ═══════════════════════════════════════
+  alunoParaApagar: any = null;
+  apagando = false;
+  alunoSelecionado: any = null;
 
   ngOnInit(): void {
-    const raw = localStorage.getItem('usuario');
-    if (!raw) { this.router.navigate(['/login']); return; }
-    this.usuario = JSON.parse(raw);
+    const usuario = this.api.getUsuario();
+    if (!usuario) { this.router.navigate(['/login']); return; }
+
+    const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
+    this.usuario = raw ? JSON.parse(raw) : usuario;
+
     if (this.usuario.tipo !== 'coordenador') { this.router.navigate(['/login']); return; }
     this.carregarAlunos();
   }
 
-  // ═══════════════════════════════════════
-  // CARREGAR
-  // ═══════════════════════════════════════
-
   async carregarAlunos(): Promise<void> {
     this.carregando = true;
-    try {
-      const res = await fetch('http://localhost:3000/alunos/todos');
-      const dados = await res.json();
-      this.alunos = dados.alunos || [];
+    const res = await this.api.get('/alunos/todos');
+    if (res.status) {
+      this.alunos = res.dados.alunos || [];
       this.alunosFiltrados = [...this.alunos];
       this.series = [...new Set<string>(
-        this.alunos.map(a => a.serie).filter(Boolean)
+        this.alunos.map((a: any) => a.serie).filter(Boolean)
       )].sort();
-    } catch {
+    } else {
       console.error('Erro ao carregar alunos');
-    } finally {
-      this.carregando = false;
-      this.cdr.detectChanges();
     }
+    this.carregando = false;
+    this.cdr.detectChanges();
   }
-
-  // ═══════════════════════════════════════
-  // FILTROS
-  // ═══════════════════════════════════════
 
   filtrar(): void {
     let lista = [...this.alunos];
-
     if (this.filtroSerie !== 'Todas') {
       lista = lista.filter(a => (a.serie || 'Sem informação') === this.filtroSerie);
     }
-
     if (this.busca.trim()) {
       const termo = this.busca.toLowerCase();
       lista = lista.filter(a =>
@@ -83,7 +72,6 @@ export class TodosAlunos implements OnInit {
         a.email?.toLowerCase().includes(termo)
       );
     }
-
     this.alunosFiltrados = lista;
   }
 
@@ -92,24 +80,9 @@ export class TodosAlunos implements OnInit {
     this.filtrar();
   }
 
+  onBusca(): void { this.filtrar(); }
 
-
-  alunoParaApagar: any = null;
-  apagando = false;
-
-  alunoSelecionado: any = null;
-
-  onBusca(): void {
-    this.filtrar();
-  }
-
-  // ═══════════════════════════════════════
-  // UTILITÁRIOS
-  // ═══════════════════════════════════════
-
-  toggleSidebar(): void {
-    this.sidebarAberta = !this.sidebarAberta;
-  }
+  toggleSidebar(): void { this.sidebarAberta = !this.sidebarAberta; }
 
   getIniciais(nome: string): string {
     return nome?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || '??';
@@ -117,18 +90,12 @@ export class TodosAlunos implements OnInit {
 
   getCondicaoBadgeClass(condicao: string): string {
     const map: any = {
-      'Autismo Nível 1': 'badge-tea',
-      'Autismo Nível 2': 'badge-tea',
-      'Autismo Nível 3': 'badge-tea',
-      'Deficiência Visual': 'badge-visual',
-      'Deficiência Auditiva': 'badge-auditiva',
-      'Deficiência Física': 'badge-fisica',
-      'Deficiência Intelectual': 'badge-cognitiva',
-      'TDAH': 'badge-tdah',
-      'Dislexia': 'badge-dislexia',
-      'Síndrome de Down': 'badge-down',
-      'Paralisia Cerebral': 'badge-pc',
-      'Nenhuma': 'badge-nenhuma'
+      'Autismo Nível 1': 'badge-tea', 'Autismo Nível 2': 'badge-tea',
+      'Autismo Nível 3': 'badge-tea', 'Deficiência Visual': 'badge-visual',
+      'Deficiência Auditiva': 'badge-auditiva', 'Deficiência Física': 'badge-fisica',
+      'Deficiência Intelectual': 'badge-cognitiva', 'TDAH': 'badge-tdah',
+      'Dislexia': 'badge-dislexia', 'Síndrome de Down': 'badge-down',
+      'Paralisia Cerebral': 'badge-pc', 'Nenhuma': 'badge-nenhuma'
     };
     return map[condicao] || 'badge-outra';
   }
@@ -139,26 +106,18 @@ export class TodosAlunos implements OnInit {
     return 'critico';
   }
 
-  voltarDashboard(): void {
-    this.router.navigate(['/coordenador']);
-  }
+  voltarDashboard(): void { this.router.navigate(['/coordenador']); }
 
   sair(): void {
     localStorage.removeItem('usuario');
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('usuario');
     this.router.navigate(['/login']);
   }
 
-  navegarPara(rota: string): void {
-    this.router.navigate([rota]);
-  }
+  navegarPara(rota: string): void { this.router.navigate([rota]); }
 
-  // ═══════════════════════════════════════
-  // APAGAR ALUNO
-  // ═══════════════════════════════════════
-
-  confirmarApagar(aluno: any): void {
-    this.alunoParaApagar = aluno;
-  }
+  confirmarApagar(aluno: any): void { this.alunoParaApagar = aluno; }
 
   cancelarApagar(): void {
     this.alunoParaApagar = null;
@@ -168,31 +127,20 @@ export class TodosAlunos implements OnInit {
   async apagarAluno(): Promise<void> {
     if (!this.alunoParaApagar) return;
     this.apagando = true;
-    try {
-      const res = await fetch(`http://localhost:3000/alunos/${this.alunoParaApagar.id}`, {
-        method: 'DELETE'
-      });
-      if (res.ok) {
-        this.alunos = this.alunos.filter(a => a.id !== this.alunoParaApagar.id);
-        this.filtrar();
-        this.series = [...new Set<string>(
-          this.alunos.map(a => a.serie).filter(Boolean)
-        )].sort();
-        this.cancelarApagar();
-      } else {
-        alert('Erro ao apagar aluno.');
-      }
-    } catch {
-      alert('Erro de conexão.');
-    } finally {
-      this.apagando = false;
-      this.cdr.detectChanges();
+    const res = await this.api.delete(`/alunos/${this.alunoParaApagar.id}`);
+    if (res.status) {
+      this.alunos = this.alunos.filter(a => a.id !== this.alunoParaApagar.id);
+      this.filtrar();
+      this.series = [...new Set<string>(
+        this.alunos.map((a: any) => a.serie).filter(Boolean)
+      )].sort();
+      this.cancelarApagar();
+    } else {
+      alert('Erro ao apagar aluno.');
     }
-
-
+    this.apagando = false;
+    this.cdr.detectChanges();
   }
-  verAluno(aluno: any): void {
-    this.alunoSelecionado = aluno;
 
-  }
+  verAluno(aluno: any): void { this.alunoSelecionado = aluno; }
 }

@@ -1,9 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-
-const API = 'http://localhost:3000';
+import { Api } from '../../service/api';
 
 const MATERIA_EMOJIS: Record<string, string> = {
   'Português': '📖',
@@ -19,7 +17,7 @@ const MATERIA_EMOJIS: Record<string, string> = {
 @Component({
   selector: 'app-boletim',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './boletim.html',
   styleUrl: './boletim.scss',
 })
@@ -40,12 +38,14 @@ export class Boletim implements OnInit {
     return notas.reduce((a, b) => a + b, 0) / notas.length;
   }
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
+  constructor(private api: Api, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
+    const usuarioToken = this.api.getUsuario();
+    if (!usuarioToken) { window.location.href = '/login'; return; }
+
     const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
-    if (!raw) { window.location.href = '/login'; return; }
-    this.usuario = JSON.parse(raw);
+    this.usuario = raw ? JSON.parse(raw) : usuarioToken;
 
     const partes = (this.usuario.nome || '').split(' ');
     this.iniciais = (partes.length >= 2
@@ -58,42 +58,34 @@ export class Boletim implements OnInit {
     this.carregarTotalTarefas();
   }
 
-  carregarBoletim(): void {
+  async carregarBoletim(): Promise<void> {
     this.carregando = true;
     this.cdr.detectChanges();
-    this.http.get<any>(`${API}/boletim/${this.usuario.id}?bimestre=${this.bimestreSelecionado}`).subscribe({
-      next: (res) => {
-        this.boletim = res.boletim;
-        this.carregando = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.boletim = [];
-        this.carregando = false;
-        this.cdr.detectChanges();
-      }
-    });
+    const res = await this.api.get(`/boletim/${this.usuario.id}?bimestre=${this.bimestreSelecionado}`);
+    if (res.status) {
+      this.boletim = res.dados.boletim;
+    } else {
+      this.boletim = [];
+    }
+    this.carregando = false;
+    this.cdr.detectChanges();
   }
 
-  carregarTotalRecadosNaoLidos(): void {
-    this.http.get<any>(`${API}/recados/aluno/${this.usuario.id}`).subscribe({
-      next: (res) => {
-        this.totalNaoLidos = (res.recados || []).filter((r: any) => r.lido === 0 || r.lido === false).length;
-        this.cdr.detectChanges();
-      },
-      error: () => { }
-    });
+  async carregarTotalRecadosNaoLidos(): Promise<void> {
+    const res = await this.api.get(`/recados/aluno/${this.usuario.id}`);
+    if (res.status) {
+      this.totalNaoLidos = (res.dados.recados || []).filter((r: any) => r.lido === 0 || r.lido === false).length;
+      this.cdr.detectChanges();
+    }
   }
 
-  carregarTotalTarefas(): void {
-    this.http.get<any>(`${API}/tarefas/aluno/${this.usuario.id}`).subscribe({
-      next: (res) => {
-        const pendentes = (res.tarefas || []).filter((t: any) => t.concluida === 0 || t.concluida === false);
-        this.totalTarefas = pendentes.length;
-        this.cdr.detectChanges();
-      },
-      error: () => { }
-    });
+  async carregarTotalTarefas(): Promise<void> {
+    const res = await this.api.get(`/tarefas/aluno/${this.usuario.id}`);
+    if (res.status) {
+      const pendentes = (res.dados.tarefas || []).filter((t: any) => t.concluida === 0 || t.concluida === false);
+      this.totalTarefas = pendentes.length;
+      this.cdr.detectChanges();
+    }
   }
 
   selecionarBimestre(b: number): void {
@@ -109,6 +101,7 @@ export class Boletim implements OnInit {
 
   sair(): void {
     localStorage.removeItem('usuario');
+    localStorage.removeItem('token');
     sessionStorage.removeItem('usuario');
     window.location.href = '/login';
   }

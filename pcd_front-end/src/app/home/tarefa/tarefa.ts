@@ -1,16 +1,13 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
-
-
-const API = 'http://localhost:3000';
+import { Api } from '../../service/api';
 
 @Component({
   selector: 'app-tarefa',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './tarefa.html',
   styleUrl: './tarefa.scss',
 })
@@ -51,13 +48,15 @@ export class Tarefa implements OnInit {
     });
   }
 
-  constructor(private http: HttpClient, private router: Router, private cdr: ChangeDetectorRef) { }
+  constructor(private api: Api, private router: Router, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    const usuarioStr = sessionStorage.getItem('usuario') || localStorage.getItem('usuario');
-    if (!usuarioStr) { this.router.navigate(['/login']); return; }
+    const usuarioToken = this.api.getUsuario();
+    if (!usuarioToken) { this.router.navigate(['/login']); return; }
 
-    const usuario = JSON.parse(usuarioStr);
+    const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
+    const usuario = raw ? JSON.parse(raw) : usuarioToken;
+
     this.tipoUsuario = usuario.tipo;
     this.usuarioId = usuario.id;
 
@@ -75,42 +74,38 @@ export class Tarefa implements OnInit {
 
     this.carregarTarefas();
     this.carregarRecados();
-
   }
-
-
-
-  carregarTarefas(): void {
+  async carregarTarefas(): Promise<void> {
     if (this.tipoUsuario === 'aluno') {
-      this.http.get<any>(`${API}/tarefas/aluno/${this.usuarioId}`).subscribe({
-        next: (res) => {
-          this.tarefas = res.tarefas.map((t: any) => ({
-            ...t,
-            concluida: t.concluida === 1 || t.concluida === true
-          }));
-          this.cdr.detectChanges();
-        },
-        error: (err) => console.error('❌ Erro:', err)
-      });
+      const res = await this.api.get(`/tarefas/aluno/${this.usuarioId}`);
+      if (res.status) {
+        this.tarefas = res.dados.tarefas.map((t: any) => ({
+          ...t,
+          concluida: t.concluida === 1 || t.concluida === true
+        }));
+        this.cdr.detectChanges();
+      } else {
+        console.error('❌ Erro ao carregar tarefas');
+      }
     } else {
-      this.http.get<any>(`${API}/tarefas/professor/${this.usuarioId}`).subscribe({
-        next: (res) => { this.tarefas = res.tarefas; this.cdr.detectChanges(); },
-        error: () => console.error('Erro ao carregar tarefas do professor')
-      });
+      const res = await this.api.get(`/tarefas/professor/${this.usuarioId}`);
+      if (res.status) {
+        this.tarefas = res.dados.tarefas;
+        this.cdr.detectChanges();
+      } else {
+        console.error('Erro ao carregar tarefas do professor');
+      }
     }
   }
 
   async carregarRecados(): Promise<void> {
     if (!this.usuarioId) return;
-    try {
-      const res = await fetch(`${API}/recados/aluno/${this.usuarioId}`);
-      if (res.ok) {
-        const dados = await res.json();
-        const naoLidos = (dados.recados || []).filter((r: any) => r.lido === 0 || r.lido === false);
-        this.totalRecadosNaoLidos = naoLidos.length;
-        this.cdr.detectChanges();
-      }
-    } catch { }
+    const res = await this.api.get(`/recados/aluno/${this.usuarioId}`);
+    if (res.status) {
+      const naoLidos = (res.dados.recados || []).filter((r: any) => r.lido === 0 || r.lido === false);
+      this.totalRecadosNaoLidos = naoLidos.length;
+      this.cdr.detectChanges();
+    }
   }
 
   abrirModal() { this.modalAberto = true; }
@@ -122,14 +117,18 @@ export class Tarefa implements OnInit {
     this.fecharModal();
   }
 
-  marcarConcluida(tarefa: any) {
+  async marcarConcluida(tarefa: any): Promise<void> {
     if (tarefa.concluida) return;
-    this.http.post<any>(`${API}/tarefas/concluir`, {
+    const res = await this.api.post('/tarefas/concluir', {
       tarefaId: tarefa.id, alunoId: this.usuarioId
-    }).subscribe({
-      next: () => { tarefa.concluida = true; this.cdr.detectChanges(); },
-      error: (err) => { console.error('Erro:', err); alert('Erro ao salvar.'); }
     });
+    if (res.status) {
+      tarefa.concluida = true;
+      this.cdr.detectChanges();
+    } else {
+      console.error('Erro:', res.dados);
+      alert('Erro ao salvar.');
+    }
   }
 
   isValidUrl(url: string): boolean {
@@ -146,6 +145,7 @@ export class Tarefa implements OnInit {
 
   sair() {
     localStorage.removeItem('usuario');
+    localStorage.removeItem('token');
     sessionStorage.removeItem('usuario');
     this.router.navigate(['/login']);
   }

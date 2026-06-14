@@ -19,7 +19,7 @@ export class Login implements OnInit {
 
   constructor(private api: Api) { }
 
- 
+
 
   ngOnInit(): void {
     this.initParticles();
@@ -205,13 +205,15 @@ export class Login implements OnInit {
       }
 
       const usuario = resposta.dados.usuario;
+      sessionStorage.setItem('token', resposta.dados.token);
+      sessionStorage.setItem('usuario', JSON.stringify(usuario));
 
       if (usuario.tipo !== 'aluno') {
         this.mostrarAcessoNegado('Esta área é exclusiva para alunos.');
         return;
       }
 
-      
+
 
       window.location.href = '/painel/';
 
@@ -257,6 +259,8 @@ export class Login implements OnInit {
       }
 
       const usuario = resposta.dados.usuario;
+      sessionStorage.setItem('token', resposta.dados.token);
+      sessionStorage.setItem('usuario', JSON.stringify(usuario));
 
       const tipoEsperado = this.tipoMap[this.professor.tipo];
 

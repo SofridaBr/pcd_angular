@@ -5,10 +5,6 @@ export class Api {
 
   private url = 'http://localhost:3000';
 
-  // ═══════════════════════════════════════
-  // HELPERS
-  // ═══════════════════════════════════════
-
   private getHeaders() {
     const token = localStorage.getItem('token');
     return {
@@ -33,10 +29,6 @@ export class Api {
     } catch { return null; }
   }
 
-  // ═══════════════════════════════════════
-  // LOGIN
-  // ═══════════════════════════════════════
-
   async login(dados: any) {
     const res = await fetch(`${this.url}/login`, {
       method: 'POST',
@@ -50,10 +42,6 @@ export class Api {
     }
     return { status: res.ok, dados: json };
   }
-
-  // ═══════════════════════════════════════
-  // REQUISIÇÕES AUTENTICADAS
-  // ═══════════════════════════════════════
 
   async get(path: string) {
     const res = await fetch(`${this.url}${path}`, {
@@ -78,4 +66,14 @@ export class Api {
     });
     return { status: res.ok, dados: await res.json() };
   }
-}
+
+  async patch(path: string, dados: any) {
+    const res = await fetch(`${this.url}${path}`, {
+      method: 'PATCH',
+      headers: this.getHeaders(),
+      body: JSON.stringify(dados)
+    });
+    return { status: res.ok, dados: await res.json() };
+  }
+
+} // ← fecha a classe aqui

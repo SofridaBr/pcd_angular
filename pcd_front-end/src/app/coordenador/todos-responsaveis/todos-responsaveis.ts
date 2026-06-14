@@ -38,7 +38,10 @@ export class TodosResponsaveis implements OnInit {
   async carregarResponsaveis(): Promise<void> {
     this.carregando = true;
     try {
-      const res = await fetch('http://localhost:3000/usuarios/responsaveis');
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:3000/usuarios/responsaveis', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const dados = await res.json();
       this.responsaveis = dados.responsaveis || [];
       this.responsaveisFiltrados = [...this.responsaveis];
@@ -82,7 +85,8 @@ export class TodosResponsaveis implements OnInit {
     this.apagando = true;
     try {
       const res = await fetch(`http://localhost:3000/usuarios/${this.responsavelParaApagar.id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }  // ← ADD AQUI
       });
       if (res.ok) {
         this.responsaveis = this.responsaveis.filter(r => r.id !== this.responsavelParaApagar.id);

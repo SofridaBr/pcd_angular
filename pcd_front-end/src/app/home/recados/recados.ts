@@ -1,14 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-
-const API = 'http://localhost:3000';
+import { Api } from '../../service/api';
 
 @Component({
   selector: 'app-recados',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './recados.html',
   styleUrl: './recados.scss',
 })
@@ -25,12 +23,15 @@ export class Recados implements OnInit {
     return this.recados.filter(r => r.lido === 0 || r.lido === false).length;
   }
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
+  constructor(private api: Api, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
+    const usuarioToken = this.api.getUsuario();
+    if (!usuarioToken) { window.location.href = '/login'; return; }
+
     const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
-    if (!raw) { window.location.href = '/login'; return; }
-    this.usuario = JSON.parse(raw);
+    this.usuario = raw ? JSON.parse(raw) : usuarioToken;
+
     const partes = (this.usuario.nome || '').split(' ');
     this.iniciais = (partes.length >= 2
       ? partes[0][0] + partes[partes.length - 1][0]
@@ -38,44 +39,41 @@ export class Recados implements OnInit {
     this.carregarRecados();
   }
 
-  carregarTotalTarefas(): void {
-    this.http.get<any>(`${API}/tarefas/aluno/${this.usuario.id}`).subscribe({
-      next: (res) => {
-        const pendentes = (res.tarefas || []).filter((t: any) => t.concluida === 0 || t.concluida === false);
-        this.totalTarefas = pendentes.length;
-        this.cdr.detectChanges();
-      },
-      error: () => { }
-    });
+  async carregarTotalTarefas(): Promise<void> {
+    const res = await this.api.get(`/tarefas/aluno/${this.usuario.id}`);
+    if (res.status) {
+      const pendentes = (res.dados.tarefas || []).filter((t: any) => t.concluida === 0 || t.concluida === false);
+      this.totalTarefas = pendentes.length;
+      this.cdr.detectChanges();
+    }
   }
 
-  carregarRecados(): void {
+  async carregarRecados(): Promise<void> {
     this.carregarTotalTarefas();
     this.carregando = true;
     this.cdr.detectChanges();
-    this.http.get<any>(`${API}/recados/aluno/${this.usuario.id}`).subscribe({
-      next: (res) => {
-        this.recados = (res.recados || []).map((r: any) => ({ ...r, aberto: false }));
-        this.carregando = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.recados = [];
-        this.carregando = false;
-        this.cdr.detectChanges();
-
-      }
-    });
+    const res = await this.api.get(`/recados/aluno/${this.usuario.id}`);
+    if (res.status) {
+      this.recados = (res.dados.recados || []).map((r: any) => ({ ...r, aberto: false }));
+    } else {
+      this.recados = [];
+    }
+    this.carregando = false;
+    this.cdr.detectChanges();
   }
 
-  marcarLido(recado: any): void {
+  async marcarLido(recado: any): Promise<void> {
     recado.aberto = !recado.aberto;
-    if (!recado.lido) {
-      recado.lido = 1;
+
+    if (recado.lido === 0 || recado.lido === false) {
+      recado.lido = 1; // atualiza visual imediatamente
       this.cdr.detectChanges();
-      this.http.patch<any>(`${API}/recados/${recado.id}/lido`, { usuarioId: this.usuario.id }).subscribe({
-        error: () => { recado.lido = 0; this.cdr.detectChanges(); }
-      });
+
+      const res = await this.api.patch(`/recados/${recado.id}/lido`, { usuarioId: this.usuario.id });
+      if (!res.status) {
+        recado.lido = 0; // reverte se falhou
+        this.cdr.detectChanges();
+      }
     }
   }
 
@@ -96,6 +94,7 @@ export class Recados implements OnInit {
 
   sair(): void {
     localStorage.removeItem('usuario');
+    localStorage.removeItem('token');
     sessionStorage.removeItem('usuario');
     window.location.href = '/login';
   }

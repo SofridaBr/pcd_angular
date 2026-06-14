@@ -1,15 +1,13 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-
-const API = 'http://localhost:3000';
+import { Api } from '../../service/api';
 
 @Component({
   selector: 'app-materiais',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './materiais.html',
   styleUrl: './materiais.scss'
 })
@@ -35,12 +33,15 @@ export class Materiais implements OnInit {
     });
   }
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
+  constructor(private api: Api, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
+    const usuario = this.api.getUsuario();
+    if (!usuario) { window.location.href = '/login'; return; }
+
     const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
-    if (!raw) { window.location.href = '/login'; return; }
-    this.usuario = JSON.parse(raw);
+    this.usuario = raw ? JSON.parse(raw) : usuario;
+
     const partes = (this.usuario.nome || '').split(' ');
     this.iniciais = (partes.length >= 2
       ? partes[0][0] + partes[partes.length - 1][0]
@@ -54,44 +55,36 @@ export class Materiais implements OnInit {
     this.carregarMateriais();
   }
 
-  carregarTotalTarefas(): void {
-    this.http.get<any>(`${API}/tarefas/aluno/${this.usuario.id}`).subscribe({
-      next: (res) => {
-        this.totalTarefas = (res.tarefas || []).filter((t: any) => t.concluida === 0 || t.concluida === false).length;
-        this.cdr.detectChanges();
-      },
-      error: () => { }
-    });
+  async carregarTotalTarefas(): Promise<void> {
+    const res = await this.api.get(`/tarefas/aluno/${this.usuario.id}`);
+    if (res.status) {
+      this.totalTarefas = (res.dados.tarefas || []).filter((t: any) => t.concluida === 0 || t.concluida === false).length;
+      this.cdr.detectChanges();
+    }
   }
 
-  carregarTotalRecados(): void {
-    this.http.get<any>(`${API}/recados/aluno/${this.usuario.id}`).subscribe({
-      next: (res) => {
-        this.totalRecados = (res.recados || []).filter((r: any) => r.lido === 0 || r.lido === false).length;
-        this.cdr.detectChanges();
-      },
-      error: () => { }
-    });
+  async carregarTotalRecados(): Promise<void> {
+    const res = await this.api.get(`/recados/aluno/${this.usuario.id}`);
+    if (res.status) {
+      this.totalRecados = (res.dados.recados || []).filter((r: any) => r.lido === 0 || r.lido === false).length;
+      this.cdr.detectChanges();
+    }
   }
 
-
-  carregarMateriais(): void {
+  async carregarMateriais(): Promise<void> {
     this.carregarTotalTarefas();
     this.carregarTotalRecados();
     this.carregando = true;
     this.cdr.detectChanges();
-    this.http.get<any>(`${API}/materiais/aluno/${this.usuario.id}`).subscribe({
-      next: (res) => {
-        this.materiais = res.materiais;
-        this.carregando = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.materiais = [];
-        this.carregando = false;
-        this.cdr.detectChanges();
-      }
-    });
+
+    const res = await this.api.get(`/materiais/aluno/${this.usuario.id}`);
+    if (res.status) {
+      this.materiais = res.dados.materiais;
+    } else {
+      this.materiais = [];
+    }
+    this.carregando = false;
+    this.cdr.detectChanges();
   }
 
   getTipoIcon(tipo: string): string {
@@ -129,6 +122,7 @@ export class Materiais implements OnInit {
 
   sair(): void {
     localStorage.removeItem('usuario');
+    localStorage.removeItem('token');
     sessionStorage.removeItem('usuario');
     window.location.href = '/login';
   }

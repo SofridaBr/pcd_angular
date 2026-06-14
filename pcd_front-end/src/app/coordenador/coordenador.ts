@@ -82,7 +82,10 @@ export class Coordenador implements OnInit {
 
   carregarBoletimAluno(): void {
     this.carregandoBoletim = true;
-    fetch(`http://localhost:3000/boletim/${this.alunoSelecionado.id}?bimestre=${this.bimestreSelecionado}`)
+    const token = localStorage.getItem('token');
+    fetch(`http://localhost:3000/boletim/${this.alunoSelecionado.id}?bimestre=${this.bimestreSelecionado}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
       .then(r => r.json())
       .then(res => {
         this.ngZone.run(() => {
@@ -319,4 +322,20 @@ export class Coordenador implements OnInit {
     if (n >= 5) return 'nota-media';
     return 'nota-ruim';
   }
+
+  getEmojiMateria(materia: string): string {  // ← DENTRO da classe
+    const map: any = {
+      'Português': '📖',
+      'Matemática': '🔢',
+      'História': '🏛️',
+      'Geografia': '🌍',
+      'Ciências': '🔬',
+      'Inglês': '🌎',
+      'Educação Física': '⚽',
+      'Artes': '🎨'
+    };
+    return map[materia] || '📚';
+  }
+
 }
+

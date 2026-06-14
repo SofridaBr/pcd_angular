@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Api } from '../../service/api';
 
 @Component({
   selector: 'app-comunicacao',
@@ -12,7 +13,7 @@ import { Router } from '@angular/router';
 })
 export class Comunicacao implements OnInit {
 
-  constructor(private router: Router, private cdr: ChangeDetectorRef) { }
+  constructor(private router: Router, private cdr: ChangeDetectorRef, private api: Api) { }
 
   usuario: any = null;
   carregando = true;
@@ -32,9 +33,12 @@ export class Comunicacao implements OnInit {
   };
 
   ngOnInit(): void {
-    const raw = localStorage.getItem('usuario');
-    if (!raw) { this.router.navigate(['/login']); return; }
-    this.usuario = JSON.parse(raw);
+    const usuario = this.api.getUsuario();
+    if (!usuario) { this.router.navigate(['/login']); return; }
+
+    const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
+    this.usuario = raw ? JSON.parse(raw) : usuario;
+
     if (this.usuario.tipo !== 'coordenador') { this.router.navigate(['/login']); return; }
     this.carregarRecados();
     this.carregarDestinatarios();
@@ -42,42 +46,34 @@ export class Comunicacao implements OnInit {
 
   async carregarRecados(): Promise<void> {
     this.carregando = true;
-    try {
-      const res = await fetch(`http://localhost:3000/recados/coordenador/${this.usuario.id}`);
-      const dados = await res.json();
-      this.recadosEnviados = dados.recados || [];
-    } catch {
+    const res = await this.api.get(`/recados/coordenador/${this.usuario.id}`);
+    if (res.status) {
+      this.recadosEnviados = res.dados.recados || [];
+    } else {
       console.error('Erro ao carregar recados');
-    } finally {
-      this.carregando = false;
-      this.cdr.detectChanges();
     }
+    this.carregando = false;
+    this.cdr.detectChanges();
   }
 
   async carregarDestinatarios(): Promise<void> {
-    try {
-      let url = '';
-      if (this.filtroTipo === 'aluno') url = 'http://localhost:3000/alunos/todos';
-      else if (this.filtroTipo === 'professor') url = 'http://localhost:3000/usuarios/professores';
-      else if (this.filtroTipo === 'responsavel') url = 'http://localhost:3000/usuarios/responsaveis';
+    let endpoint = '';
+    if (this.filtroTipo === 'aluno') endpoint = '/alunos/todos';
+    else if (this.filtroTipo === 'professor') endpoint = '/usuarios/professores';
+    else if (this.filtroTipo === 'responsavel') endpoint = '/usuarios/responsaveis';
+    else return;
 
-      const res = await fetch(url);
-      const dados = await res.json();
-
-      if (this.filtroTipo === 'aluno') this.destinatarios = dados.alunos || [];
-      else if (this.filtroTipo === 'professor') this.destinatarios = dados.professores || [];
-      else if (this.filtroTipo === 'responsavel') this.destinatarios = dados.responsaveis || [];
-
-      this.novoRecado.destinatarioId = null;
-      this.cdr.detectChanges();
-    } catch {
-      console.error('Erro ao carregar destinatários');
+    const res = await this.api.get(endpoint);
+    if (res.status) {
+      if (this.filtroTipo === 'aluno') this.destinatarios = res.dados.alunos || [];
+      else if (this.filtroTipo === 'professor') this.destinatarios = res.dados.professores || [];
+      else if (this.filtroTipo === 'responsavel') this.destinatarios = res.dados.responsaveis || [];
     }
+    this.novoRecado.destinatarioId = null;
+    this.cdr.detectChanges();
   }
 
-  onFiltroTipoChange(): void {
-    this.carregarDestinatarios();
-  }
+  onFiltroTipoChange(): void { this.carregarDestinatarios(); }
 
   abrirModal(): void {
     this.modalAberto = true;
@@ -86,9 +82,7 @@ export class Comunicacao implements OnInit {
     this.erro = false;
   }
 
-  fecharModal(): void {
-    this.modalAberto = false;
-  }
+  fecharModal(): void { this.modalAberto = false; }
 
   async enviarRecado(): Promise<void> {
     if (!this.novoRecado.titulo.trim() || !this.novoRecado.mensagem.trim()) {
@@ -100,51 +94,47 @@ export class Comunicacao implements OnInit {
     this.enviando = true;
     this.msgFeedback = '';
 
-    try {
-      let url = '';
-      let body: any = {
+    let res: any;
+
+    if (this.filtroTipo === 'professor') {
+      res = await this.api.post('/recados/coordenador', {
+        remetenteId: this.usuario.id,
+        professorId: this.novoRecado.destinatarioId,
+        titulo: this.novoRecado.titulo,
+        mensagem: this.novoRecado.mensagem
+      });
+    } else if (this.filtroTipo === 'responsavel') {
+      res = await this.api.post('/recados/coordenador/responsavel', {
+        remetenteId: this.usuario.id,
+        responsavelId: this.novoRecado.destinatarioId,
+        titulo: this.novoRecado.titulo,
+        mensagem: this.novoRecado.mensagem
+      });
+    } else {
+      // aluno
+      const body: any = {
+        professorId: this.usuario.id,
         titulo: this.novoRecado.titulo,
         mensagem: this.novoRecado.mensagem
       };
-
-      if (this.filtroTipo === 'professor') {
-        // ✅ Rota específica do coordenador → professor
-        url = 'http://localhost:3000/recados/coordenador';
-        body.remetenteId = this.usuario.id;
-        body.professorId = this.novoRecado.destinatarioId; // null = todos (backend não suporta "todos" aqui ainda)
-      } else {
-        // ✅ Rota padrão → aluno ou responsável (via aluno_id)
-        url = 'http://localhost:3000/recados';
-        body.professorId = this.usuario.id; // coordenador age como remetente
-        if (this.novoRecado.destinatarioId) {
-          body.alunoId = this.novoRecado.destinatarioId;
-        }
+      if (this.novoRecado.destinatarioId) {
+        body.alunoId = this.novoRecado.destinatarioId;
       }
-
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-
-      const dados = await res.json();
-
-      if (res.ok) {
-        this.msgFeedback = 'Recado enviado com sucesso!';
-        this.erro = false;
-        await this.carregarRecados();
-        setTimeout(() => this.fecharModal(), 1200);
-      } else {
-        this.msgFeedback = dados.mensagem || 'Erro ao enviar.';
-        this.erro = true;
-      }
-    } catch {
-      this.msgFeedback = 'Erro de conexão.';
-      this.erro = true;
-    } finally {
-      this.enviando = false;
-      this.cdr.detectChanges();
+      res = await this.api.post('/recados', body);
     }
+
+    if (res.status) {
+      this.msgFeedback = '✅ Recado enviado com sucesso!';
+      this.erro = false;
+      await this.carregarRecados();
+      setTimeout(() => this.fecharModal(), 1200);
+    } else {
+      this.msgFeedback = '❌ ' + (res.dados?.mensagem || 'Erro ao enviar.');
+      this.erro = true;
+    }
+
+    this.enviando = false;
+    this.cdr.detectChanges();
   }
 
   formatarData(data: string): string {
@@ -160,6 +150,13 @@ export class Comunicacao implements OnInit {
   }
 
   voltarDashboard(): void { this.router.navigate(['/coordenador']); }
-  sair(): void { localStorage.removeItem('usuario'); this.router.navigate(['/login']); }
+
+  sair(): void {
+    localStorage.removeItem('usuario');
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('usuario');
+    this.router.navigate(['/login']);
+  }
+
   navegarPara(rota: string): void { this.router.navigate([rota]); }
 }

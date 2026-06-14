@@ -13,13 +13,18 @@ export class Familiar implements OnInit {
 
   private readonly API = 'http://localhost:3000';
 
-  // ═══════════════════════════════════════
-  // USUÁRIO LOGADO
-  // ═══════════════════════════════════════
-
   usuario: any = null;
   dataAtual: string = '';
+
   constructor(private ngZone: NgZone, private cdr: ChangeDetectorRef) { }
+
+  private getHeaders(): HeadersInit {
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token') || '';
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+  }
 
   get inicialNome(): string {
     return this.usuario?.nome?.[0]?.toUpperCase() ?? '?';
@@ -29,28 +34,14 @@ export class Familiar implements OnInit {
     return this.usuario?.nome?.split(' ')[0] ?? '';
   }
 
-  // ═══════════════════════════════════════
-  // NAVEGAÇÃO (ABAS)
-  // ═══════════════════════════════════════
-
   abaAtual: string = 'home';
   abaConfig: string = 'sobre';
 
   setAba(aba: string): void {
     this.abaAtual = aba;
-
-    if (aba === 'boletim') {
-      this.carregarBoletins();
-    }
-
-    if (aba === 'recados') {
-      this.carregarRecados();
-    }
+    if (aba === 'boletim') this.carregarBoletins();
+    if (aba === 'recados') this.carregarRecados();
   }
-
-  // ═══════════════════════════════════════
-  // ALUNOS
-  // ═══════════════════════════════════════
 
   alunos: any[] = [];
   buscaAluno: string = '';
@@ -58,16 +49,13 @@ export class Familiar implements OnInit {
 
   get alunosFiltrados(): any[] {
     let lista = this.alunos;
-
     if (this.filtroAlunos === 'pcd') {
       lista = lista.filter(a => a.condicao && a.condicao !== 'Nenhuma');
     }
-
     if (this.buscaAluno.trim()) {
       const termo = this.buscaAluno.toLowerCase();
       lista = lista.filter(a => a.nome?.toLowerCase().includes(termo));
     }
-
     return lista;
   }
 
@@ -81,16 +69,22 @@ export class Familiar implements OnInit {
 
   async carregarAlunos(): Promise<void> {
     try {
-      const res = await fetch(`${this.API}/responsavel/alunos/${this.usuario.id}`);
+      const res = await fetch(`${this.API}/responsavel/alunos/${this.usuario.id}`, {
+        headers: this.getHeaders()
+      });
       const dados = await res.json();
 
       if (res.ok) {
         for (const aluno of dados) {
-          const r = await fetch(`${this.API}/tarefas/pendentes/${aluno.id}`);
+          const r = await fetch(`${this.API}/tarefas/pendentes/${aluno.id}`, {
+            headers: this.getHeaders()
+          });
           const d = await r.json();
           aluno.tarefasPendentes = d.pendentes;
 
-          const r2 = await fetch(`${this.API}/tarefas/concluidas/${aluno.id}`);
+          const r2 = await fetch(`${this.API}/tarefas/concluidas/${aluno.id}`, {
+            headers: this.getHeaders()
+          });
           const d2 = await r2.json();
           aluno.tarefasConcluidas = d2.concluidas;
         }
@@ -106,9 +100,6 @@ export class Familiar implements OnInit {
       console.error('Erro ao carregar alunos');
     }
   }
-  // ═══════════════════════════════════════
-  // DETALHE DO ALUNO (modal)
-  // ═══════════════════════════════════════
 
   alunoSelecionado: any = null;
 
@@ -121,10 +112,6 @@ export class Familiar implements OnInit {
     this.abaAtual = 'boletim';
     this.carregarBoletins();
   }
-
-  // ═══════════════════════════════════════
-  // MODAL — ADICIONAR ALUNO
-  // ═══════════════════════════════════════
 
   modalAdicionarAberto: boolean = false;
   emailAlunoParaAdicionar: string = '';
@@ -147,13 +134,12 @@ export class Familiar implements OnInit {
     if (!email) {
       this.alertaAdicionar = 'Informe o e-mail do aluno.';
       return;
-
     }
 
     try {
       const res = await fetch(`${this.API}/responsavel/vincular`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getHeaders(),
         body: JSON.stringify({
           responsavel_id: this.usuario.id,
           email_aluno: email
@@ -173,8 +159,8 @@ export class Familiar implements OnInit {
         await this.carregarAlunos();
         this.ngZone.run(() => {
           this.modalAdicionarAberto = false;
-          this.abaAtual = 'alunos'; // ← muda para outra aba
-          setTimeout(() => this.abaAtual = 'home', 50); // ← volta para home (força re-render)
+          this.abaAtual = 'alunos';
+          setTimeout(() => this.abaAtual = 'home', 50);
         });
       }, 1200);
 
@@ -182,10 +168,6 @@ export class Familiar implements OnInit {
       this.alertaAdicionar = 'Erro ao conectar ao servidor.';
     }
   }
-
-  // ═══════════════════════════════════════
-  // BOLETIM
-  // ═══════════════════════════════════════
 
   boletins: Record<number, any[] | undefined> = {};
   bimestreSelecionado: number = 1;
@@ -196,27 +178,23 @@ export class Familiar implements OnInit {
 
   async carregarBoletins(): Promise<void> {
     const bimestre = Number(this.bimestreSelecionado);
-    this.boletins = {}; // ← limpa o cache antes de recarregar
+    this.boletins = {};
     for (const aluno of this.alunos) {
       try {
-        const res = await fetch(
-          `${this.API}/boletim/${aluno.id}?bimestre=${bimestre}`
-        );
+        const res = await fetch(`${this.API}/boletim/${aluno.id}?bimestre=${bimestre}`, {
+          headers: this.getHeaders()
+        });
         const dados = await res.json();
         this.boletins = {
           ...this.boletins,
           [aluno.id]: res.ok ? dados.boletim : []
         };
-        this.cdr.detectChanges(); // ← força atualização após cada aluno
+        this.cdr.detectChanges();
       } catch {
         this.boletins[aluno.id] = [];
       }
     }
   }
-
-  // ═══════════════════════════════════════
-  // RECADOS
-  // ═══════════════════════════════════════
 
   recados: any[] = [];
 
@@ -228,18 +206,20 @@ export class Familiar implements OnInit {
     try {
       const ids = this.alunos.map(a => a.id).join(',');
 
-      if (!ids) return;
-
-      const res = await fetch(`${this.API}/recados/responsavel?alunos=${ids}&usuarioId=${this.usuario.id}`);
+      const res = await fetch(`${this.API}/recados/responsavel?alunos=${ids}&usuarioId=${this.usuario.id}`, {
+        headers: this.getHeaders()
+      });
       const dados = await res.json();
 
       if (res.ok) {
         this.recados = dados;
+        this.cdr.detectChanges();
       }
     } catch {
       console.error('Erro ao carregar recados');
     }
   }
+
   recadoSelecionado: any = null;
 
   lerRecado(recado: any): void {
@@ -247,10 +227,11 @@ export class Familiar implements OnInit {
     if (!recado.lido) {
       fetch(`${this.API}/recados/${recado.id}/lido`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getHeaders(),
         body: JSON.stringify({ usuarioId: this.usuario.id })
       });
       recado.lido = true;
+      this.cdr.detectChanges();
     }
   }
 
@@ -258,13 +239,8 @@ export class Familiar implements OnInit {
     this.recadoSelecionado = null;
   }
 
-  // ═══════════════════════════════════════
-  // BADGE DE CONDIÇÃO
-  // ═══════════════════════════════════════
-
   badgeCondicao(condicao: string): string {
     if (!condicao || condicao === 'Nenhuma') return 'bc-nenhuma';
-
     const c = condicao.toLowerCase();
     if (c.includes('autismo') || c.includes('tea')) return 'bc-autismo';
     if (c.includes('visual')) return 'bc-visual';
@@ -272,27 +248,19 @@ export class Familiar implements OnInit {
     if (c.includes('tdah')) return 'bc-tdah';
     if (c.includes('dislexia')) return 'bc-dislexia';
     if (c.includes('down')) return 'bc-down';
-
     return 'bc-outra';
   }
 
-  // ═══════════════════════════════════════
-  // LOGOUT
-  // ═══════════════════════════════════════
-
   logout(): void {
     localStorage.removeItem('usuario');
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('usuario');
+    sessionStorage.removeItem('token');
     window.location.href = '/login';
   }
 
-
-
-  // ═══════════════════════════════════════
-  // INIT
-  // ═══════════════════════════════════════
-
   ngOnInit(): void {
-    const raw = localStorage.getItem('usuario');
+    const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
 
     if (!raw) {
       window.location.href = '/login';
@@ -315,6 +283,5 @@ export class Familiar implements OnInit {
     });
 
     this.carregarAlunos();
-
   }
 }

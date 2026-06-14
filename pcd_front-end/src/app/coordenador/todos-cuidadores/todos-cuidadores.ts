@@ -38,7 +38,10 @@ export class TodosCuidadores implements OnInit {
   async carregarCuidadores(): Promise<void> {
     this.carregando = true;
     try {
-      const res = await fetch('http://localhost:3000/usuarios/cuidadores');
+      const token = localStorage.getItem('token');  // ← ADD
+      const res = await fetch('http://localhost:3000/usuarios/cuidadores', {
+        headers: { 'Authorization': `Bearer ${token}` }  // ← ADD
+      });
       const dados = await res.json();
       this.cuidadores = dados.cuidadores || [];
       this.cuidadoresFiltrados = [...this.cuidadores];
@@ -82,7 +85,8 @@ export class TodosCuidadores implements OnInit {
     this.apagando = true;
     try {
       const res = await fetch(`http://localhost:3000/usuarios/${this.cuidadorParaApagar.id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }  // ← ADD
       });
       if (res.ok) {
         this.cuidadores = this.cuidadores.filter(c => c.id !== this.cuidadorParaApagar.id);

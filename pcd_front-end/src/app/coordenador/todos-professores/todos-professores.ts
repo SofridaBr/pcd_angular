@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Api } from '../../service/api';
 
 @Component({
   selector: 'app-todos-professores',
@@ -14,12 +15,9 @@ export class TodosProfessores implements OnInit {
 
   constructor(
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private api: Api
   ) { }
-
-  // ═══════════════════════════════════════
-  // ESTADO
-  // ═══════════════════════════════════════
 
   usuario: any = null;
   professores: any[] = [];
@@ -35,51 +33,38 @@ export class TodosProfessores implements OnInit {
   professorParaApagar: any = null;
   apagando = false;
 
-  // ═══════════════════════════════════════
-  // INIT
-  // ═══════════════════════════════════════
-
   ngOnInit(): void {
-    const raw = localStorage.getItem('usuario');
-    if (!raw) { this.router.navigate(['/login']); return; }
-    this.usuario = JSON.parse(raw);
+    const usuario = this.api.getUsuario();
+    if (!usuario) { this.router.navigate(['/login']); return; }
+
+    const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
+    this.usuario = raw ? JSON.parse(raw) : usuario;
+
     if (this.usuario.tipo !== 'coordenador') { this.router.navigate(['/login']); return; }
     this.carregarProfessores();
   }
 
-  // ═══════════════════════════════════════
-  // CARREGAR
-  // ═══════════════════════════════════════
-
   async carregarProfessores(): Promise<void> {
     this.carregando = true;
-    try {
-      const res = await fetch('http://localhost:3000/usuarios/professores');
-      const dados = await res.json();
-      this.professores = dados.professores || [];
+    const res = await this.api.get('/usuarios/professores');
+    if (res.status) {
+      this.professores = res.dados.professores || [];
       this.professoresFiltrados = [...this.professores];
       this.disciplinas = [...new Set<string>(
-        this.professores.map(p => p.disciplina).filter(Boolean)
+        this.professores.map((p: any) => p.disciplina).filter(Boolean)
       )].sort();
-    } catch {
+    } else {
       console.error('Erro ao carregar professores');
-    } finally {
-      this.carregando = false;
-      this.cdr.detectChanges();
     }
+    this.carregando = false;
+    this.cdr.detectChanges();
   }
 
-
-  // ═══════════════════════════════════════
-  // FILTROS
-  // ═══════════════════════════════════════
   filtrar(): void {
     let lista = [...this.professores];
-
     if (this.filtroDisciplina !== 'Todas') {
       lista = lista.filter(p => p.disciplina === this.filtroDisciplina);
     }
-
     if (this.busca.trim()) {
       const termo = this.busca.toLowerCase();
       lista = lista.filter(p =>
@@ -87,7 +72,6 @@ export class TodosProfessores implements OnInit {
         p.email?.toLowerCase().includes(termo)
       );
     }
-
     this.professoresFiltrados = lista;
   }
 
@@ -101,25 +85,11 @@ export class TodosProfessores implements OnInit {
     this.filtrar();
   }
 
-  onBusca(): void {
-    this.filtrar();
-  }
+  onBusca(): void { this.filtrar(); }
 
-  // ═══════════════════════════════════════
-  // DETALHE
-  // ═══════════════════════════════════════
+  verProfessor(professor: any): void { this.professorSelecionado = professor; }
 
-  verProfessor(professor: any): void {
-    this.professorSelecionado = professor;
-  }
-
-  // ═══════════════════════════════════════
-  // APAGAR
-  // ═══════════════════════════════════════
-
-  confirmarApagar(professor: any): void {
-    this.professorParaApagar = professor;
-  }
+  confirmarApagar(professor: any): void { this.professorParaApagar = professor; }
 
   cancelarApagar(): void {
     this.professorParaApagar = null;
@@ -129,31 +99,20 @@ export class TodosProfessores implements OnInit {
   async apagarProfessor(): Promise<void> {
     if (!this.professorParaApagar) return;
     this.apagando = true;
-    try {
-      const res = await fetch(`http://localhost:3000/usuarios/${this.professorParaApagar.id}`, {
-        method: 'DELETE'
-      });
-      if (res.ok) {
-        this.professores = this.professores.filter(p => p.id !== this.professorParaApagar.id);
-        this.filtrar();
-        this.disciplinas = [...new Set<string>(
-          this.professores.map(p => p.disciplina).filter(Boolean)
-        )].sort();
-        this.cancelarApagar();
-      } else {
-        alert('Erro ao apagar.');
-      }
-    } catch {
-      alert('Erro de conexão.');
-    } finally {
-      this.apagando = false;
-      this.cdr.detectChanges();
+    const res = await this.api.delete(`/usuarios/${this.professorParaApagar.id}`);
+    if (res.status) {
+      this.professores = this.professores.filter(p => p.id !== this.professorParaApagar.id);
+      this.filtrar();
+      this.disciplinas = [...new Set<string>(
+        this.professores.map((p: any) => p.disciplina).filter(Boolean)
+      )].sort();
+      this.cancelarApagar();
+    } else {
+      alert('Erro ao apagar.');
     }
+    this.apagando = false;
+    this.cdr.detectChanges();
   }
-
-  // ═══════════════════════════════════════
-  // UTILITÁRIOS
-  // ═══════════════════════════════════════
 
   getIniciais(nome: string): string {
     return nome?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || '??';
@@ -177,16 +136,14 @@ export class TodosProfessores implements OnInit {
     return map[tipo] || tipo;
   }
 
-  voltarDashboard(): void {
-    this.router.navigate(['/coordenador']);
-  }
+  voltarDashboard(): void { this.router.navigate(['/coordenador']); }
 
   sair(): void {
     localStorage.removeItem('usuario');
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('usuario');
     this.router.navigate(['/login']);
   }
 
-  navegarPara(rota: string): void {
-    this.router.navigate([rota]);
-  }
+  navegarPara(rota: string): void { this.router.navigate([rota]); }
 }

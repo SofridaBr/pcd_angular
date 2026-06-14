@@ -1,10 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-
-const API = 'http://localhost:3000';
+import { Api } from '../service/api';
 
 const MATERIAS = [
   'Português', 'Matemática', 'História', 'Geografia',
@@ -25,12 +23,13 @@ const MATERIA_EMOJIS: Record<string, string> = {
 @Component({
   selector: 'app-professor',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './professor.html',
   styleUrl: './professor.scss',
 })
 export class Professor implements OnInit {
 
+  usuario: any = null;
   professorId: number = 0;
   nomeProfessor: string = '';
   dataHoje: string = '';
@@ -136,31 +135,31 @@ export class Professor implements OnInit {
   }
 
   constructor(
-    private http: HttpClient,
+    private api: Api,
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
-    const usuarioStr = sessionStorage.getItem('usuario') || localStorage.getItem('usuario');
-    if (!usuarioStr) { this.router.navigate(['/login']); return; }
-    const usuario = JSON.parse(usuarioStr);
-    this.professorId = usuario.id;
-    this.nomeProfessor = usuario.nome;
+    const usuario = this.api.getUsuario();
+    if (!usuario) { this.router.navigate(['/login']); return; }
+
+    const raw = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
+    this.usuario = raw ? JSON.parse(raw) : usuario;
+
+    this.professorId = this.usuario.id;
+    this.nomeProfessor = this.usuario.nome;
     this.dataHoje = new Date().toLocaleDateString('pt-BR', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
 
-    const partes = (this.nomeProfessor || '').split(' ');
+    const partes = (this.usuario.nome || '').split(' ');
     this.iniciais = (partes.length >= 2
       ? partes[0][0] + partes[partes.length - 1][0]
       : partes[0]?.[0] || '?').toUpperCase();
-
     this.route.queryParams.subscribe(params => {
-      if (params['aba']) {
-        this.abaAtiva = params['aba'];
-      }
+      if (params['aba']) this.abaAtiva = params['aba'];
     });
 
     this.carregarAlunos();
@@ -172,18 +171,18 @@ export class Professor implements OnInit {
 
   sair(): void {
     localStorage.removeItem('usuario');
+    localStorage.removeItem('token');
     sessionStorage.removeItem('usuario');
     this.router.navigate(['/login']);
   }
 
-  carregarAlunos(): void {
-    this.http.get<any>(`${API}/alunos/${this.professorId}`).subscribe({
-      next: (res) => { this.alunos = res.alunos; this.cdr.detectChanges(); },
-      error: () => console.error('Erro ao carregar alunos')
-    });
+  async carregarAlunos(): Promise<void> {
+    const res = await this.api.get(`/alunos/${this.professorId}`);
+    if (res.status) { this.alunos = res.dados.alunos; this.cdr.detectChanges(); }
+    else console.error('Erro ao carregar alunos');
   }
 
-  adicionarAluno(): void {
+  async adicionarAluno(): Promise<void> {
     if (!this.emailNovoAluno.trim()) {
       this.msgFeedbackAluno = 'Digite o email do aluno.';
       this.erroAluno = true;
@@ -191,23 +190,21 @@ export class Professor implements OnInit {
     }
     this.carregandoAdd = true;
     this.msgFeedbackAluno = '';
-    this.http.post<any>(`${API}/adicionar-aluno`, {
+    const res = await this.api.post('/adicionar-aluno', {
       professorId: this.professorId,
       emailAluno: this.emailNovoAluno.trim()
-    }).subscribe({
-      next: (res) => {
-        this.msgFeedbackAluno = '✅ ' + res.mensagem;
-        this.erroAluno = false;
-        this.emailNovoAluno = '';
-        this.carregandoAdd = false;
-        this.carregarAlunos();
-      },
-      error: (err) => {
-        this.msgFeedbackAluno = '❌ ' + (err.error?.mensagem || 'Erro ao adicionar aluno.');
-        this.erroAluno = true;
-        this.carregandoAdd = false;
-      }
     });
+    if (res.status) {
+      this.msgFeedbackAluno = '✅ ' + res.dados.mensagem;
+      this.erroAluno = false;
+      this.emailNovoAluno = '';
+      this.carregarAlunos();
+    } else {
+      this.msgFeedbackAluno = '❌ ' + (res.dados?.mensagem || 'Erro ao adicionar aluno.');
+      this.erroAluno = true;
+    }
+    this.carregandoAdd = false;
+    this.cdr.detectChanges();
   }
 
   abreviarSerie(serie: string): string {
@@ -217,11 +214,10 @@ export class Professor implements OnInit {
     return serie.substring(0, 4);
   }
 
-  carregarTarefasEnviadas(): void {
-    this.http.get<any>(`${API}/tarefas/professor/${this.professorId}`).subscribe({
-      next: (res) => { this.tarefasEnviadas = res.tarefas; this.cdr.detectChanges(); },
-      error: () => console.error('Erro ao carregar tarefas')
-    });
+  async carregarTarefasEnviadas(): Promise<void> {
+    const res = await this.api.get(`/tarefas/professor/${this.professorId}`);
+    if (res.status) { this.tarefasEnviadas = res.dados.tarefas; this.cdr.detectChanges(); }
+    else console.error('Erro ao carregar tarefas');
   }
 
   abrirModalTarefa(): void {
@@ -232,9 +228,7 @@ export class Professor implements OnInit {
     this.modalTarefaAberto = true;
   }
 
-  fecharModalTarefa(): void {
-    this.modalTarefaAberto = false;
-  }
+  fecharModalTarefa(): void { this.modalTarefaAberto = false; }
 
   toggleAluno(alunoId: number, event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
@@ -246,14 +240,11 @@ export class Professor implements OnInit {
   }
 
   selecionarTodos(): void {
-    if (this.todosSelecionados) {
-      this.alunosSelecionados = [];
-    } else {
-      this.alunosSelecionados = this.alunos.map(a => a.id);
-    }
+    if (this.todosSelecionados) this.alunosSelecionados = [];
+    else this.alunosSelecionados = this.alunos.map(a => a.id);
   }
 
-  criarTarefa(): void {
+  async criarTarefa(): Promise<void> {
     const { titulo, materia, link } = this.novaTarefa;
     if (!titulo.trim() || !materia.trim() || !link.trim()) {
       this.msgFeedbackTarefa = '❌ Preencha título, matéria e link.';
@@ -267,26 +258,23 @@ export class Professor implements OnInit {
     }
     this.carregandoTarefa = true;
     this.msgFeedbackTarefa = '';
-    this.http.post<any>(`${API}/tarefas`, {
+    const res = await this.api.post('/tarefas', {
       professorId: this.professorId,
       ...this.novaTarefa,
       alunosIds: this.alunosSelecionados
-    }).subscribe({
-      next: () => {
-        this.carregandoTarefa = false;
-        this.msgFeedbackTarefa = '✅ Tarefa publicada com sucesso!';
-        this.erroTarefa = false;
-        this.carregarTarefasEnviadas();
-        this.cdr.detectChanges();
-        setTimeout(() => { this.fecharModalTarefa(); this.trocarAba('tarefas'); }, 1500);
-      },
-      error: (err) => {
-        this.msgFeedbackTarefa = '❌ ' + (err.error?.mensagem || 'Erro ao criar tarefa.');
-        this.erroTarefa = true;
-        this.carregandoTarefa = false;
-        this.cdr.detectChanges();
-      }
     });
+    if (res.status) {
+      this.msgFeedbackTarefa = '✅ Tarefa publicada com sucesso!';
+      this.erroTarefa = false;
+      this.carregarTarefasEnviadas();
+      this.cdr.detectChanges();
+      setTimeout(() => { this.fecharModalTarefa(); this.trocarAba('tarefas'); }, 1500);
+    } else {
+      this.msgFeedbackTarefa = '❌ ' + (res.dados?.mensagem || 'Erro ao criar tarefa.');
+      this.erroTarefa = true;
+    }
+    this.carregandoTarefa = false;
+    this.cdr.detectChanges();
   }
 
   abrirBoletimAluno(aluno: any): void {
@@ -300,21 +288,19 @@ export class Professor implements OnInit {
     if (this.alunoBoletimSelecionado) this.carregarNotasAluno();
   }
 
-  carregarNotasAluno(): void {
-    const url = `${API}/boletim/professor/${this.professorId}/aluno/${this.alunoBoletimSelecionado.id}?bimestre=${this.bimestreSelecionado}`;
-    this.http.get<any>(url).subscribe({
-      next: (res) => {
-        this.notasBoletim = res.boletim.map((item: any) => ({ ...item, salvo: false }));
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.notasBoletim = MATERIAS.map(m => ({ materia: m, nota: null, salvo: false }));
-        this.cdr.detectChanges();
-      }
-    });
+  async carregarNotasAluno(): Promise<void> {
+    const res = await this.api.get(
+      `/boletim/professor/${this.professorId}/aluno/${this.alunoBoletimSelecionado.id}?bimestre=${this.bimestreSelecionado}`
+    );
+    if (res.status) {
+      this.notasBoletim = res.dados.boletim.map((item: any) => ({ ...item, salvo: false }));
+    } else {
+      this.notasBoletim = MATERIAS.map(m => ({ materia: m, nota: null, salvo: false }));
+    }
+    this.cdr.detectChanges();
   }
 
-  salvarNota(item: any): void {
+  async salvarNota(item: any): Promise<void> {
     if (item.nota === null || item.nota === '') return;
     const nota = parseFloat(item.nota);
     if (isNaN(nota) || nota < 0 || nota > 10) {
@@ -322,55 +308,47 @@ export class Professor implements OnInit {
       this.erroBoletim = true;
       return;
     }
-    this.http.post<any>(`${API}/boletim`, {
+    const res = await this.api.post('/boletim', {
       professorId: this.professorId,
       alunoId: this.alunoBoletimSelecionado.id,
       materia: item.materia,
-      nota: nota,
+      nota,
       bimestre: this.bimestreSelecionado
-    }).subscribe({
-      next: () => {
-        item.salvo = true;
-        this.cdr.detectChanges();
-        setTimeout(() => { item.salvo = false; this.cdr.detectChanges(); }, 2000);
-        this.msgFeedbackBoletim = '';
-      },
-      error: (err) => {
-        this.msgFeedbackBoletim = '❌ ' + (err.error?.mensagem || 'Erro ao salvar nota.');
-        this.erroBoletim = true;
-        this.cdr.detectChanges();
-      }
     });
+    if (res.status) {
+      item.salvo = true;
+      this.msgFeedbackBoletim = '';
+      this.cdr.detectChanges();
+      setTimeout(() => { item.salvo = false; this.cdr.detectChanges(); }, 2000);
+    } else {
+      this.msgFeedbackBoletim = '❌ ' + (res.dados?.mensagem || 'Erro ao salvar nota.');
+      this.erroBoletim = true;
+      this.cdr.detectChanges();
+    }
   }
 
   getMateriaEmoji(materia: string): string {
     return MATERIA_EMOJIS[materia] || '📚';
   }
 
-  carregarRecadosEnviados(): void {
-    this.http.get<any>(`${API}/recados/professor/${this.professorId}`).subscribe({
-      next: (res) => { this.recadosEnviados = res.recados; this.cdr.detectChanges(); },
-      error: () => console.error('Erro ao carregar recados')
-    });
+  async carregarRecadosEnviados(): Promise<void> {
+    const res = await this.api.get(`/recados/professor/${this.professorId}`);
+    if (res.status) { this.recadosEnviados = res.dados.recados; this.cdr.detectChanges(); }
+    else console.error('Erro ao carregar recados');
   }
 
-  carregarRecadosRecebidos(): void {
-    this.http.get<any>(`${API}/recados/recebidos/professor/${this.professorId}`).subscribe({
-      next: (res) => { this.recadosRecebidos = res.recados; this.cdr.detectChanges(); },
-      error: () => console.error('Erro ao carregar recados recebidos')
-    });
+  async carregarRecadosRecebidos(): Promise<void> {
+    const res = await this.api.get(`/recados/recebidos/professor/${this.professorId}`);
+    if (res.status) { this.recadosRecebidos = res.dados.recados; this.cdr.detectChanges(); }
+    else console.error('Erro ao carregar recados recebidos');
   }
 
-  marcarRecadoLido(id: number): void {
-    this.http.patch<any>(`${API}/recados/${id}/lido`, { usuarioId: this.professorId }).subscribe({
-      next: () => {
-        this.recadosRecebidos = this.recadosRecebidos.map(r =>
-          r.id === id ? { ...r, lido: true } : r
-        );
-        this.cdr.detectChanges();
-      },
-      error: () => { }
-    });
+  async marcarRecadoLido(id: number): Promise<void> {
+    const res = await this.api.patch(`/recados/${id}/lido`, { usuarioId: this.professorId });
+    if (res.status) {
+      this.recadosRecebidos = this.recadosRecebidos.map(r => r.id === id ? { ...r, lido: true } : r);
+      this.cdr.detectChanges();
+    }
   }
 
   abrirModalRecado(): void {
@@ -379,11 +357,9 @@ export class Professor implements OnInit {
     this.modalRecadoAberto = true;
   }
 
-  fecharModalRecado(): void {
-    this.modalRecadoAberto = false;
-  }
+  fecharModalRecado(): void { this.modalRecadoAberto = false; }
 
-  enviarRecado(): void {
+  async enviarRecado(): Promise<void> {
     if (!this.novoRecado.titulo.trim() || !this.novoRecado.mensagem.trim()) {
       this.msgFeedbackRecado = '❌ Preencha título e mensagem.';
       this.erroRecado = true;
@@ -391,34 +367,30 @@ export class Professor implements OnInit {
     }
     this.carregandoRecado = true;
     this.msgFeedbackRecado = '';
-    this.http.post<any>(`${API}/recados`, {
+    const res = await this.api.post('/recados', {
       professorId: this.professorId,
       alunoId: this.novoRecado.alunoId || null,
       titulo: this.novoRecado.titulo,
       mensagem: this.novoRecado.mensagem
-    }).subscribe({
-      next: (res) => {
-        this.carregandoRecado = false;
-        this.msgFeedbackRecado = '✅ ' + res.mensagem;
-        this.erroRecado = false;
-        this.carregarRecadosEnviados();
-        this.cdr.detectChanges();
-        setTimeout(() => this.fecharModalRecado(), 1500);
-      },
-      error: (err) => {
-        this.msgFeedbackRecado = '❌ ' + (err.error?.mensagem || 'Erro ao enviar recado.');
-        this.erroRecado = true;
-        this.carregandoRecado = false;
-        this.cdr.detectChanges();
-      }
     });
+    if (res.status) {
+      this.msgFeedbackRecado = '✅ ' + res.dados.mensagem;
+      this.erroRecado = false;
+      this.carregarRecadosEnviados();
+      this.cdr.detectChanges();
+      setTimeout(() => this.fecharModalRecado(), 1500);
+    } else {
+      this.msgFeedbackRecado = '❌ ' + (res.dados?.mensagem || 'Erro ao enviar recado.');
+      this.erroRecado = true;
+    }
+    this.carregandoRecado = false;
+    this.cdr.detectChanges();
   }
 
-  carregarMateriaisEnviados(): void {
-    this.http.get<any>(`${API}/materiais/professor/${this.professorId}`).subscribe({
-      next: (res) => { this.materiaisEnviados = res.materiais; this.cdr.detectChanges(); },
-      error: () => console.error('Erro ao carregar materiais')
-    });
+  async carregarMateriaisEnviados(): Promise<void> {
+    const res = await this.api.get(`/materiais/professor/${this.professorId}`);
+    if (res.status) { this.materiaisEnviados = res.dados.materiais; this.cdr.detectChanges(); }
+    else console.error('Erro ao carregar materiais');
   }
 
   abrirModalMaterial(): void {
@@ -441,14 +413,11 @@ export class Professor implements OnInit {
   }
 
   selecionarTodosMaterial(): void {
-    if (this.todosMaterialSelecionados) {
-      this.alunosMaterialSelecionados = [];
-    } else {
-      this.alunosMaterialSelecionados = this.alunos.map(a => a.id);
-    }
+    if (this.todosMaterialSelecionados) this.alunosMaterialSelecionados = [];
+    else this.alunosMaterialSelecionados = this.alunos.map(a => a.id);
   }
 
-  publicarMaterial(): void {
+  async publicarMaterial(): Promise<void> {
     const { titulo, tipo, url } = this.novoMaterial;
     if (!titulo.trim() || !tipo || !url.trim()) {
       this.msgFeedbackMaterial = '❌ Preencha título, tipo e URL.';
@@ -462,26 +431,23 @@ export class Professor implements OnInit {
     }
     this.carregandoMaterial = true;
     this.msgFeedbackMaterial = '';
-    this.http.post<any>(`${API}/materiais`, {
+    const res = await this.api.post('/materiais', {
       professorId: this.professorId,
       ...this.novoMaterial,
       alunosIds: this.alunosMaterialSelecionados
-    }).subscribe({
-      next: () => {
-        this.carregandoMaterial = false;
-        this.msgFeedbackMaterial = '✅ Material publicado com sucesso!';
-        this.erroMaterial = false;
-        this.carregarMateriaisEnviados();
-        this.cdr.detectChanges();
-        setTimeout(() => { this.fecharModalMaterial(); this.trocarAba('materiais'); }, 1500);
-      },
-      error: (err) => {
-        this.msgFeedbackMaterial = '❌ ' + (err.error?.mensagem || 'Erro ao publicar.');
-        this.erroMaterial = true;
-        this.carregandoMaterial = false;
-        this.cdr.detectChanges();
-      }
     });
+    if (res.status) {
+      this.msgFeedbackMaterial = '✅ Material publicado com sucesso!';
+      this.erroMaterial = false;
+      this.carregarMateriaisEnviados();
+      this.cdr.detectChanges();
+      setTimeout(() => { this.fecharModalMaterial(); this.trocarAba('materiais'); }, 1500);
+    } else {
+      this.msgFeedbackMaterial = '❌ ' + (res.dados?.mensagem || 'Erro ao publicar.');
+      this.erroMaterial = true;
+    }
+    this.carregandoMaterial = false;
+    this.cdr.detectChanges();
   }
 
   getTipoLabel(tipo: string): string {
@@ -525,5 +491,4 @@ export class Professor implements OnInit {
       this.cdr.detectChanges();
     }, 10);
   }
-
 }

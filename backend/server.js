@@ -90,9 +90,9 @@ app.post("/cadastro/aluno", async (req, res) => {
             if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
             if (resultado.length > 0) return res.status(400).json({ mensagem: "Este CPF já está cadastrado." });
 
-        
 
-            conexao.query(`SELECT id FROM usuarios WHERE rg = ?`, [rg], async(erro, resultado) => {
+
+            conexao.query(`SELECT id FROM usuarios WHERE rg = ?`, [rg], async (erro, resultado) => {
                 if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
                 if (resultado.length > 0) return res.status(400).json({ mensagem: "Este RG já está cadastrado." });
 
@@ -693,23 +693,6 @@ app.get("/recados/professor/:professorId", autenticar, (req, res) => {
     });
 });
 
-// Marcar recado como lido
-// ════════════════════════════════════════════════
-// MARCAR RE CADO COMO LIDO (Corrigido para bater com o Angular)
-// ════════════════════════════════════════════════
-app.patch("/recados/:id/lido", autenticar, (req, res) => {
-    const { id } = req.params;
-
-    conexao.query(
-        `UPDATE recados SET lido = 1 WHERE id = ?`,
-        [id],
-        (erro, resultado) => {
-            if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
-            if (resultado.affectedRows === 0) return res.status(404).json({ mensagem: "Recado não encontrado." });
-            res.json({ mensagem: "Recado marcado como lido." });
-        }
-    );
-});
 // ════════════════════════════════════════════════
 // MATERIAIS
 // ════════════════════════════════════════════════
@@ -837,41 +820,13 @@ app.post("/responsavel/vincular", autenticar, (req, res) => {
     );
 });
 
-// Recados dos alunos vinculados ao responsável
-app.get("/recados/responsavel", autenticar, (req, res) => {
-    const ids = req.query.alunos;
-    const usuarioId = req.query.usuarioId;
 
-    if (!ids || !usuarioId) return res.status(400).json({ mensagem: "Informe os IDs dos alunos e usuarioId." });
-
-    const idsArray = ids.split(',').map(Number).filter(Boolean);
-    if (idsArray.length === 0) return res.json([]);
-
-    const placeholders = idsArray.map(() => '?').join(',');
-
-    const sql = `
-    SELECT r.id, r.titulo, r.mensagem, r.criado_em,
-           al.nome AS aluno,
-           pr.nome AS professor,
-           CASE WHEN rl.id IS NOT NULL THEN 1 ELSE 0 END AS lido
-    FROM recados r
-    INNER JOIN usuarios al ON r.aluno_id = al.id
-    INNER JOIN usuarios pr ON r.professor_id = pr.id
-    LEFT JOIN recado_leituras rl 
-           ON rl.recado_id = r.id AND rl.usuario_id = ?
-    WHERE r.aluno_id IN (${placeholders})
-    ORDER BY r.criado_em DESC
-  `;
-
-    conexao.query(sql, [usuarioId, ...idsArray], (erro, resultado) => {
-        if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
-        res.json(resultado);
-    });
-});
 
 // Marcar recado como lido (PATCH)
 // Marcar recado como lido (PATCH)
 app.patch("/recados/:id/lido", (req, res) => {
+    console.log('PATCH lido - params:', req.params);
+    console.log('PATCH lido - body:', req.body);
     const { usuarioId } = req.body;
 
     if (!usuarioId) return res.status(400).json({ mensagem: "usuarioId é obrigatório." });
@@ -1047,6 +1002,9 @@ app.delete("/usuarios/:id", autenticar, (req, res) => {
 });
 
 
+
+
+
 // ════════════════════════════════════════════════
 // BUSCAR TODOS OS RESPONSÁVEIS (coordenador)
 // ════════════════════════════════════════════════
@@ -1118,16 +1076,47 @@ app.get("/recados/recebidos/professor/:professorId", autenticar, (req, res) => {
 });
 
 // Buscar TODOS os recados enviados pelo coordenador
+app.get("/recados/responsavel", autenticar, (req, res) => {
+    const ids = req.query.alunos;
+    const usuarioId = req.query.usuarioId;
+
+    if (!usuarioId) return res.status(400).json({ mensagem: "Informe o usuarioId." });
+
+    const idsArray = ids ? ids.split(',').map(Number).filter(Boolean) : [];
+    const placeholders = idsArray.length > 0 ? idsArray.map(() => '?').join(',') : 'NULL';
+
+    const sql = `
+        SELECT r.id, r.titulo, r.mensagem, r.criado_em,
+               al.nome AS aluno,
+               pr.nome AS professor,
+               CASE WHEN rl.id IS NOT NULL THEN 1 ELSE 0 END AS lido
+        FROM recados r
+        INNER JOIN usuarios pr ON r.professor_id = pr.id
+        LEFT JOIN usuarios al ON r.aluno_id = al.id
+        LEFT JOIN recado_leituras rl ON rl.recado_id = r.id AND rl.usuario_id = ?
+        WHERE r.aluno_id IN (${placeholders})
+           OR r.destinatario_responsavel_id = ?
+        ORDER BY r.criado_em DESC
+    `;
+
+    conexao.query(sql, [usuarioId, ...idsArray, usuarioId], (erro, resultado) => {
+        if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
+        res.json(resultado);
+    });
+});
+
+// Buscar TODOS os recados enviados pelo coordenador
 app.get("/recados/coordenador/:id", autenticar, (req, res) => {
     const { id } = req.params;
 
     const sql = `
         SELECT 
             r.id, r.titulo, r.mensagem, r.lido, r.criado_em,
-            COALESCE(al.nome, pr.nome, '📢 Todos') AS aluno
+            COALESCE(al.nome, pr.nome, resp.nome, '📢 Todos') AS aluno
         FROM recados r
-        LEFT JOIN usuarios al ON r.aluno_id = al.id
-        LEFT JOIN usuarios pr ON r.destinatario_professor_id = pr.id
+        LEFT JOIN usuarios al   ON r.aluno_id = al.id
+        LEFT JOIN usuarios pr   ON r.destinatario_professor_id = pr.id
+        LEFT JOIN usuarios resp ON r.destinatario_responsavel_id = resp.id
         WHERE r.professor_id = ?
         ORDER BY r.criado_em DESC
     `;
@@ -1135,6 +1124,25 @@ app.get("/recados/coordenador/:id", autenticar, (req, res) => {
     conexao.query(sql, [id], (erro, resultado) => {
         if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
         res.json({ recados: resultado });
+    });
+});
+
+// Coordenador envia recado para responsável
+app.post("/recados/coordenador/responsavel", autenticar, (req, res) => {
+    const { remetenteId, responsavelId, titulo, mensagem } = req.body;
+
+    if (!remetenteId || !responsavelId || !titulo || !mensagem) {
+        return res.status(400).json({ mensagem: "Campos obrigatórios faltando." });
+    }
+
+    const sql = `
+        INSERT INTO recados (professor_id, destinatario_responsavel_id, titulo, mensagem)
+        VALUES (?, ?, ?, ?)
+    `;
+
+    conexao.query(sql, [remetenteId, responsavelId, titulo, mensagem], (erro, resultado) => {
+        if (erro) return res.status(500).json({ mensagem: "Erro ao enviar recado." });
+        res.json({ mensagem: "Recado enviado ao responsável!", id: resultado.insertId });
     });
 });
 

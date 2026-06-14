@@ -285,7 +285,7 @@
       <div class="modal-notas" *ngIf="!carregandoBoletim">
         <div class="nota-item" *ngFor="let item of boletimAluno">
           <div class="nota-materia">
-            <span class="nota-emoji">📚</span>
+            <span class="nota-emoji">{{ getEmojiMateria(item.materia) }}</span>
             <span>{{ item.materia }}</span>
           </div>
           <div class="nota-valor" [ngClass]="getNoteClass(item.nota)">
