@@ -373,29 +373,176 @@
   }
 }
 
+// ═══════════════════════════════════════
+// RESPONSIVO MOBILE
+// ═══════════════════════════════════════
+
 @media (max-width: 768px) {
   :host {
     flex-direction: column;
   }
 
+  // Sidebar vira navbar horizontal no topo
   .sidebar {
-    width: 100%;
+    width: 100% !important;
     min-height: auto;
-    position: relative;
     height: auto;
+    position: relative;
+    flex-direction: row;
+    padding: 12px 16px;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 
-  .config-layout {
-    flex-direction: column;
+  .sidebar-header {
+    padding: 0;
+    border-bottom: none;
+    flex-shrink: 0;
   }
 
-  .config-nav {
-    position: static;
-    min-width: unset;
+  .sidebar-profile {
+    display: none;
+  }
+
+  .sidebar-avatar-mini {
+    display: flex;
+    padding: 0 8px;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    padding: 0 8px;
+    gap: 4px;
+    flex: 1;
+    overflow-x: auto;
+
+    // Esconde labels de seção
+    .nav-label {
+      display: none;
+    }
+
+    .nav-item {
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px 10px;
+      font-size: 10px;
+      white-space: nowrap;
+      border-radius: 10px;
+
+      i {
+        font-size: 22px;
+      }
+
+      span {
+        display: block !important;
+        font-size: 10px;
+      }
+    }
+
+    .badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      padding: 1px 5px;
+      font-size: 9px;
+    }
+  }
+
+  .toggle-btn {
+    display: none;
+  }
+
+  // Conteúdo
+  .content {
+    min-height: calc(100vh - 80px);
+  }
+
+  .topbar {
+    padding: 14px 16px;
+  }
+
+  .page-title {
+    font-size: 18px;
   }
 
   .main-content {
+    padding: 16px;
+  }
+
+  // Config layout empilha verticalmente
+  .config-layout {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  // Config nav vira abas horizontais
+  .config-nav {
+    position: static;
+    min-width: unset;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+    gap: 8px;
+    border-radius: 14px;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .config-tab {
+    flex-shrink: 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    border-radius: 10px;
+    white-space: nowrap;
+
+    i {
+      font-size: 16px;
+    }
+  }
+
+  .config-body {
     padding: 20px 16px;
+    border-radius: 14px;
+
+    h2 {
+      font-size: 20px;
+    }
+
+    h3 {
+      font-size: 15px;
+    }
+
+    p, li {
+      font-size: 14px;
+    }
+  }
+
+  // Cards de suporte empilham
+  .suporte-cards {
+    flex-direction: column;
+  }
+
+  .suporte-card {
+    padding: 20px;
+    width: 100%;
+  }
+
+  // Botão acessibilidade menor no mobile
+  .accessibility-button {
+    width: 54px;
+    height: 54px;
+    font-size: 24px;
+    right: 14px;
+    bottom: 14px;
+  }
+
+  .accessibility-menu {
+    width: calc(100vw - 28px);
+    right: 14px;
+    bottom: 80px;
   }
 }
 

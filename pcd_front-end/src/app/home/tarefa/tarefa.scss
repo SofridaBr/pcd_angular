@@ -15,7 +15,6 @@
   padding: 0;
 }
 
-// ── SIDEBAR (idêntica à home) ──────────────────
 .sidebar {
   width: 260px;
   min-height: 100vh;
@@ -210,7 +209,6 @@
   margin-left: auto;
 }
 
-// ── CONTENT ───────────────────────────────────
 .content {
   flex: 1;
   display: flex;
@@ -219,7 +217,6 @@
   transition: 0.3s;
 }
 
-// TOPBAR
 .topbar {
   background: #fff;
   padding: 16px 32px;
@@ -277,7 +274,6 @@
   }
 }
 
-// MAIN
 .main-content {
   padding: 28px 32px;
   display: flex;
@@ -286,7 +282,6 @@
   animation: fadeSlideUp 0.35s ease both;
 }
 
-// FILTROS
 .filters-bar {
   display: flex;
   gap: 14px;
@@ -325,7 +320,6 @@
   }
 }
 
-// CONTAGEM
 .results-info {
   display: flex;
   align-items: center;
@@ -351,7 +345,6 @@
   }
 }
 
-// EMPTY STATE
 .empty-state {
   background: #fff;
   border-radius: 20px;
@@ -379,14 +372,12 @@
   font-size: 14px;
 }
 
-// GRID
 .tarefas-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
 }
 
-// CARD
 .task-card {
   background: #fff;
   border-radius: 20px;
@@ -540,7 +531,6 @@
   }
 }
 
-// MODAL
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -629,33 +619,6 @@
   }
 }
 
-// RESPONSIVE
-@media (max-width: 768px) {
-  :host {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-    min-height: auto;
-    position: relative;
-    height: auto;
-  }
-
-  .sidebar.collapsed {
-    width: 100%;
-  }
-
-  .main-content {
-    padding: 20px 16px;
-  }
-
-  .topbar {
-    padding: 14px 16px;
-  }
-}
-
-
 .accessibility-button {
   position: fixed;
   right: 20px;
@@ -716,5 +679,134 @@
     &:hover {
       background: #003bb3;
     }
+  }
+}
+
+@media (max-width: 768px) {
+  :host {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    min-height: auto;
+    height: auto;
+    position: relative;
+    flex-direction: row;
+    padding: 12px 16px;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .sidebar.collapsed {
+    width: 100% !important;
+  }
+
+  .sidebar-header {
+    padding: 0;
+    border-bottom: none;
+    flex-shrink: 0;
+  }
+
+  .sidebar-profile {
+    display: none;
+  }
+
+  .sidebar-avatar-mini {
+    display: flex;
+    padding: 0 8px;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    padding: 0 8px;
+    gap: 4px;
+    flex: 1;
+    overflow-x: auto;
+
+    .nav-label {
+      display: none;
+    }
+
+    .nav-item {
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px 10px;
+      font-size: 10px;
+      white-space: nowrap;
+      border-radius: 10px;
+      position: relative;
+
+      i {
+        font-size: 22px;
+      }
+
+      span {
+        display: block !important;
+        font-size: 10px;
+      }
+    }
+
+    .badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      padding: 1px 5px;
+      font-size: 9px;
+    }
+  }
+
+  .toggle-btn {
+    display: none;
+  }
+
+  .content {
+    min-height: calc(100vh - 80px);
+  }
+
+  .topbar {
+    padding: 14px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .page-title {
+    font-size: 18px;
+  }
+
+  .main-content {
+    padding: 16px;
+  }
+
+  .tarefas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filters-bar {
+    flex-direction: column;
+  }
+
+  .filter-wrap {
+    width: 100%;
+
+    select {
+      width: 100%;
+      min-width: unset;
+    }
+  }
+
+  .accessibility-button {
+    width: 54px;
+    height: 54px;
+    font-size: 24px;
+    right: 14px;
+    bottom: 14px;
+  }
+
+  .accessibility-menu {
+    width: calc(100vw - 28px);
+    right: 14px;
+    bottom: 80px;
   }
 }

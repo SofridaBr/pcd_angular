@@ -172,6 +172,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: 0.2s;
+  position: relative;
 
   i {
     font-size: 20px;
@@ -517,36 +518,129 @@
   margin-left: auto;
 }
 
-// RESPONSIVE
-@media (max-width: 900px) {
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
-}
+// ═══════════════════════════════════════
+// RESPONSIVO MOBILE
+// ═══════════════════════════════════════
 
 @media (max-width: 768px) {
   :host {
     flex-direction: column;
   }
 
+  // Sidebar vira navbar horizontal no topo
   .sidebar {
-    width: 100%;
+    width: 100% !important;
     min-height: auto;
-    position: relative;
     height: auto;
+    position: relative;
+    flex-direction: row;
+    padding: 12px 16px;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 
-  .main-content {
-    padding: 20px 16px;
+  .sidebar.collapsed {
+    width: 100% !important;
+  }
+
+  .sidebar-header {
+    padding: 0;
+    border-bottom: none;
+    flex-shrink: 0;
+  }
+
+  .sidebar-profile {
+    display: none;
+  }
+
+  .sidebar-avatar-mini {
+    display: flex;
+    padding: 0 8px;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    padding: 0 8px;
+    gap: 4px;
+    flex: 1;
+    overflow-x: auto;
+
+    .nav-label {
+      display: none;
+    }
+
+    .nav-item {
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px 10px;
+      font-size: 10px;
+      white-space: nowrap;
+      border-radius: 10px;
+      position: relative;
+
+      i {
+        font-size: 22px;
+      }
+
+      span {
+        display: block !important;
+        font-size: 10px;
+      }
+    }
+
+    .badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      padding: 1px 5px;
+      font-size: 9px;
+    }
+  }
+
+  .toggle-btn {
+    display: none;
+  }
+
+  .content {
+    min-height: calc(100vh - 80px);
   }
 
   .topbar {
     padding: 14px 16px;
   }
 
+  .page-title {
+    font-size: 18px;
+  }
+
+  .main-content {
+    padding: 16px;
+  }
+
+  // Hero do perfil empilha
   .profile-hero {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  // Grid de informações vira 1 coluna
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .accessibility-button {
+    width: 54px;
+    height: 54px;
+    font-size: 24px;
+    right: 14px;
+    bottom: 14px;
+  }
+
+  .accessibility-menu {
+    width: calc(100vw - 28px);
+    right: 14px;
+    bottom: 80px;
   }
 }
 
