@@ -1,0 +1,201 @@
+<div class="app-wrapper">
+
+    <!-- ══════════ SIDEBAR ══════════ -->
+
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-icon">🌟</div>
+            <span class="logo-text">Educa<span>Inclusiva</span></span>
+        </div>
+
+        <!-- ADICIONA ISSO -->
+        <div class="sidebar-profile">
+            <div class="sidebar-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
+            <div class="profile-info">
+                <span class="profile-name">{{ usuario?.nome }}</span>
+                <span class="profile-sub">Coordenador(a)</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <p class="nav-label">PRINCIPAL</p>
+            <a class="nav-item" (click)="navegarPara('/coordenador')">
+                <i class="ti ti-layout-dashboard"></i><span>Home</span>
+            </a>
+            <a class="nav-item" (click)="navegarPara('/coordenador/alunos')">
+                <i class="ti ti-users"></i><span>Todos os alunos</span>
+            </a>
+            <p class="nav-label">ESCOLAR</p>
+            <a class="nav-item active" (click)="navegarPara('/coordenador/professores')">
+                <i class="ti ti-school"></i><span>Professores</span>
+            </a>
+            <a class="nav-item" (click)="navegarPara('/coordenador/comunicacao')">
+                <i class="ti ti-message-2"></i><span>Recados</span>
+            </a>
+            <a class="nav-item" (click)="navegarPara('/coordenador/responsaveis')">
+                <i class="ti ti-heart-handshake"></i><span>Responsáveis</span>
+            </a>
+            <a class="nav-item" (click)="navegarPara('/coordenador/cuidadores')">
+                <i class="ti ti-accessible"></i><span>Apoio & Cuidadores</span>
+            </a>
+            <p class="nav-label">SISTEMA</p>
+            <a class="nav-item" (click)="navegarPara('/coordenador/configuracoes')">
+                <i class="ti ti-settings"></i><span>Configurações</span>
+            </a>
+            <a class="nav-item sair" (click)="sair()">
+                <i class="ti ti-logout"></i><span>Sair</span>
+            </a>
+        </nav>
+
+
+    </aside>
+
+    <!-- ══════════ CONTEÚDO ══════════ -->
+    <div class="content">
+
+        <!-- TOPBAR -->
+        
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="btn-voltar" (click)="voltarDashboard()">
+                    <i class="ti ti-arrow-left"></i>
+                </button>
+                <h1 class="topbar-title">Professores do sistema</h1>
+            </div>
+            <div class="topbar-right">
+                <div class="user-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
+            </div>
+        </header>
+
+        <!-- MAIN -->
+        <main class="main-content">
+
+            <!-- TÍTULO -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Professores</h1>
+                    <p class="page-sub">
+                        {{ carregando ? 'Carregando...' : professoresFiltrados.length + ' membro(s) encontrado(s)'
+                        }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- FILTROS POR TIPO -->
+
+
+            <!-- FILTROS POR DISCIPLINA -->
+            <div class="series-row" *ngIf="!carregando && disciplinas.length > 0">
+                <button class="serie-chip disciplina-chip" [class.ativo]="filtroDisciplina === 'Todas'"
+                    (click)="selecionarDisciplina('Todas')">
+                    Todas as disciplinas
+                </button>
+                <button class="serie-chip disciplina-chip" *ngFor="let d of disciplinas"
+                    [class.ativo]="filtroDisciplina === d" (click)="selecionarDisciplina(d)">
+                    {{ d }}
+                </button>
+            </div>
+
+            <!-- LOADING -->
+            <div class="loading-wrap" *ngIf="carregando">
+                <div class="spinner"></div>
+                <p>Carregando equipe...</p>
+            </div>
+
+            <!-- GRID DE CARDS -->
+            <div class="alunos-grid" *ngIf="!carregando">
+
+                <div class="aluno-card" *ngFor="let prof of professoresFiltrados" (click)="verProfessor(prof)">
+
+                    <div class="card-top">
+                        <div class="card-avatar">{{ getIniciais(prof.nome) }}</div>
+                        <div class="card-info">
+                            <span class="card-nome">{{ prof.nome }}</span>
+                            <span class="card-email">{{ prof.email }}</span>
+                        </div>
+                    </div>
+
+                    <div class="card-tags">
+                        <span class="tag badge" [ngClass]="getTipoBadgeClass(prof.tipo)">
+                            {{ getTipoLabel(prof.tipo) }}
+                        </span>
+                        <span class="tag tag-disciplina" *ngIf="prof.disciplina">
+                            <i class="ti ti-book"></i> {{ prof.disciplina }}
+                        </span>
+                    </div>
+
+                    <div class="card-actions">
+                        <button class="btn-apagar" (click)="$event.stopPropagation(); confirmarApagar(prof)">
+                            <i class="ti ti-trash"></i> Apagar
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Estado vazio -->
+                <div class="empty-state" *ngIf="professoresFiltrados.length === 0">
+                    <span class="empty-icon">🔍</span>
+                    <p>Nenhum membro encontrado</p>
+                    <span>Tente ajustar os filtros ou a busca</span>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODAL DETALHE PROFESSOR -->
+    <div class="modal-overlay" *ngIf="professorSelecionado" (click)="professorSelecionado = null">
+        <div class="modal-box" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">👤 {{ professorSelecionado?.nome }}</span>
+                <button class="modal-close" (click)="professorSelecionado = null">✕</button>
+            </div>
+            <div class="detalhe-grid">
+                <div class="detalhe-item">
+                    <span class="detalhe-label">Tipo</span>
+                    <span class="detalhe-val">{{ getTipoLabel(professorSelecionado?.tipo) }}</span>
+                </div>
+                <div class="detalhe-item">
+                    <span class="detalhe-label">Disciplina</span>
+                    <span class="detalhe-val">{{ professorSelecionado?.disciplina || '—' }}</span>
+                </div>
+                <div class="detalhe-item">
+                    <span class="detalhe-label">E-mail</span>
+                    <span class="detalhe-val">{{ professorSelecionado?.email || '—' }}</span>
+                </div>
+                <div class="detalhe-item">
+                    <span class="detalhe-label">Telefone</span>
+                    <span class="detalhe-val">{{ professorSelecionado?.telefone || '—' }}</span>
+                </div>
+                <div class="detalhe-item">
+                    <span class="detalhe-label">CPF</span>
+                    <span class="detalhe-val">{{ professorSelecionado?.cpf || '—' }}</span>
+                </div>
+                <div class="detalhe-item">
+                    <span class="detalhe-label">RG</span>
+                    <span class="detalhe-val">{{ professorSelecionado?.rg || '—' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAÇÃO APAGAR -->
+    <div class="modal-overlay" *ngIf="professorParaApagar" (click)="cancelarApagar()">
+        <div class="modal-box modal-confirmacao" (click)="$event.stopPropagation()">
+            <div class="modal-icon">⚠️</div>
+            <h2 class="modal-titulo">Apagar membro?</h2>
+            <p class="modal-texto">
+                Tem certeza que deseja apagar <strong>{{ professorParaApagar?.nome }}</strong>?
+                Esta ação é permanente.
+            </p>
+            <div class="modal-actions">
+                <button class="btn-cancelar" (click)="cancelarApagar()">Cancelar</button>
+                <button class="btn-confirmar" (click)="apagarProfessor()" [disabled]="apagando">
+                    {{ apagando ? 'Apagando...' : 'Sim, apagar' }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>

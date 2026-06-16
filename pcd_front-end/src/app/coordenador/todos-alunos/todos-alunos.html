@@ -1,0 +1,218 @@
+<div class="app-wrapper" [class.sidebar-fechada]="!sidebarAberta">
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside class="sidebar">
+
+    <div class="sidebar-logo">
+      <div class="logo-icon">🌟</div>
+      <span class="logo-text" *ngIf="sidebarAberta">Educa<span>Inclusiva</span></span>
+    </div>
+
+    <div class="sidebar-profile">
+      <div class="sidebar-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
+      <div class="profile-info" *ngIf="sidebarAberta">
+        <span class="profile-name">{{ usuario?.nome }}</span>
+        <span class="profile-sub">Coordenador(a)</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <p class="nav-label" *ngIf="sidebarAberta">PRINCIPAL</p>
+      <a class="nav-item" (click)="navegarPara('/coordenador')">
+        <i class="ti ti-layout-dashboard"></i>
+        <span *ngIf="sidebarAberta">Home</span>
+      </a>
+      <a class="nav-item active" (click)="navegarPara('/coordenador/alunos')">
+        <i class="ti ti-users"></i>
+        <span *ngIf="sidebarAberta">Todos os alunos</span>
+        <span class="nav-badge" *ngIf="sidebarAberta">{{ alunos.length }}</span>
+      </a>
+
+      <p class="nav-label" *ngIf="sidebarAberta">ESCOLAR</p>
+      <a class="nav-item" (click)="navegarPara('/coordenador/professores')">
+        <i class="ti ti-school"></i>
+        <span *ngIf="sidebarAberta">Professores</span>
+      </a>
+      <a class="nav-item" (click)="navegarPara('/coordenador/comunicacao')">
+        <i class="ti ti-message-2"></i>
+        <span *ngIf="sidebarAberta">Recados</span>
+      </a>
+      <a class="nav-item" (click)="navegarPara('/coordenador/responsaveis')">
+        <i class="ti ti-heart-handshake"></i>
+        <span *ngIf="sidebarAberta">Responsáveis</span>
+      </a>
+      <a class="nav-item" (click)="navegarPara('/coordenador/cuidadores')">
+        <i class="ti ti-accessible"></i>
+        <span *ngIf="sidebarAberta">Apoio & Cuidadores</span>
+      </a>
+
+      <p class="nav-label" *ngIf="sidebarAberta">SISTEMA</p>
+      <a class="nav-item" (click)="navegarPara('/coordenador/configuracoes')">
+        <i class="ti ti-settings"></i>
+        <span *ngIf="sidebarAberta">Configurações</span>
+      </a>
+      <a class="nav-item sair" (click)="sair()">
+        <i class="ti ti-logout"></i>
+        <span *ngIf="sidebarAberta">Sair</span>
+      </a>
+    </nav>
+
+  </aside>
+
+  <!-- ══════════ CONTEÚDO ══════════ -->
+  <div class="content">
+
+    <!-- TOPBAR — igual ao home -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn-toggle-sidebar" (click)="toggleSidebar()">
+          <i class="ti ti-menu-2"></i>
+        </button>
+        <h1 class="page-title">Alunos do sistema</h1>
+       
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-icon-btn">
+          <i class="ti ti-bell"></i>
+          <span class="notif-dot"></span>
+        </button>
+        <div class="topbar-user">
+          <div class="user-info">
+            <span class="user-role">Coordenação</span>
+            <span class="user-escola">Escola</span>
+          </div>
+          <div class="user-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Todos os Alunos</h1>
+          <p class="page-sub">
+            {{ carregando ? 'Carregando...' : alunosFiltrados.length + ' aluno(s) encontrado(s)' }}
+          </p>
+        </div>
+      </div>
+
+      <div class="series-row" *ngIf="!carregando">
+        <button class="serie-chip" [class.ativo]="filtroSerie === 'Todas'" (click)="selecionarSerie('Todas')">
+          Todas as séries
+        </button>
+        <button class="serie-chip" *ngFor="let s of series" [class.ativo]="filtroSerie === s"
+          (click)="selecionarSerie(s)">
+          {{ s }}
+        </button>
+      </div>
+
+      <div class="loading-wrap" *ngIf="carregando">
+        <div class="spinner"></div>
+        <p>Carregando alunos...</p>
+      </div>
+
+      <div class="alunos-grid" *ngIf="!carregando">
+
+        <div class="aluno-card" *ngFor="let aluno of alunosFiltrados" (click)="verAluno(aluno)">
+          <div class="card-top">
+            <div class="card-avatar">{{ getIniciais(aluno.nome) }}</div>
+            <div class="card-info">
+              <span class="card-nome">{{ aluno.nome }}</span>
+              <span class="card-email">{{ aluno.email }}</span>
+            </div>
+          </div>
+          <div class="prog-bar-wrap">
+            <div class="prog-bar" [ngClass]="getProgressoClass(aluno.progresso)" [style.width.%]="aluno.progresso">
+            </div>
+          </div>
+          <div class="card-tags">
+            <span class="tag tag-serie" *ngIf="aluno.serie">
+              <i class="ti ti-school"></i> {{ aluno.serie }}
+            </span>
+            <span class="tag tag-escola" *ngIf="aluno.tipoEscola">
+              <i class="ti ti-building"></i> {{ aluno.tipoEscola }}
+            </span>
+            <span class="tag badge" [ngClass]="getCondicaoBadgeClass(aluno.condicao)"
+              *ngIf="aluno.condicao && aluno.condicao !== 'Nenhuma'">
+              {{ aluno.condicao }}
+            </span>
+          </div>
+          <div class="card-actions">
+            <button class="btn-apagar" (click)="$event.stopPropagation(); confirmarApagar(aluno)">
+              <i class="ti ti-trash"></i> Apagar aluno
+            </button>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="alunosFiltrados.length === 0">
+          <span class="empty-icon">🔍</span>
+          <p>Nenhum aluno encontrado</p>
+          <span>Tente ajustar os filtros ou a busca</span>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODAL DETALHE ALUNO -->
+  <div class="modal-overlay" *ngIf="alunoSelecionado" (click)="alunoSelecionado = null">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">👤 {{ alunoSelecionado?.nome }}</span>
+        <button class="modal-close" (click)="alunoSelecionado = null">✕</button>
+      </div>
+      <div class="detalhe-grid">
+        <div class="detalhe-item">
+          <span class="detalhe-label">Série</span>
+          <span class="detalhe-val">{{ alunoSelecionado?.serie || '—' }}</span>
+        </div>
+        <div class="detalhe-item">
+          <span class="detalhe-label">Condição</span>
+          <span class="detalhe-val">{{ alunoSelecionado?.condicao || 'Nenhuma' }}</span>
+        </div>
+        <div class="detalhe-item">
+          <span class="detalhe-label">E-mail</span>
+          <span class="detalhe-val">{{ alunoSelecionado?.email || '—' }}</span>
+        </div>
+        <div class="detalhe-item">
+          <span class="detalhe-label">Telefone</span>
+          <span class="detalhe-val">{{ alunoSelecionado?.telefone || '—' }}</span>
+        </div>
+        <div class="detalhe-item">
+          <span class="detalhe-label">CPF</span>
+          <span class="detalhe-val">{{ alunoSelecionado?.cpf || '—' }}</span>
+        </div>
+        <div class="detalhe-item">
+          <span class="detalhe-label">RG</span>
+          <span class="detalhe-val">{{ alunoSelecionado?.rg || '—' }}</span>
+        </div>
+        <div class="detalhe-item">
+          <span class="detalhe-label">Tipo de Escola</span>
+          <span class="detalhe-val">{{ alunoSelecionado?.tipoEscola || '—' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMAÇÃO -->
+  <div class="modal-overlay" *ngIf="alunoParaApagar" (click)="cancelarApagar()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-icon">⚠️</div>
+      <h2 class="modal-titulo">Apagar aluno?</h2>
+      <p class="modal-texto">
+        Tem certeza que deseja apagar <strong>{{ alunoParaApagar?.nome }}</strong>?
+        Esta ação é permanente e remove todos os dados do aluno.
+      </p>
+      <div class="modal-actions">
+        <button class="btn-cancelar" (click)="cancelarApagar()">Cancelar</button>
+        <button class="btn-confirmar" (click)="apagarAluno()" [disabled]="apagando">
+          {{ apagando ? 'Apagando...' : 'Sim, apagar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

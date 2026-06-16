@@ -1,0 +1,171 @@
+<!-- SIDEBAR -->
+<aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <div class="sidebar-header">
+        <div class="logo">
+            <div class="logo-icon">🌟</div>
+            <span class="logo-text" *ngIf="!sidebarCollapsed">Educa<span>Inclusiva</span></span>
+        </div>
+        <button class="toggle-btn" (click)="toggleSidebar()">
+            <i class="ti" [class.ti-layout-sidebar-left-collapse]="!sidebarCollapsed"
+                [class.ti-layout-sidebar-right-collapse]="sidebarCollapsed"></i>
+        </button>
+    </div>
+    <div class="sidebar-profile" *ngIf="!sidebarCollapsed">
+        <div class="avatar">{{ iniciais }}</div>
+        <div class="profile-info">
+            <span class="profile-name">{{ usuario?.nome?.split(' ')[0] }}</span>
+            <span class="profile-badge">Aluno: {{ usuario?.nome }}</span>
+        </div>
+    </div>
+    <div class="sidebar-avatar-mini" *ngIf="sidebarCollapsed">
+        <div class="avatar mini">{{ iniciais }}</div>
+    </div>
+    <nav class="sidebar-nav">
+        <p class="nav-label" *ngIf="!sidebarCollapsed">PRINCIPAL</p>
+        <a class="nav-item" routerLink="/painel" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+            <i class="ti ti-home"></i><span *ngIf="!sidebarCollapsed">Home</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/informacoes" routerLinkActive="active">
+            <i class="ti ti-user-circle"></i><span *ngIf="!sidebarCollapsed">Informações</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/tarefas" routerLinkActive="active">
+            <i class="ti ti-clipboard-list"></i>
+            <span *ngIf="!sidebarCollapsed">Tarefas</span>
+            <span class="badge" *ngIf="totalTarefas > 0 && !sidebarCollapsed">{{ totalTarefas }}</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/boletim" routerLinkActive="active">
+            <i class="ti ti-chart-bar"></i><span *ngIf="!sidebarCollapsed">Boletim</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/recados" routerLinkActive="active">
+            <i class="ti ti-mail"></i>
+            <span *ngIf="!sidebarCollapsed">Recados</span>
+            <span class="badge" *ngIf="totalNaoLidos > 0 && !sidebarCollapsed">{{ totalNaoLidos }}</span>
+        </a>
+        <p class="nav-label" *ngIf="!sidebarCollapsed">APRENDIZADO</p>
+        <a class="nav-item" routerLink="/painel/materiais" routerLinkActive="active">
+            <i class="ti ti-books"></i><span *ngIf="!sidebarCollapsed">Materiais Digitais</span>
+        </a>
+
+        <a class="nav-item" routerLink="/painel/tutoriais" routerLinkActive="active">
+            <i class="ti ti-video"></i><span *ngIf="!sidebarCollapsed">Tutoriais</span>
+        </a>
+
+        <p class="nav-label" *ngIf="!sidebarCollapsed">CONTA</p>
+
+        <a class="nav-item" routerLink="/painel/configuracoes" routerLinkActive="active">
+            <i class="ti ti-settings"></i>
+            <span *ngIf="!sidebarCollapsed">Configurações</span>
+        </a>
+        <a class="nav-item logout" (click)="sair()">
+            <i class="ti ti-logout"></i><span *ngIf="!sidebarCollapsed">Sair</span>
+        </a>
+    </nav>
+</aside>
+
+<!-- CONTEÚDO -->
+<div class="content" [class.expanded]="sidebarCollapsed">
+
+    <header class="topbar">
+        <div class="topbar-left">
+            <a class="back-btn" routerLink="/painel"><i class="ti ti-arrow-left"></i></a>
+            <h1 class="page-title">Meu Boletim</h1>
+        </div>
+        <div class="topbar-right">
+            <!-- Seletor de bimestre -->
+            <div class="bimestre-tabs">
+                <button *ngFor="let b of [1,2,3,4]" class="bim-btn" [class.active]="bimestreSelecionado === b"
+                    (click)="selecionarBimestre(b)">
+                    {{ b }}º Bim
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+
+        <!-- MEDIA GERAL -->
+        <div class="media-card">
+            <div class="media-left">
+                <div class="media-circle" [class.boa]="mediaGeral >= 7"
+                    [class.media]="mediaGeral >= 5 && mediaGeral < 7" [class.ruim]="mediaGeral < 5 && mediaGeral > 0">
+                    {{ mediaGeral > 0 ? mediaGeral.toFixed(1) : '—' }}
+                </div>
+                <div>
+                    <h2>Média Geral</h2>
+                    <p>{{ bimestreSelecionado }}º Bimestre</p>
+                </div>
+            </div>
+            <div class="media-status" *ngIf="mediaGeral > 0">
+                <span class="status-badge" [class.aprovado]="mediaGeral >= 7"
+                    [class.atencao]="mediaGeral >= 5 && mediaGeral < 7" [class.risco]="mediaGeral < 5">
+                    {{ mediaGeral >= 7 ? '🌟 Aprovado' : mediaGeral >= 5 ? '⚠️ Atenção' : '❗ Em risco' }}
+                </span>
+            </div>
+        </div>
+
+        <!-- LOADING -->
+        <div class="loading-box" *ngIf="carregando">
+            <p>Carregando boletim...</p>
+        </div>
+
+        <!-- MENSAGEM VAZIO -->
+        <div class="vazio-box" *ngIf="!carregando && boletim.length === 0">
+            <p>📋 Nenhuma nota lançada para o {{ bimestreSelecionado }}º bimestre ainda.</p>
+            <span>Seu professor irá lançar as notas em breve!</span>
+        </div>
+
+        <!-- TABELA DE NOTAS -->
+        <div class="boletim-card" *ngIf="!carregando && boletim.length > 0">
+            <div class="boletim-row header-row">
+                <span>Matéria</span>
+                <span>Nota</span>
+                <span>Situação</span>
+            </div>
+
+            <div class="boletim-row" *ngFor="let item of boletim">
+                <span class="materia-cell">
+                    <span class="materia-emoji">{{ getMateriaEmoji(item.materia) }}</span>
+                    {{ item.materia }}
+                </span>
+
+                <span class="nota-cell" [class.nota-boa]="item.nota >= 7"
+                    [class.nota-media]="item.nota >= 5 && item.nota < 7"
+                    [class.nota-ruim]="item.nota !== null && item.nota < 5">
+                    {{ item.nota !== null ? item.nota : '—' }}
+                </span>
+
+                <span class="situacao-cell">
+                    <span *ngIf="item.nota === null" class="badge-sit aguardando">Aguardando</span>
+                    <span *ngIf="item.nota >= 7" class="badge-sit aprovado">Aprovado</span>
+                    <span *ngIf="item.nota >= 5 && item.nota < 7" class="badge-sit atencao">Atenção</span>
+                    <span *ngIf="item.nota !== null && item.nota < 5" class="badge-sit risco">Em risco</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- LEGENDA -->
+        <div class="legenda" *ngIf="!carregando && boletim.length > 0">
+            <span class="leg-item"><span class="dot green"></span> ≥ 7.0 — Aprovado</span>
+            <span class="leg-item"><span class="dot yellow"></span> 5.0 a 6.9 — Atenção</span>
+            <span class="leg-item"><span class="dot red"></span> &lt; 5.0 — Em risco</span>
+        </div>
+
+    </main>
+
+    <!-- BOTÃO ACESSIBILIDADE -->
+    <div class="accessibility-button" (click)="toggleMenu()">♿</div>
+
+    <div class="accessibility-menu" [class.active]="menuAcessibilidade">
+        <h2>♿ Acessibilidade</h2>
+        <button (click)="increaseFont()">🔡 Aumentar fonte</button>
+        <button (click)="decreaseFont()">🔤 Diminuir fonte</button>
+        <button (click)="toggleContrast()">🌗 Alto contraste</button>
+        <button (click)="toggleDyslexia()">📖 Modo dislexia</button>
+        <button (click)="toggleTDAH()">🎯 Modo TDAH</button>
+        <button (click)="zoomPage()">🔍 Zoom +</button>
+        <button (click)="speakText()">🔊 Ler página</button>
+        <button (click)="toggleGuide()">📏 Guia de leitura</button>
+    </div>
+
+    <div id="reading-guide"></div>
+</div>

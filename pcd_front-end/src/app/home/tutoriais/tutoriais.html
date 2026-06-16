@@ -1,0 +1,116 @@
+<!-- SIDEBAR -->
+<aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <div class="sidebar-header">
+        <div class="logo">
+            <div class="logo-icon">🌟</div>
+            <span class="logo-text" *ngIf="!sidebarCollapsed">Educa<span>Inclusiva</span></span>
+        </div>
+        <button class="toggle-btn" (click)="toggleSidebar()">
+            <i class="ti" [class.ti-layout-sidebar-left-collapse]="!sidebarCollapsed"
+                [class.ti-layout-sidebar-right-collapse]="sidebarCollapsed"></i>
+        </button>
+    </div>
+    <div class="sidebar-profile" *ngIf="!sidebarCollapsed">
+        <div class="avatar">{{ iniciais }}</div>
+        <div class="profile-info">
+            <span class="profile-name">{{ usuario?.nome?.split(' ')[0] }}</span>
+            <span class="profile-badge">Aluno: {{ usuario?.nome }}</span>
+        </div>
+    </div>
+    <div class="sidebar-avatar-mini" *ngIf="sidebarCollapsed">
+        <div class="avatar mini">{{ iniciais }}</div>
+    </div>
+    <nav class="sidebar-nav">
+        <p class="nav-label" *ngIf="!sidebarCollapsed">PRINCIPAL</p>
+        <a class="nav-item" routerLink="/painel" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+            <i class="ti ti-home"></i><span *ngIf="!sidebarCollapsed">Home</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/informacoes" routerLinkActive="active">
+            <i class="ti ti-user-circle"></i><span *ngIf="!sidebarCollapsed">Informações</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/tarefas" routerLinkActive="active">
+            <i class="ti ti-clipboard-list"></i>
+            <span *ngIf="!sidebarCollapsed">Tarefas</span>
+            <span class="badge" *ngIf="totalTarefas > 0 && !sidebarCollapsed">{{ totalTarefas }}</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/boletim" routerLinkActive="active">
+            <i class="ti ti-chart-bar"></i><span *ngIf="!sidebarCollapsed">Boletim</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/recados" routerLinkActive="active">
+            <i class="ti ti-mail"></i>
+            <span *ngIf="!sidebarCollapsed">Recados</span>
+            <span class="badge" *ngIf="totalRecados > 0 && !sidebarCollapsed">{{ totalRecados }}</span>
+        </a>
+        <p class="nav-label" *ngIf="!sidebarCollapsed">APRENDIZADO</p>
+        <a class="nav-item" routerLink="/painel/materiais" routerLinkActive="active">
+            <i class="ti ti-books"></i><span *ngIf="!sidebarCollapsed">Materiais Digitais</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/tutoriais" routerLinkActive="active">
+            <i class="ti ti-video"></i><span *ngIf="!sidebarCollapsed">Tutoriais</span>
+        </a>
+
+
+        <p class="nav-label" *ngIf="!sidebarCollapsed">CONTA</p>
+
+        <a class="nav-item" routerLink="/painel/configuracoes" routerLinkActive="active">
+            <i class="ti ti-settings"></i>
+            <span *ngIf="!sidebarCollapsed">Configurações</span>
+        </a>
+        <a class="nav-item logout" (click)="sair()">
+            <i class="ti ti-logout"></i><span *ngIf="!sidebarCollapsed">Sair</span>
+        </a>
+    </nav>
+</aside>
+
+<!-- CONTEÚDO -->
+<div class="content" [class.expanded]="sidebarCollapsed">
+    <header class="topbar">
+        <div class="topbar-left">
+            <h1 class="page-title">Tutoriais</h1>
+        </div>
+        <div class="topbar-right">
+            <div class="date-chip">
+                <i class="ti ti-calendar"></i>
+                {{ dataAtual }}
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+
+        <div class="section-intro">
+            <h2>🎬 Aprenda com vídeos</h2>
+            <p>Assista aos tutoriais abaixo para aprender a usar a plataforma.</p>
+        </div>
+
+        <div class="videos-grid">
+            <div class="video-card" *ngFor="let v of videos">
+                <div class="video-embed">
+                    <iframe [src]="v.url | safeUrl" frameborder="0" allowfullscreen></iframe>
+                </div>
+                <div class="video-info">
+                    <h3>{{ v.titulo }}</h3>
+                    <p>{{ v.descricao }}</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- BOTÃO ACESSIBILIDADE -->
+    <div class="accessibility-button" (click)="toggleMenu()">♿</div>
+
+    <div class="accessibility-menu" [class.active]="menuAcessibilidade">
+        <h2>♿ Acessibilidade</h2>
+        <button (click)="increaseFont()">🔡 Aumentar fonte</button>
+        <button (click)="decreaseFont()">🔤 Diminuir fonte</button>
+        <button (click)="toggleContrast()">🌗 Alto contraste</button>
+        <button (click)="toggleDyslexia()">📖 Modo dislexia</button>
+        <button (click)="toggleTDAH()">🎯 Modo TDAH</button>
+        <button (click)="zoomPage()">🔍 Zoom +</button>
+        <button (click)="speakText()">🔊 Ler página</button>
+        <button (click)="toggleGuide()">📏 Guia de leitura</button>
+    </div>
+
+    <div id="reading-guide"></div>
+</div>

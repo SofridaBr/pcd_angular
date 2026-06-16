@@ -1,0 +1,262 @@
+<!-- SIDEBAR -->
+<aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+
+    <div class="sidebar-header">
+        <div class="logo">
+            <div class="logo-icon">🌟</div>
+            <span class="logo-text" *ngIf="!sidebarCollapsed">Educa<span>Inclusiva</span></span>
+        </div>
+        <button class="toggle-btn" (click)="toggleSidebar()">
+            <i class="ti" [class.ti-layout-sidebar-left-collapse]="!sidebarCollapsed"
+                [class.ti-layout-sidebar-right-collapse]="sidebarCollapsed"></i>
+        </button>
+    </div>
+
+    <!-- PERFIL -->
+
+
+    <div class="sidebar-profile" *ngIf="!sidebarCollapsed">
+        <div class="avatar">{{ iniciais }}</div>
+        <div class="profile-info">
+            <span class="profile-name">{{ usuario?.nome?.split(' ')[0] }}</span>
+            <span class="profile-badge">Aluno: {{ usuario?.nome }}</span>
+        </div>
+    </div>
+    <div class="sidebar-avatar-mini" *ngIf="sidebarCollapsed">
+        <div class="avatar mini">{{ iniciais }}</div>
+    </div>
+
+
+
+    <!-- NAV -->
+    <nav class="sidebar-nav">
+
+        <p class="nav-label" *ngIf="!sidebarCollapsed">PRINCIPAL</p>
+
+        <a class="nav-item" routerLink="/painel" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+            <i class="ti ti-home"></i>
+            <span *ngIf="!sidebarCollapsed">Home</span>
+        </a>
+
+        <a class="nav-item" routerLink="/painel/informacoes" routerLinkActive="active">
+            <i class="ti ti-user-circle"></i>
+            <span *ngIf="!sidebarCollapsed">Informações</span>
+        </a>
+
+        <a class="nav-item" routerLink="/painel/tarefas" routerLinkActive="active">
+            <i class="ti ti-clipboard-list"></i>
+            <span *ngIf="!sidebarCollapsed">Tarefas</span>
+            <span class="badge" *ngIf="totalTarefas > 0 && !sidebarCollapsed">{{ totalTarefas }}</span>
+        </a>
+
+        <a class="nav-item" routerLink="/painel/boletim" routerLinkActive="active">
+            <i class="ti ti-chart-bar"></i>
+            <span *ngIf="!sidebarCollapsed">Boletim</span>
+        </a>
+
+        <a class="nav-item" routerLink="/painel/recados" routerLinkActive="active">
+            <i class="ti ti-mail"></i>
+            <span *ngIf="!sidebarCollapsed">Recados</span>
+            <span class="badge" *ngIf="totalRecadosNaoLidos > 0 && !sidebarCollapsed">{{ totalRecadosNaoLidos }}</span>
+        </a>
+
+        <p class="nav-label" *ngIf="!sidebarCollapsed">APRENDIZADO</p>
+
+        <a class="nav-item" routerLink="/painel/materiais" routerLinkActive="active">
+            <i class="ti ti-books"></i>
+            <span *ngIf="!sidebarCollapsed">Materiais Digitais</span>
+        </a>
+        <a class="nav-item" routerLink="/painel/tutoriais" routerLinkActive="active">
+            <i class="ti ti-video"></i><span *ngIf="!sidebarCollapsed">Tutoriais</span>
+        </a>
+
+        <p class="nav-label" *ngIf="!sidebarCollapsed">CONTA</p>
+
+        <a class="nav-item" routerLink="/painel/configuracoes" routerLinkActive="active">
+            <i class="ti ti-settings"></i>
+            <span *ngIf="!sidebarCollapsed">Configurações</span>
+        </a>
+
+        <a class="nav-item logout" (click)="sair()">
+            <i class="ti ti-logout"></i>
+            <span *ngIf="!sidebarCollapsed">Sair</span>
+        </a>
+
+    </nav>
+</aside>
+
+<!-- CONTEÚDO PRINCIPAL -->
+<div class="content" [class.expanded]="sidebarCollapsed">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <h1 class="page-title">Home</h1>
+        </div>
+        <div class="topbar-right">
+            <div class="date-chip">
+                <i class="ti ti-calendar"></i>
+                {{ dataAtual }}
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+        <!-- SAUDAÇÃO -->
+        <div class="welcome-card">
+            <div class="welcome-left">
+                <div class="avatar-big">{{ iniciais }}</div>
+                <div>
+                    <h2 class="welcome-title">Olá, {{ usuario?.nome?.split(' ')[0] }}! 👋</h2>
+                    <p class="welcome-sub">
+                        {{ usuario?.serie || 'Série não informada' }} •
+                        {{ usuario?.tipoEscola || 'Escola não informada' }}
+                    </p>
+                    <p class="welcome-condicao" *ngIf="usuario?.condicao && usuario?.condicao !== 'Nenhuma'">
+                        ♿ {{ usuario?.condicao }}
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+
+
+        <!-- CARDS RESUMO -->
+        <div class="cards-grid">
+
+            <!-- Tarefas -->
+            <div class="summary-card" routerLink="/painel/tarefas">
+                <div class="card-icon yellow">
+                    <i class="ti ti-clipboard-list"></i>
+                </div>
+                <div class="card-body">
+                    <span class="card-label">Pendências</span>
+                    <span class="card-num yellow-text">{{ totalTarefas }}</span>
+                    <span class="card-sub">tarefas pendentes</span>
+                    <div class="task-list">
+                        <div class="task-item" *ngFor="let t of tarefasRecentes">
+                            <i class="ti ti-point-filled"></i>
+                            {{ t.titulo }}
+                        </div>
+                        <div class="task-item empty" *ngIf="tarefasRecentes.length === 0">
+                            Nenhuma tarefa pendente 🎉
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boletim -->
+            <div class="summary-card" routerLink="/painel/boletim">
+                <div class="card-icon teal">
+                    <i class="ti ti-chart-bar"></i>
+                </div>
+                <div class="card-body">
+                    <span class="card-label">Boletim</span>
+                    <span class="card-num teal-text">📊</span>
+                    <span class="card-sub">notas do bimestre</span>
+                    <div class="task-list">
+                        <div class="task-item"><i class="ti ti-pencil"></i> Ver minhas notas</div>
+                        <div class="task-item"><i class="ti ti-award"></i> Acompanhar desempenho</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recados -->
+            <div class="summary-card" routerLink="/painel/recados">
+                <div class="card-icon orange" [class.has-badge]="totalRecadosNaoLidos > 0">
+                    <i class="ti ti-mail"></i>
+                    <span class="card-badge" *ngIf="totalRecadosNaoLidos > 0">{{ totalRecadosNaoLidos }}</span>
+                </div>
+                <div class="card-body">
+                    <span class="card-label">Recados</span>
+                    <span class="card-num orange-text">
+                        {{ totalRecadosNaoLidos > 0 ? totalRecadosNaoLidos : '📬' }}
+                    </span>
+                    <span class="card-sub">
+                        {{ totalRecadosNaoLidos > 0 ? 'recado(s) não lido(s)' : 'recados do professor' }}
+                    </span>
+                    <div class="task-list">
+                        <div class="task-item" *ngFor="let r of recadosRecentes">
+                            <i class="ti ti-mail"></i> {{ r.titulo }}
+                        </div>
+                        <div class="task-item empty" *ngIf="recadosRecentes.length === 0">
+                            Nenhum recado novo 📬
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informações pessoais -->
+            <div class="summary-card" routerLink="/painel/informacoes">
+                <div class="card-icon blue">
+                    <i class="ti ti-user-circle"></i>
+                </div>
+                <div class="card-body">
+                    <span class="card-label">Meu Perfil</span>
+                    <span class="card-num blue-text">👤</span>
+                    <span class="card-sub">ver suas informações</span>
+                    <div class="task-list">
+                        <div class="task-item"><i class="ti ti-mail"></i> {{ usuario?.email }}</div>
+                        <div class="task-item"><i class="ti ti-school"></i> {{ usuario?.serie || 'Série não informada'
+                            }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Materiais -->
+            <div class="summary-card" routerLink="/painel/materiais">
+                <div class="card-icon green">
+                    <i class="ti ti-books"></i>
+                </div>
+                <div class="card-body">
+                    <span class="card-label">Materiais</span>
+                    <span class="card-num green-text">📚</span>
+                    <span class="card-sub">materiais disponíveis</span>
+                    <div class="task-list">
+                        <div class="task-item"><i class="ti ti-file-text"></i> Acesse os materiais</div>
+                        <div class="task-item"><i class="ti ti-video"></i> Vídeos e documentos</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tutoriais — adiciona depois do card Materiais -->
+            <div class="summary-card" routerLink="/painel/tutoriais">
+                <div class="card-icon purple">
+                    <i class="ti ti-video"></i>
+                </div>
+                <div class="card-body">
+                    <span class="card-label">Tutoriais</span>
+                    <span class="card-num purple-text">🎬</span>
+                    <span class="card-sub">aprenda com vídeos</span>
+                    <div class="task-list">
+                        <div class="task-item"><i class="ti ti-player-play"></i> Vídeo 1</div>
+                        <div class="task-item"><i class="ti ti-player-play"></i> Vídeo 2</div>
+                        <div class="task-item"><i class="ti ti-player-play"></i> Vídeo 3</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- BOTÃO ACESSIBILIDADE -->
+    <div class="accessibility-button" (click)="toggleMenu()">♿</div>
+
+    <div class="accessibility-menu" [class.active]="menuAcessibilidade">
+        <h2>♿ Acessibilidade</h2>
+        <button (click)="increaseFont()">🔡 Aumentar fonte</button>
+        <button (click)="decreaseFont()">🔤 Diminuir fonte</button>
+        <button (click)="toggleContrast()">🌗 Alto contraste</button>
+        <button (click)="toggleDyslexia()">📖 Modo dislexia</button>
+        <button (click)="toggleTDAH()">🎯 Modo TDAH</button>
+        <button (click)="zoomPage()">🔍 Zoom +</button>
+        <button (click)="speakText()">🔊 Ler página</button>
+        <button (click)="toggleGuide()">📏 Guia de leitura</button>
+    </div>
+
+    <div id="reading-guide"></div>
+</div>

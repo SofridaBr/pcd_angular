@@ -1,0 +1,304 @@
+<div class="app-wrapper" [class.sidebar-fechada]="!sidebarAberta">
+
+  <aside class="sidebar">
+
+    <div class="sidebar-logo">
+      <div class="logo-icon">🌟</div>
+      <span class="logo-text" *ngIf="sidebarAberta">Educa<span>Inclusiva</span></span>
+    </div>
+
+    <div class="sidebar-profile">
+      <div class="sidebar-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
+      <div class="profile-info" *ngIf="sidebarAberta">
+        <span class="profile-name">{{ usuario?.nome }}</span>
+        <span class="profile-sub">Coordenador(a)</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <p class="nav-label" *ngIf="sidebarAberta">PRINCIPAL</p>
+
+      <a class="nav-item active" (click)="navegarPara('/coordenador')">
+        <i class="ti ti-layout-dashboard"></i>
+        <span *ngIf="sidebarAberta">Home</span>
+      </a>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/alunos')">
+        <i class="ti ti-users"></i>
+        <span *ngIf="sidebarAberta">Todos os alunos</span>
+      </a>
+
+      <p class="nav-label" *ngIf="sidebarAberta">ESCOLAR</p>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/professores')">
+        <i class="ti ti-school"></i>
+        <span *ngIf="sidebarAberta">Professores</span>
+      </a>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/comunicacao')">
+        <i class="ti ti-message-2"></i>
+        <span *ngIf="sidebarAberta">Recados</span>
+      </a>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/responsaveis')">
+        <i class="ti ti-heart-handshake"></i>
+        <span *ngIf="sidebarAberta">Responsáveis</span>
+      </a>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/cuidadores')">
+        <i class="ti ti-accessible"></i>
+        <span *ngIf="sidebarAberta">Apoio & Cuidadores</span>
+      </a>
+
+      <p class="nav-label" *ngIf="sidebarAberta">SISTEMA</p>
+
+      <a class="nav-item" (click)="navegarPara('/coordenador/configuracoes')">
+        <i class="ti ti-settings"></i>
+        <span *ngIf="sidebarAberta">Configurações</span>
+      </a>
+
+      <a class="nav-item sair" (click)="sair()">
+        <i class="ti ti-logout"></i>
+        <span *ngIf="sidebarAberta">Sair</span>
+      </a>
+
+    </nav>
+
+
+
+  </aside>
+
+  <div class="content">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn-toggle-sidebar" (click)="toggleSidebar()">
+          <i class="ti ti-menu-2"></i>
+        </button>
+        <h1 class="page-title">Home</h1>
+        
+      </div>
+
+      <div class="topbar-right">
+        <button class="topbar-icon-btn">
+          <i class="ti ti-bell"></i>
+          <span class="notif-dot"></span>
+        </button>
+        <div class="topbar-user">
+          <div class="user-info">
+            <span class="user-role">Coordenação</span>
+            <span class="user-escola">Escola</span>
+          </div>
+          <div class="user-avatar">{{ getIniciais(usuario?.nome || '') }}</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+
+      <div class="greeting-row">
+        <div>
+          <h1 class="greeting-title">Olá, {{ usuario?.nome?.split(' ')[0] }}!</h1>
+          <p class="greeting-sub">Coordenação Pedagógica</p>
+        </div>
+        <div class="greeting-date">
+          <span class="date-label">{{ dataHoje | titlecase }}</span>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card stat-blue">
+          <div class="stat-icon"><i class="ti ti-users-group"></i></div>
+          <div class="stat-info">
+            <span class="stat-badge">+3 este mês</span>
+            <p class="stat-value">{{ carregandoStats ? '...' : stats.totalAlunos }}</p>
+            <p class="stat-label">Alunos com PcD cadastrados</p>
+            <div class="stat-bar">
+              <div class="stat-bar-fill blue-fill" [style.width.%]="100"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-green">
+          <div class="stat-icon"><i class="ti ti-school"></i></div>
+          <div class="stat-info">
+            <span class="stat-badge green-badge">Ativos</span>
+            <p class="stat-value">{{ carregandoStats ? '...' : stats.totalProfessores }}</p>
+            <p class="stat-label">Professores ativos</p>
+            <div class="stat-bar">
+              <div class="stat-bar-fill green-fill" [style.width.%]="100"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-purple">
+          <div class="stat-icon"><i class="ti ti-heart-handshake"></i></div>
+          <div class="stat-info">
+            <span class="stat-badge purple-badge">Cadastrados</span>
+            <p class="stat-value">{{ carregandoStats ? '...' : stats.totalResponsaveis }}</p>
+            <p class="stat-label">Responsáveis cadastrados</p>
+            <div class="stat-bar">
+              <div class="stat-bar-fill purple-fill" [style.width.%]="100"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-grid">
+
+        <div class="card card-alunos">
+          <div class="card-header">
+            <div class="card-title-row">
+              <span class="card-dot blue-dot"></span>
+              <h2 class="card-title">Alunos com PcD</h2>
+            </div>
+          </div>
+          <div class="filtros-row">
+            <button class="filtro-btn" [class.ativo]="filtroAtual === 'Todos'" (click)="filtrarAlunos('Todos')">
+              Todos ({{ alunos.length }})
+            </button>
+          </div>
+          <div class="tabela-wrap">
+            <table class="tabela">
+              <thead>
+                <tr>
+                  <th>ALUNO</th>
+                  <th>NECESSIDADE</th>
+                  <th>SÉRIE</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let aluno of alunosFiltrados" (click)="abrirBoletim(aluno)" style="cursor:pointer">
+                  <td>
+                    <div class="aluno-cell">
+                      <div class="aluno-avatar">{{ getIniciais(aluno.nome) }}</div>
+                      <div class="aluno-info">
+                        <span class="aluno-nome">{{ aluno.nome }}</span>
+                        <span class="aluno-email">{{ aluno.email }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="getCondicaoBadgeClass(aluno.condicao)">
+                      {{ getCondicaoAbrev(aluno.condicao) }}
+                    </span>
+                  </td>
+                  <td><span class="serie-text">{{ aluno.serie || '—' }}</span></td>
+                </tr>
+                <tr *ngIf="!carregandoAlunos && alunosFiltrados.length === 0">
+                  <td colspan="4" class="empty-row"><i class="ti ti-mood-empty"></i> Nenhum aluno encontrado</td>
+                </tr>
+                <tr *ngIf="carregandoAlunos">
+                  <td colspan="4" class="loading-row">
+                    <div class="spinner"></div> Carregando alunos...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="right-col">
+
+          <div class="card card-turmas">
+            <div class="card-header">
+              <div class="card-title-row">
+                <span class="card-dot green-dot"></span>
+                <h2 class="card-title">Professores</h2>
+              </div>
+            </div>
+            <div class="turmas-list" *ngIf="!carregandoTurmas">
+              <div class="turma-item" *ngFor="let turma of turmas.slice(0, 5)"
+                (click)="navegarPara('/coordenador/professores')" style="cursor:pointer">
+                <div class="turma-avatar">{{ getIniciais(turma.professor) }}</div>
+                <div class="turma-info">
+                  <span class="turma-nome">{{ turma.professor }}</span>
+                  <span class="turma-disc">{{ turma.disciplina || 'Sem disciplina' }}</span>
+                </div>
+                <div class="turma-meta">
+                  <span class="turma-alunos">{{ turma.totalAlunos }} alunos</span>
+                </div>
+              </div>
+              <div class="empty-list" *ngIf="turmas.length === 0">
+                <i class="ti ti-mood-empty"></i> Nenhum professor cadastrado
+              </div>
+            </div>
+            <div class="loading-block" *ngIf="carregandoTurmas">
+              <div class="spinner"></div>
+            </div>
+          </div>
+
+          <div class="card card-mensagens">
+            <div class="card-header">
+              <div class="card-title-row">
+                <span class="card-dot orange-dot"></span>
+                <h2 class="card-title">Mensagens</h2>
+              </div>
+              <span class="badge-count" *ngIf="mensagens.length > 0">{{ mensagens.length }} mensagens</span>
+            </div>
+            <div class="msgs-list" *ngIf="!carregandoMensagens">
+              <div class="msg-item" *ngFor="let msg of mensagens" [class.nao-lida]="!msg.lido" (click)="irParaRecados()"
+                style="cursor:pointer">
+                <div class="msg-avatar">{{ getIniciais(msg.aluno || 'U') }}</div>
+                <div class="msg-body">
+                  <span class="msg-nome">{{ msg.aluno }}</span>
+                  <span class="msg-texto">{{ msg.titulo }}</span>
+                </div>
+                <span class="msg-hora">{{ formatarHora(msg.criado_em) }}</span>
+              </div>
+              <div class="empty-list" *ngIf="mensagens.length === 0">
+                <i class="ti ti-mail-off"></i> Sem mensagens
+              </div>
+            </div>
+            <div class="loading-block" *ngIf="carregandoMensagens">
+              <div class="spinner"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="modal-overlay" *ngIf="modalAberto" (click)="fecharModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-aluno-info">
+          <div class="modal-avatar">{{ getIniciais(alunoSelecionado?.nome || '') }}</div>
+          <div>
+            <h2>{{ alunoSelecionado?.nome }}</h2>
+            <span>{{ alunoSelecionado?.serie || 'Sem série' }}</span>
+          </div>
+        </div>
+        <button class="modal-fechar" (click)="fecharModal()"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="modal-bimestres">
+        <button *ngFor="let b of [1,2,3,4]" class="bimestre-btn" [class.ativo]="bimestreSelecionado === b"
+          (click)="selecionarBimestre(b)">{{ b }}º Bimestre</button>
+      </div>
+      <div class="modal-loading" *ngIf="carregandoBoletim">
+        <div class="spinner"></div> Carregando...
+      </div>
+      <div class="modal-notas" *ngIf="!carregandoBoletim">
+        <div class="nota-item" *ngFor="let item of boletimAluno">
+          <div class="nota-materia">
+            <span class="nota-emoji">{{ getEmojiMateria(item.materia) }}</span>
+            <span>{{ item.materia }}</span>
+          </div>
+          <div class="nota-valor" [ngClass]="getNoteClass(item.nota)">
+            {{ item.nota !== null ? item.nota : '—' }}
+          </div>
+        </div>
+        <div class="empty-list" *ngIf="boletimAluno.length === 0">
+          <i class="ti ti-mood-empty"></i> Sem notas neste bimestre
+        </div>
+        <div class="modal-media" *ngIf="boletimAluno.length > 0">
+          <span>Média Geral</span>
+          <strong [ngClass]="getNoteClass(mediaGeral)">{{ mediaGeral.toFixed(1) }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

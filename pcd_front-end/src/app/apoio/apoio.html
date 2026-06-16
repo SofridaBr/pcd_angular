@@ -1,0 +1,401 @@
+<div class="painel-wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">🌟</div>
+      <span class="brand-text">Educa<span class="brand-accent">Inclusiva</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">{{ iniciais }}</div>
+      <div class="user-info">
+        <span class="user-nome">{{ usuario?.nome }}</span>
+        <span class="user-tipo">Apoio / Cuidador</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-group-label">PRINCIPAL</span>
+      <a class="nav-item" [class.active]="abaAtual === 'dashboard'" (click)="setAba('dashboard')">
+        <i class="ti ti-home"></i> Home
+      </a>
+      <a class="nav-item" [class.active]="abaAtual === 'aluno'" (click)="setAba('aluno')">
+        <i class="ti ti-user-circle"></i> Meu Aluno
+      </a>
+      <a class="nav-item" [class.active]="abaAtual === 'recados'" (click)="setAba('recados')">
+        <i class="ti ti-message"></i> Recados
+        <span class="nav-badge badge-red" *ngIf="recadosNaoLidos > 0">{{ recadosNaoLidos }}</span>
+      </a>
+
+      <span class="nav-group-label">CONTA</span>
+      <a class="nav-item" [class.active]="abaAtual === 'configuracoes'" (click)="setAba('configuracoes')">
+        <i class="ti ti-settings"></i> Configurações
+      </a>
+      
+      <a class="nav-item nav-logout" (click)="sair()">
+        <i class="ti ti-logout"></i> Sair
+      </a>
+    </nav>
+  </aside>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="painel-main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">
+          <span *ngIf="abaAtual === 'dashboard'">Dashboard</span>
+          <span *ngIf="abaAtual === 'aluno'">Meu Aluno</span>
+          <span *ngIf="abaAtual === 'recados'">Recados</span>
+          <span *ngIf="abaAtual === 'configuracoes'">⚙️ Configurações</span>
+        </h1>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-date">
+          <i class="ti ti-calendar"></i>
+          {{ dataAtual }}
+        </div>
+        <div class="topbar-avatar">{{ iniciais }}</div>
+      </div>
+    </header>
+
+    <!-- ── ABA: DASHBOARD ─────────────────────── -->
+    <div *ngIf="abaAtual === 'dashboard'" class="aba-content">
+
+      <div class="banner-boas-vindas">
+        <div class="banner-info">
+          <div class="banner-avatar">{{ iniciais }}</div>
+          <div>
+            <h2 class="banner-titulo">Bom dia, {{ primeiroNome }}! 👋</h2>
+            <p class="banner-sub" *ngIf="aluno">Acompanhamento do aluno {{ aluno.nome }}</p>
+            <p class="banner-sub" *ngIf="!aluno">Nenhum aluno vinculado ainda</p>
+          </div>
+        </div>
+        <div class="banner-actions">
+          <button class="btn-adicionar-aluno" (click)="abrirModalAdicionar()">
+            <i class="ti ti-user-plus"></i> Adicionar Aluno
+          </button>
+          <button class="btn-enviar-recado" (click)="abrirModalRecado()">
+            <i class="ti ti-message-plus"></i> Enviar Recado
+          </button>
+        </div>
+      </div>
+
+      <!-- Cards de resumo -->
+      <div class="stats-grid" *ngIf="aluno">
+        <div class="stat-card">
+          <div class="stat-icon stat-blue"><i class="ti ti-clipboard-check"></i></div>
+          <div class="stat-info">
+            <span class="stat-valor">{{ aluno.tarefasConcluidas ?? 0 }}</span>
+            <span class="stat-label">Tarefas Concluídas</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-orange"><i class="ti ti-clock"></i></div>
+          <div class="stat-info">
+            <span class="stat-valor">{{ aluno.tarefasPendentes ?? 0 }}</span>
+            <span class="stat-label">Tarefas Pendentes</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-green"><i class="ti ti-heart"></i></div>
+          <div class="stat-info">
+            <span class="stat-valor">{{ aluno.condicao || 'Nenhuma' }}</span>
+            <span class="stat-label">Condição</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de alunos com tarefas -->
+      <div class="section-card" *ngIf="alunos.length > 0">
+        <div class="section-header">
+          <h3><i class="ti ti-users"></i> Alunos Vinculados</h3>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <select class="filtro-serie" [(ngModel)]="filtroSerie">
+              <option value="">Todas as séries</option>
+              <option *ngFor="let s of seriesDisponiveis">{{ s }}</option>
+            </select>
+            <button class="btn-ver-todos" (click)="setAba('aluno')">Ver detalhes</button>
+          </div>
+        </div>
+        <div class="alunos-lista">
+          <div class="aluno-row" *ngFor="let a of alunosFiltrados">
+            <div class="aluno-row-avatar">{{ a.nome[0] }}</div>
+            <div class="aluno-row-info">
+              <span class="aluno-row-nome">{{ a.nome }}</span>
+              <span class="aluno-row-serie">{{ a.serie || 'Série não informada' }}</span>
+            </div>
+            <div class="aluno-row-stats">
+              <div class="aluno-stat-pill concluidas">
+                <i class="ti ti-circle-check"></i>
+                <span>{{ a.tarefasConcluidas ?? 0 }} concluídas</span>
+              </div>
+              <div class="aluno-stat-pill pendentes">
+                <i class="ti ti-clock"></i>
+                <span>{{ a.tarefasPendentes ?? 0 }} pendentes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" *ngIf="!aluno">
+        <i class="ti ti-user-off"></i>
+        <p>Nenhum aluno vinculado à sua conta ainda.</p>
+        <button class="btn-primary-sm" (click)="abrirModalAdicionar()">
+          <i class="ti ti-user-plus"></i> Vincular aluno pelo e-mail
+        </button>
+      </div>
+
+      <!-- Recados recentes -->
+      <div class="section-card" *ngIf="recados.length > 0">
+        <div class="section-header">
+          <h3><i class="ti ti-message"></i> Recados Recentes</h3>
+          <button class="btn-ver-todos" (click)="setAba('recados')">Ver todos</button>
+        </div>
+        <div class="recados-list">
+          <div class="recado-item" *ngFor="let r of recados.slice(0, 3)" [class.nao-lido]="!r.lido">
+            <div class="recado-topo">
+              <span class="recado-titulo">{{ r.titulo }}</span>
+              <span class="recado-data">{{ r.criado_em | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <p class="recado-msg">{{ r.mensagem }}</p>
+            <span class="badge-novo" *ngIf="!r.lido">Novo</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── ABA: MEU ALUNO ────────────────────── -->
+    <div *ngIf="abaAtual === 'aluno'" class="aba-content">
+      <div class="aba-header">
+        <h2>Meu Aluno</h2>
+        <button class="btn-primary-sm" (click)="abrirModalAdicionar()">
+          <i class="ti ti-user-plus"></i> Vincular Aluno
+        </button>
+      </div>
+
+      <div class="empty-state" *ngIf="alunos.length === 0">
+        <i class="ti ti-user-off"></i>
+        <p>Nenhum aluno vinculado à sua conta.</p>
+        <button class="btn-primary-sm" (click)="abrirModalAdicionar()">
+          <i class="ti ti-user-plus"></i> Vincular aluno pelo e-mail
+        </button>
+      </div>
+
+      <div *ngIf="alunos.length > 0">
+        <div class="aluno-detalhe-card" *ngFor="let a of alunos" style="margin-bottom: 16px;">
+          <div class="aluno-detalhe-header">
+            <div class="aluno-avatar-lg">{{ a.nome[0] }}</div>
+            <div>
+              <h2>{{ a.nome }}</h2>
+              <p>{{ a.serie || 'Série não informada' }}</p>
+            </div>
+          </div>
+          <div class="detalhe-grid">
+            <div class="detalhe-item">
+              <span class="detalhe-label">E-mail</span>
+              <span class="detalhe-val">{{ a.email || '—' }}</span>
+            </div>
+            <div class="detalhe-item">
+              <span class="detalhe-label">Condição</span>
+              <span class="detalhe-val">{{ a.condicao || 'Nenhuma' }}</span>
+            </div>
+            <div class="detalhe-item">
+              <span class="detalhe-label">Tipo de Escola</span>
+              <span class="detalhe-val">{{ a.tipoEscola || '—' }}</span>
+            </div>
+            <div class="detalhe-item">
+              <span class="detalhe-label">Telefone</span>
+              <span class="detalhe-val">{{ a.telefone || '—' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ABA: RECADOS ──────────────────────── -->
+    <div *ngIf="abaAtual === 'recados'" class="aba-content">
+      <div class="aba-header">
+        <h2>Recados</h2>
+        <button class="btn-primary-sm" (click)="abrirModalRecado()">
+          <i class="ti ti-message-plus"></i> Enviar Recado
+        </button>
+      </div>
+
+      <div class="empty-state" *ngIf="recados.length === 0">
+        <i class="ti ti-message-off"></i>
+        <p>Nenhum recado ainda.</p>
+      </div>
+
+      <div class="recados-full-list">
+        <div class="recado-card" *ngFor="let r of recados" [class.nao-lido]="!r.lido" (click)="lerRecado(r)">
+          <div class="recado-header">
+            <span class="recado-titulo">{{ r.titulo }}</span>
+            <span class="recado-data">{{ r.criado_em | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <p class="recado-professor">Prof. {{ r.professor }}</p>
+          <p class="recado-msg">{{ r.mensagem }}</p>
+          <span class="recado-badge" *ngIf="!r.lido">Novo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ABA: CONFIGURAÇÕES ─────────────────── -->
+    <div *ngIf="abaAtual === 'configuracoes'" class="aba-content">
+      <div class="config-layout">
+        <nav class="config-nav">
+          <button class="config-tab" [class.ativa]="abaConfig === 'sobre'" (click)="abaConfig = 'sobre'">
+            <i class="ti ti-info-circle"></i> Sobre
+          </button>
+          <button class="config-tab" [class.ativa]="abaConfig === 'privacidade'" (click)="abaConfig = 'privacidade'">
+            <i class="ti ti-shield"></i> Política de Privacidade
+          </button>
+          <button class="config-tab" [class.ativa]="abaConfig === 'termos'" (click)="abaConfig = 'termos'">
+            <i class="ti ti-file-text"></i> Termos de Uso
+          </button>
+          <button class="config-tab" [class.ativa]="abaConfig === 'suporte'" (click)="abaConfig = 'suporte'">
+            <i class="ti ti-help-circle"></i> Suporte
+          </button>
+        </nav>
+
+        <div class="config-body">
+          <div *ngIf="abaConfig === 'sobre'">
+            <h2>Sobre o EducaInclusiva</h2>
+            <p>O <strong>EducaInclusiva</strong> nasceu para transformar a experiência educacional, conectando alunos, professores e responsáveis em uma plataforma acessível e inclusiva.</p>
+            <h3>Benefícios para apoio e cuidadores</h3>
+            <ul>
+              <li><strong>Acompanhamento:</strong> visualize o progresso e atividades do aluno.</li>
+              <li><strong>Comunicação:</strong> envie e receba recados dos professores.</li>
+              <li><strong>Informações:</strong> acesse dados escolares do aluno vinculado.</li>
+            </ul>
+          </div>
+          <div *ngIf="abaConfig === 'privacidade'">
+            <h2>Política de Privacidade</h2>
+            <p>Seus dados são tratados com total segurança e confidencialidade.</p>
+            <h3>Dados coletados</h3>
+            <ul>
+              <li>Nome, e-mail e informações institucionais para personalizar a experiência.</li>
+              <li>Dados dos alunos vinculados para acompanhamento educacional.</li>
+            </ul>
+            <h3>Uso dos dados</h3>
+            <ul>
+              <li>Exclusivamente para fins educacionais dentro da plataforma.</li>
+              <li>Nunca vendidos ou compartilhados com anunciantes.</li>
+            </ul>
+          </div>
+          <div *ngIf="abaConfig === 'termos'">
+            <h2>Termos de Uso</h2>
+            <p>Ao usar o EducaInclusiva, você concorda com os seguintes termos:</p>
+            <ul>
+              <li>Usar a plataforma apenas para fins educacionais.</li>
+              <li>Não compartilhar suas credenciais de acesso.</li>
+              <li>Respeitar os outros usuários da plataforma.</li>
+              <li>Não publicar conteúdo inadequado ou ofensivo.</li>
+            </ul>
+          </div>
+          <div *ngIf="abaConfig === 'suporte'">
+            <h2>Suporte</h2>
+            <p>Encontrou algum problema? Entre em contato:</p>
+            <div class="suporte-cards">
+              <div class="suporte-card">
+                <i class="ti ti-mail"></i>
+                <strong>E-mail</strong>
+                <span>suporte&#64;educainclusiva.com</span>
+              </div>
+              <div class="suporte-card">
+                <i class="ti ti-help-circle"></i>
+                <strong>FAQ</strong>
+                <span>Acesse as perguntas frequentes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL ADICIONAR ALUNO -->
+<div class="modal-overlay" *ngIf="modalAdicionarAberto">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">👤 Vincular Aluno</span>
+      <button class="modal-close" (click)="fecharModalAdicionar()">✕</button>
+    </div>
+    <p class="modal-sub">Digite o e-mail do aluno para vinculá-lo à sua conta</p>
+    <div class="modal-alert error" *ngIf="alertaAdicionar && alertaAdicionar !== 'Aluno vinculado com sucesso!'">
+      {{ alertaAdicionar }}
+    </div>
+    <div class="modal-alert success" *ngIf="alertaAdicionar === 'Aluno vinculado com sucesso!'">
+      {{ alertaAdicionar }}
+    </div>
+    <div class="modal-form">
+      <div>
+        <label class="label"><i class="ti ti-mail"></i> E-mail do aluno</label>
+        <div class="input-wrap">
+          <i class="ti ti-mail field-icon"></i>
+          <input class="ei-input" type="text" placeholder="aluno@escola.com"
+            [(ngModel)]="emailAlunoParaAdicionar" name="emailAluno">
+        </div>
+      </div>
+      <button class="btn-primary" (click)="adicionarAluno()" [disabled]="adicionandoAluno">
+        <i class="ti ti-user-plus"></i>
+        {{ adicionandoAluno ? 'Vinculando...' : 'Vincular Aluno' }}
+      </button>
+      <button class="btn-secondary" (click)="fecharModalAdicionar()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ENVIAR RECADO -->
+<div class="modal-overlay" *ngIf="modalRecadoAberto">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">💬 Enviar Recado</span>
+      <button class="modal-close" (click)="fecharModalRecado()">✕</button>
+    </div>
+    <p class="modal-sub">Envie um recado para o professor do aluno</p>
+
+    <div class="modal-alert error" *ngIf="alertaRecado && alertaRecado !== 'Recado enviado com sucesso!'">
+      {{ alertaRecado }}
+    </div>
+    <div class="modal-alert success" *ngIf="alertaRecado === 'Recado enviado com sucesso!'">
+      {{ alertaRecado }}
+    </div>
+
+    <div class="modal-form">
+      <div>
+        <label class="label"><i class="ti ti-user"></i> Para qual aluno</label>
+        <div class="input-wrap">
+          <select class="ei-input" [(ngModel)]="recadoAlunoId" name="alunoId" style="padding-left: 12px;">
+            <option value="">Para todos os alunos</option>
+            <option *ngFor="let a of alunos" [value]="a.id">{{ a.nome }}</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="label"><i class="ti ti-pencil"></i> Título</label>
+        <div class="input-wrap">
+          <i class="ti ti-pencil field-icon"></i>
+          <input class="ei-input" type="text" placeholder="Assunto do recado"
+            [(ngModel)]="novoRecado.titulo" name="titulo">
+        </div>
+      </div>
+      <div>
+        <label class="label"><i class="ti ti-message"></i> Mensagem</label>
+        <textarea class="ei-textarea" placeholder="Digite sua mensagem..."
+          [(ngModel)]="novoRecado.mensagem" name="mensagem" rows="4"></textarea>
+      </div>
+      <button class="btn-primary" (click)="enviarRecado()">
+        <i class="ti ti-send"></i> Enviar
+      </button>
+      <button class="btn-secondary" (click)="fecharModalRecado()">Cancelar</button>
+    </div>
+  </div>
+</div>
