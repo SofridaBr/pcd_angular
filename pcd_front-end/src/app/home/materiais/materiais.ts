@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../service/api';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-materiais',
@@ -33,7 +34,7 @@ export class Materiais implements OnInit {
     });
   }
 
-  constructor(private api: Api, private cdr: ChangeDetectorRef) { }
+  constructor(private api: Api, private cdr: ChangeDetectorRef, private sanitizer: DomSanitizer) { }
 
   ngOnInit(): void {
     const usuario = this.api.getUsuario();
@@ -124,9 +125,10 @@ export class Materiais implements OnInit {
     return url?.includes('youtube.com') || url?.includes('youtu.be');
   }
 
-  getYoutubeEmbed(url: string): string {
+  getYoutubeEmbed(url: string): SafeResourceUrl {
     const match = url.match(/(?:v=|youtu\.be\/)([^&?\s]+)/);
-    return match ? `https://www.youtube.com/embed/${match[1]}` : url;
+    const embedUrl = match ? `https://www.youtube.com/embed/${match[1]}` : url;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
   }
 
   toggleSidebar(): void { this.sidebarCollapsed = !this.sidebarCollapsed; }
@@ -137,6 +139,7 @@ export class Materiais implements OnInit {
     sessionStorage.removeItem('usuario');
     window.location.href = '/login';
   }
+
   // ═══════════════════════════════════════
   // ACESSIBILIDADE
   // ═══════════════════════════════════════
@@ -158,6 +161,4 @@ export class Materiais implements OnInit {
   toggleTDAH(): void { this.tdah = !this.tdah; document.body.classList.toggle('tdah-mode'); }
   zoomPage(): void { this.zoom += 0.1; document.body.style.zoom = this.zoom.toString(); }
   speakText(): void { const s = new SpeechSynthesisUtterance(document.body.innerText); s.lang = 'pt-BR'; window.speechSynthesis.speak(s); }
-
-} // ← fecha a classe
-
+}

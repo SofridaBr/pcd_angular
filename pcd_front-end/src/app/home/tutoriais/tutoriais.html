@@ -96,22 +96,21 @@
         </div>
 
     </main>
+
+    <!-- BOTÃO ACESSIBILIDADE -->
+    <div class="accessibility-button" (click)="toggleMenu()">♿</div>
+
+    <div class="accessibility-menu" [class.active]="menuAcessibilidade">
+        <h2>♿ Acessibilidade</h2>
+        <button (click)="increaseFont()">🔡 Aumentar fonte</button>
+        <button (click)="decreaseFont()">🔤 Diminuir fonte</button>
+        <button (click)="toggleContrast()">🌗 Alto contraste</button>
+        <button (click)="toggleDyslexia()">📖 Modo dislexia</button>
+        <button (click)="toggleTDAH()">🎯 Modo TDAH</button>
+        <button (click)="zoomPage()">🔍 Zoom +</button>
+        <button (click)="speakText()">🔊 Ler página</button>
+        <button (click)="toggleGuide()">📏 Guia de leitura</button>
+    </div>
+
+    <div id="reading-guide"></div>
 </div>
-
-
-<!-- BOTÃO ACESSIBILIDADE -->
-<div class="accessibility-button" (click)="toggleMenu()">♿</div>
-
-<div class="accessibility-menu" [class.active]="menuAcessibilidade">
-    <h2>♿ Acessibilidade</h2>
-    <button (click)="increaseFont()">🔡 Aumentar fonte</button>
-    <button (click)="decreaseFont()">🔤 Diminuir fonte</button>
-    <button (click)="toggleContrast()">🌗 Alto contraste</button>
-    <button (click)="toggleDyslexia()">📖 Modo dislexia</button>
-    <button (click)="toggleTDAH()">🎯 Modo TDAH</button>
-    <button (click)="zoomPage()">🔍 Zoom +</button>
-    <button (click)="speakText()">🔊 Ler página</button>
-    <button (click)="toggleGuide()">📏 Guia de leitura</button>
-</div>
-
-<div id="reading-guide"></div>

@@ -305,6 +305,76 @@
   animation: fadeSlideUp 0.35s ease both;
 }
 
+// ACESSIBILIDADE
+.accessibility-button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 50px;
+  height: 50px;
+  background: #1565C0;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: 0 4px 16px rgba(21, 101, 192, 0.4);
+  transition: 0.2s;
+
+  &:hover {
+    background: #0D47A1;
+    transform: scale(1.1);
+  }
+}
+
+.accessibility-menu {
+  position: fixed;
+  bottom: 86px;
+  right: 24px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  z-index: 998;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  width: 220px;
+
+  &.active {
+    display: flex;
+  }
+
+  h2 {
+    font-size: 14px;
+    color: #1565C0;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  button {
+    background: #F0F4FF;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1565C0;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    text-align: left;
+    transition: 0.15s;
+
+    &:hover {
+      background: #E3F2FD;
+    }
+  }
+}
+
+
 // MÉDIA GERAL
 .media-card {
   background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
@@ -551,18 +621,95 @@
   }
 
   .sidebar {
-    width: 100%;
+    width: 100% !important;
     min-height: auto;
-    position: relative;
     height: auto;
+    position: relative;
+    flex-direction: row;
+    padding: 12px 16px;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 
-  .main-content {
-    padding: 20px 16px;
+  .sidebar.collapsed {
+    width: 100% !important;
+  }
+
+  .sidebar-header {
+    padding: 0;
+    border-bottom: none;
+    flex-shrink: 0;
+  }
+
+  .sidebar-profile {
+    display: none;
+  }
+
+  .sidebar-avatar-mini {
+    display: flex;
+    padding: 0 8px;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    padding: 0 8px;
+    gap: 4px;
+    flex: 1;
+    overflow-x: auto;
+
+    .nav-label {
+      display: none;
+    }
+
+    .nav-item {
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px 10px;
+      font-size: 10px;
+      white-space: nowrap;
+      border-radius: 10px;
+      position: relative;
+
+      i {
+        font-size: 22px;
+      }
+
+      span {
+        display: block !important;
+        font-size: 10px;
+      }
+    }
+
+    .badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      padding: 1px 5px;
+      font-size: 9px;
+    }
+  }
+
+  .toggle-btn {
+    display: none;
+  }
+
+  .content {
+    min-height: calc(100vh - 80px);
   }
 
   .topbar {
     padding: 14px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .page-title {
+    font-size: 18px;
+  }
+
+  .main-content {
+    padding: 16px;
   }
 
   .media-card {
@@ -574,68 +721,28 @@
     grid-template-columns: 1fr 70px 110px;
     padding: 14px 16px;
   }
-}
 
-
-.accessibility-button {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  width: 70px;
-  height: 70px;
-  background: #0057ff;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px;
-  cursor: pointer;
-  z-index: 9999;
-  box-shadow: 0 4px 20px rgba(0, 87, 255, 0.45);
-  transition: transform 0.3s, box-shadow 0.3s;
-
-  &:hover {
-    transform: scale(1.13) rotate(-8deg);
-    box-shadow: 0 8px 28px rgba(0, 87, 255, 0.55);
-  }
-}
-
-.accessibility-menu {
-  position: fixed;
-  right: 20px;
-  bottom: 100px;
-  width: 280px;
-  background: white;
-  border-radius: 20px;
-  padding: 20px;
-  display: none;
-  flex-direction: column;
-  gap: 12px;
-  z-index: 9999;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
-
-  &.active {
-    display: flex;
+  .bimestre-tabs {
+    flex-wrap: wrap;
+    gap: 4px;
   }
 
-  h2 {
-    color: #0057ff;
-    text-align: center;
+  .bim-btn {
+    padding: 6px 10px;
+    font-size: 12px;
   }
 
-  button {
-    border: none;
-    padding: 12px;
-    border-radius: 12px;
-    cursor: pointer;
-    background: #0057ff;
-    color: white;
-    font-size: 15px;
-    font-family: 'Nunito', sans-serif;
+  .accessibility-button {
+    width: 54px;
+    height: 54px;
+    font-size: 24px;
+    right: 14px;
+    bottom: 14px;
+  }
 
-    &:hover {
-      background: #003bb3;
-    }
+  .accessibility-menu {
+    width: calc(100vw - 28px);
+    right: 14px;
+    bottom: 80px;
   }
 }

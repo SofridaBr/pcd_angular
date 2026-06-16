@@ -1545,23 +1545,123 @@
 }
 
 // Responsive
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .layout {
     flex-direction: column;
   }
 
   .sidebar {
-    width: 100%;
+    width: 100% !important;
     min-height: auto;
     height: auto;
     position: relative;
+    flex-direction: row;
+    padding: 12px 16px;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .sidebar-header {
+    padding: 0;
+    border-bottom: none;
+    flex-shrink: 0;
+  }
+
+  .sidebar-profile {
+    display: none;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    padding: 0 8px;
+    gap: 4px;
+    flex: 1;
+    overflow-x: auto;
+
+    .nav-label {
+      display: none;
+    }
+
+    .nav-spacer {
+      display: none;
+    }
+
+    .nav-item {
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px 10px;
+      font-size: 10px;
+      white-space: nowrap;
+      border-radius: 10px;
+      position: relative;
+
+      i {
+        font-size: 22px;
+      }
+
+      span {
+        display: block !important;
+        font-size: 10px;
+      }
+    }
+
+    .nav-badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      padding: 1px 5px;
+      font-size: 9px;
+    }
+  }
+
+  .content {
+    height: auto;
+    overflow-y: unset;
+  }
+
+  .topbar {
+    padding: 14px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .page-title {
+    font-size: 18px;
+  }
+
+  .main-content {
+    padding: 16px;
   }
 
   .summary-grid {
     grid-template-columns: 1fr 1fr;
   }
 
-  .main-content {
-    padding: 16px;
+  .welcome-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .topbar-left {
+    max-width: 100%;
+  }
+
+  .date-chip,
+  .professor-chip {
+    display: none;
+  }
+
+  .inner-tabs {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .alunos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tarefas-grid {
+    grid-template-columns: 1fr;
   }
 }
