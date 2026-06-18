@@ -16,10 +16,12 @@ app.use(express.json());
 // CONEXÃO COM MYSQL
 // ════════════════════════════════════════════════
 const conexao = mysql.createPool({
-    host: "localhost",
-    user: "root",
-    password: "123456",
-    database: "educa_inclusiva",
+    host: process.env.DB_HOST || "localhost",
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD || "123456",
+    database: process.env.DB_NAME || "educa_inclusiva",
+    port: process.env.DB_PORT || 3306,
+    ssl: process.env.DB_HOST ? { rejectUnauthorized: false } : undefined,
     waitForConnections: true,
     connectionLimit: 10
 });
@@ -1150,6 +1152,7 @@ app.post("/recados/coordenador/responsavel", autenticar, (req, res) => {
 // ════════════════════════════════════════════════
 // SERVIDOR
 // ════════════════════════════════════════════════
-app.listen(3000, () => {
-    console.log("✅ Servidor EducaInclusiva rodando na porta 3000");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`✅ Servidor EducaInclusiva rodando na porta ${PORT}`);
 });
