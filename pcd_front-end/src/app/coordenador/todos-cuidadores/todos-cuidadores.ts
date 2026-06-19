@@ -39,7 +39,7 @@ export class TodosCuidadores implements OnInit {
     this.carregando = true;
     try {
       const token = localStorage.getItem('token');  // ← ADD
-      const res = await fetch(https://educainclusiva-backend-hvwz.onrender.com/usuarios/cuidadores', {
+      const res = await fetch('https://educainclusiva-backend-hvwz.onrender.com/usuarios/cuidadores', {
         headers: { 'Authorization': `Bearer ${token}` }  // ← ADD
       });
       const dados = await res.json();

@@ -39,7 +39,7 @@ export class TodosResponsaveis implements OnInit {
     this.carregando = true;
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(https://educainclusiva-backend-hvwz.onrender.com/usuarios/responsaveis', {
+      const res = await fetch('https://educainclusiva-backend-hvwz.onrender.com/usuarios/responsaveis', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const dados = await res.json();
