@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class Apoio implements OnInit {
 
-  private readonly API = 'http://https://educainclusiva-backend-hvwz.onrender.com';
+  private readonly API = https://://educainclusiva-backend-hvwz.onrender.com';
 
   constructor(private cdr: ChangeDetectorRef) { }
 
