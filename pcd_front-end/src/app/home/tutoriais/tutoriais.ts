@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { SafeUrlPipe } from '../../pipes/safe-url-pipe';
 
-const API = 'http://localhost:3000';
+const API = 'http://https://educainclusiva-backend-hvwz.onrender.com';
 
 @Component({
   selector: 'app-tutoriais',

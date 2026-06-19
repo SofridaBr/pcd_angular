@@ -39,7 +39,7 @@ export class TodosResponsaveis implements OnInit {
     this.carregando = true;
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:3000/usuarios/responsaveis', {
+      const res = await fetch('http://https://educainclusiva-backend-hvwz.onrender.com/usuarios/responsaveis', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const dados = await res.json();
@@ -84,7 +84,7 @@ export class TodosResponsaveis implements OnInit {
     if (!this.responsavelParaApagar) return;
     this.apagando = true;
     try {
-      const res = await fetch(`http://localhost:3000/usuarios/${this.responsavelParaApagar.id}`, {
+      const res = await fetch(`http://https://educainclusiva-backend-hvwz.onrender.com/usuarios/${this.responsavelParaApagar.id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }  // ← ADD AQUI
       });
