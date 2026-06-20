@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class Api {
 
-  private url = 'https://educainclusiva-backend-hvwz.onrender.com';
+  private url = 'https://educainclusiva-backend-hvvz.onrender.com';
 
   private getHeaders() {
     const token = localStorage.getItem('token');

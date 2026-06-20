@@ -83,7 +83,7 @@ export class Coordenador implements OnInit {
   carregarBoletimAluno(): void {
     this.carregandoBoletim = true;
     const token = localStorage.getItem('token');
-    fetch(`https://educainclusiva-backend-hvwz.onrender.com/boletim/${this.alunoSelecionado.id}?bimestre=${this.bimestreSelecionado}`, {
+    fetch(`https://educainclusiva-backend-hvvz.onrender.com/boletim/${this.alunoSelecionado.id}?bimestre=${this.bimestreSelecionado}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(r => r.json())
@@ -148,7 +148,7 @@ export class Coordenador implements OnInit {
   async carregarAlunos(): Promise<void> {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('https://educainclusiva-backend-hvwz.onrender.com/alunos/todos', {
+      const res = await fetch('https://educainclusiva-backend-hvvz.onrender.com/alunos/todos', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const dados = await res.json();
@@ -173,7 +173,7 @@ export class Coordenador implements OnInit {
   async carregarTurmas(): Promise<void> {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('https://educainclusiva-backend-hvwz.onrender.com/escola/turmas', {
+      const res = await fetch('https://educainclusiva-backend-hvvz.onrender.com/escola/turmas', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const dados = await res.json();
@@ -194,7 +194,7 @@ export class Coordenador implements OnInit {
   async carregarStats(): Promise<void> {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('https://educainclusiva-backend-hvwz.onrender.com/escola/stats', {
+      const res = await fetch('https://educainclusiva-backend-hvvz.onrender.com/escola/stats', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const dados = await res.json();
@@ -215,7 +215,7 @@ export class Coordenador implements OnInit {
   async carregarMensagens(): Promise<void> {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`https://educainclusiva-backend-hvwz.onrender.com/recados/coordenador/${this.usuario.id}`, {
+      const res = await fetch(`https://educainclusiva-backend-hvvz.onrender.com/recados/coordenador/${this.usuario.id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const dados = await res.json();
