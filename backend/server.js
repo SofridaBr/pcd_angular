@@ -12,6 +12,12 @@ const SECRET = 'educa_inclusiva_secret_2026';
 app.use(cors());
 app.use(express.json());
 
+app.use((req, res, next) => {
+    console.log(`📨 ${req.method} ${req.path}`);
+    next();
+});
+
+
 // ════════════════════════════════════════════════
 // CONEXÃO COM MYSQL
 // ════════════════════════════════════════════════
