@@ -16,10 +16,12 @@ app.use(express.json());
 // CONEXÃO COM MYSQL
 // ════════════════════════════════════════════════
 const conexao = mysql.createPool({
-    host: "localhost",
-    user: "root",
-    password: "123456",
-    database: "educa_inclusiva",
+    host: process.env.DB_HOST || "localhost",
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD || "123456",
+    database: process.env.DB_NAME || "educa_inclusiva",
+    port: process.env.DB_PORT || 3306,
+    ssl: process.env.DB_HOST ? { rejectUnauthorized: false } : undefined,
     waitForConnections: true,
     connectionLimit: 10
 });
@@ -238,7 +240,6 @@ app.get("/aluno/:id", autenticar, (req, res) => {
 app.delete("/alunos/:id", autenticar, (req, res) => {
     const { id } = req.params;
 
-    // Deleta em cascata nas tabelas relacionadas, depois o usuário
     const tabelas = [
         `DELETE FROM tarefa_aluno      WHERE aluno_id = ?`,
         `DELETE FROM material_aluno    WHERE aluno_id = ?`,
@@ -530,7 +531,6 @@ app.get("/escola/turmas", autenticar, (req, res) => {
 // ════  BOLETIM  ══════════════════════════════════
 // ════════════════════════════════════════════════
 
-// Salvar / atualizar nota (professor)
 app.post("/boletim", autenticar, (req, res) => {
     const { professorId, alunoId, materia, nota, bimestre } = req.body;
 
@@ -554,7 +554,6 @@ app.post("/boletim", autenticar, (req, res) => {
     });
 });
 
-// Buscar boletim completo de um aluno (por bimestre)
 app.get("/boletim/:alunoId", autenticar, (req, res) => {
     const { alunoId } = req.params;
     const bimestre = req.query.bimestre || 1;
@@ -574,12 +573,10 @@ app.get("/boletim/:alunoId", autenticar, (req, res) => {
     });
 });
 
-// Buscar boletim de todos os alunos de um professor (para edição)
 app.get("/boletim/professor/:professorId/aluno/:alunoId", autenticar, (req, res) => {
     const { professorId, alunoId } = req.params;
     const bimestre = req.query.bimestre || 1;
 
-    // Retorna todas as matérias com nota (null se não lançada ainda)
     const materias = [
         'Português', 'Matemática', 'História', 'Geografia',
         'Ciências', 'Inglês', 'Educação Física', 'Artes'
@@ -594,7 +591,6 @@ app.get("/boletim/professor/:professorId/aluno/:alunoId", autenticar, (req, res)
     conexao.query(sql, [alunoId, professorId, bimestre], (erro, resultado) => {
         if (erro) return res.status(500).json({ mensagem: "Erro no servidor." });
 
-        // Combina matérias fixas com notas existentes
         const notasMap = {};
         resultado.forEach((r) => { notasMap[r.materia] = r.nota; });
 
@@ -611,7 +607,6 @@ app.get("/boletim/professor/:professorId/aluno/:alunoId", autenticar, (req, res)
 // ════  RECADOS  ══════════════════════════════════
 // ════════════════════════════════════════════════
 
-// Enviar recado (professor → aluno específico ou todos)
 app.post("/recados", (req, res) => {
     const { professorId, alunoId, titulo, mensagem } = req.body;
 
@@ -619,16 +614,13 @@ app.post("/recados", (req, res) => {
         return res.status(400).json({ mensagem: "professorId, titulo e mensagem são obrigatórios." });
     }
 
-    // Se alunoId for null/undefined → recado para todos os alunos do professor
     if (alunoId) {
-        // Recado individual
         const sql = `INSERT INTO recados (professor_id, aluno_id, titulo, mensagem) VALUES (?, ?, ?, ?)`;
         conexao.query(sql, [professorId, alunoId, titulo, mensagem], (erro, resultado) => {
             if (erro) return res.status(500).json({ mensagem: "Erro ao enviar recado." });
             res.json({ mensagem: "Recado enviado com sucesso!", id: resultado.insertId });
         });
     } else {
-        // Recado para todos os alunos vinculados
         conexao.query(
             `SELECT aluno_id FROM professor_aluno WHERE professor_id = ?`,
             [professorId],
@@ -651,7 +643,6 @@ app.post("/recados", (req, res) => {
     }
 });
 
-// Buscar recados do aluno
 app.get("/recados/aluno/:alunoId", autenticar, (req, res) => {
     const { alunoId } = req.params;
 
@@ -673,8 +664,6 @@ app.get("/recados/aluno/:alunoId", autenticar, (req, res) => {
     });
 });
 
-
-// Buscar recados enviados pelo professor
 app.get("/recados/professor/:professorId", autenticar, (req, res) => {
     const { professorId } = req.params;
 
@@ -697,7 +686,6 @@ app.get("/recados/professor/:professorId", autenticar, (req, res) => {
 // MATERIAIS
 // ════════════════════════════════════════════════
 
-// Criar material
 app.post("/materiais", autenticar, (req, res) => {
     const { professorId, titulo, descricao, tipo, url, banner, materia, alunosIds } = req.body;
     if (!professorId || !titulo || !url || !tipo) {
@@ -718,7 +706,6 @@ app.post("/materiais", autenticar, (req, res) => {
     });
 });
 
-// Buscar materiais do aluno
 app.get("/materiais/aluno/:alunoId", autenticar, (req, res) => {
     const { alunoId } = req.params;
     const sql = `
@@ -736,9 +723,6 @@ app.get("/materiais/aluno/:alunoId", autenticar, (req, res) => {
     });
 });
 
-// ════════════════════════════════════════════════
-// BUSCAR MATERIAIS DO PROFESSOR (SQL Corrigido)
-// ════════════════════════════════════════════════
 app.get("/materiais/professor/:professorId", autenticar, (req, res) => {
     const { professorId } = req.params;
     const sql = `
@@ -760,7 +744,6 @@ app.get("/materiais/professor/:professorId", autenticar, (req, res) => {
 // RESPONSÁVEL
 // ════════════════════════════════════════════════
 
-// Buscar alunos vinculados ao responsável
 app.get("/responsavel/alunos/:id", autenticar, (req, res) => {
     const { id } = req.params;
 
@@ -780,7 +763,6 @@ app.get("/responsavel/alunos/:id", autenticar, (req, res) => {
     });
 });
 
-// Vincular aluno pelo e-mail
 app.post("/responsavel/vincular", autenticar, (req, res) => {
     const { responsavel_id, email_aluno } = req.body;
 
@@ -820,13 +802,7 @@ app.post("/responsavel/vincular", autenticar, (req, res) => {
     );
 });
 
-
-
-// Marcar recado como lido (PATCH)
-// Marcar recado como lido (PATCH)
 app.patch("/recados/:id/lido", (req, res) => {
-    console.log('PATCH lido - params:', req.params);
-    console.log('PATCH lido - body:', req.body);
     const { usuarioId } = req.body;
 
     if (!usuarioId) return res.status(400).json({ mensagem: "usuarioId é obrigatório." });
@@ -842,7 +818,6 @@ app.patch("/recados/:id/lido", (req, res) => {
     });
 });
 
-// Tarefas pendentes do aluno
 app.get("/tarefas/pendentes/:alunoId", autenticar, (req, res) => {
     const { alunoId } = req.params;
 
@@ -858,7 +833,6 @@ app.get("/tarefas/pendentes/:alunoId", autenticar, (req, res) => {
     });
 });
 
-// Tarefas concluídas do aluno
 app.get("/tarefas/concluidas/:alunoId", autenticar, (req, res) => {
     const { alunoId } = req.params;
 
@@ -874,12 +848,10 @@ app.get("/tarefas/concluidas/:alunoId", autenticar, (req, res) => {
     });
 });
 
-
 // ════════════════════════════════════════════════
 // APOIO
 // ════════════════════════════════════════════════
 
-// Buscar aluno vinculado ao apoio
 app.get("/apoio/aluno/:id", autenticar, (req, res) => {
     const { id } = req.params;
 
@@ -898,9 +870,7 @@ app.get("/apoio/aluno/:id", autenticar, (req, res) => {
     });
 });
 
-// Vincular aluno ao apoio pelo e-mail
 app.post("/apoio/vincular", autenticar, (req, res) => {
-    console.log('Body recebido:', req.body);
     const { apoioId, emailAluno } = req.body;
 
     if (!apoioId || !emailAluno) {
@@ -955,11 +925,6 @@ app.get("/usuarios/educadores", autenticar, (req, res) => {
     });
 });
 
-
-
-// ════════════════════════════════════════════════
-// BUSCAR SÓ PROFESSORES (coordenador)         ← ADICIONA AQUI
-// ════════════════════════════════════════════════
 app.get("/usuarios/professores", autenticar, (req, res) => {
     const sql = `
         SELECT id, nome, email, cpf, rg, telefone, disciplina, tipoEscola, tipo
@@ -973,9 +938,6 @@ app.get("/usuarios/professores", autenticar, (req, res) => {
     });
 });
 
-// ════════════════════════════════════════════════
-// APAGAR EDUCADOR (coordenador)
-// ════════════════════════════════════════════════
 app.delete("/usuarios/:id", autenticar, (req, res) => {
     const { id } = req.params;
 
@@ -1000,10 +962,6 @@ app.delete("/usuarios/:id", autenticar, (req, res) => {
 
     executar(0);
 });
-
-
-
-
 
 // ════════════════════════════════════════════════
 // BUSCAR TODOS OS RESPONSÁVEIS (coordenador)
@@ -1037,7 +995,6 @@ app.get("/usuarios/cuidadores", autenticar, (req, res) => {
     });
 });
 
-// Coordenador envia recado para professor
 app.post("/recados/coordenador", autenticar, (req, res) => {
     const { remetenteId, professorId, titulo, mensagem } = req.body;
 
@@ -1056,7 +1013,6 @@ app.post("/recados/coordenador", autenticar, (req, res) => {
     });
 });
 
-// Professor busca recados recebidos (do coordenador)
 app.get("/recados/recebidos/professor/:professorId", autenticar, (req, res) => {
     const { professorId } = req.params;
 
@@ -1075,7 +1031,6 @@ app.get("/recados/recebidos/professor/:professorId", autenticar, (req, res) => {
     });
 });
 
-// Buscar TODOS os recados enviados pelo coordenador
 app.get("/recados/responsavel", autenticar, (req, res) => {
     const ids = req.query.alunos;
     const usuarioId = req.query.usuarioId;
@@ -1105,7 +1060,6 @@ app.get("/recados/responsavel", autenticar, (req, res) => {
     });
 });
 
-// Buscar TODOS os recados enviados pelo coordenador
 app.get("/recados/coordenador/:id", autenticar, (req, res) => {
     const { id } = req.params;
 
@@ -1127,7 +1081,6 @@ app.get("/recados/coordenador/:id", autenticar, (req, res) => {
     });
 });
 
-// Coordenador envia recado para responsável
 app.post("/recados/coordenador/responsavel", autenticar, (req, res) => {
     const { remetenteId, responsavelId, titulo, mensagem } = req.body;
 
@@ -1146,10 +1099,10 @@ app.post("/recados/coordenador/responsavel", autenticar, (req, res) => {
     });
 });
 
-
 // ════════════════════════════════════════════════
 // SERVIDOR
 // ════════════════════════════════════════════════
-app.listen(3000, () => {
-    console.log("✅ Servidor EducaInclusiva rodando na porta 3000");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`✅ Servidor EducaInclusiva rodando na porta ${PORT}`);
 });
