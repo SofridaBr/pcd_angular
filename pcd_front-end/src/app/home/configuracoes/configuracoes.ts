@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 
-const API = 'http://localhost:3000';
+const API = 'https://educainclusiva-backend-hvwz.onrender.com';
 
 @Component({
   selector: 'app-configuracoes',

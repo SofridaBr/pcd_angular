@@ -346,7 +346,7 @@ export class Login implements OnInit {
     const { senha2, tipo, ...payload } = this.cadastroAluno;
 
     try {
-      const res = await fetch('http://localhost:3000/cadastro/aluno', {
+      const res = await fetch('https://educainclusiva-backend-hvwz.onrender.com/cadastro/aluno', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -427,7 +427,7 @@ export class Login implements OnInit {
     try {
 
       const res = await fetch(
-        'http://localhost:3000/cadastro/institucional',
+        'https://educainclusiva-backend-hvwz.onrender.com/cadastro/institucional',
         {
           method: 'POST',
           headers: {

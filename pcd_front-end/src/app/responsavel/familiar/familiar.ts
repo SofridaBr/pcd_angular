@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class Familiar implements OnInit {
 
-  private readonly API = 'http://localhost:3000';
+  private readonly API = 'https://educainclusiva-backend-hvwz.onrender.com';
 
   usuario: any = null;
   dataAtual: string = '';

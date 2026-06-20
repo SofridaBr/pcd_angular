@@ -39,7 +39,7 @@ export class TodosCuidadores implements OnInit {
     this.carregando = true;
     try {
       const token = localStorage.getItem('token');  // ← ADD
-      const res = await fetch('http://localhost:3000/usuarios/cuidadores', {
+      const res = await fetch('https://educainclusiva-backend-hvwz.onrender.com/usuarios/cuidadores', {
         headers: { 'Authorization': `Bearer ${token}` }  // ← ADD
       });
       const dados = await res.json();
@@ -84,7 +84,7 @@ export class TodosCuidadores implements OnInit {
     if (!this.cuidadorParaApagar) return;
     this.apagando = true;
     try {
-      const res = await fetch(`http://localhost:3000/usuarios/${this.cuidadorParaApagar.id}`, {
+      const res = await fetch(`https://educainclusiva-backend-hvwz.onrender.com/usuarios/${this.cuidadorParaApagar.id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }  // ← ADD
       });
